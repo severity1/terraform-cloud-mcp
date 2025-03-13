@@ -124,6 +124,9 @@ __pypackages__/
 celerybeat-schedule
 celerybeat.pid
 
+# Process IDs
+*.pid
+
 # SageMath parsed files
 *.sage.py
 
@@ -172,3 +175,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Others
+examples/
+ISSUES.md
+TASKS.md
