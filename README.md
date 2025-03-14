@@ -21,25 +21,20 @@ pip install -r requirements.txt
 # Run in foreground (basic)
 python server.py
 
-# Run with Terraform Cloud API token via command line
-python server.py --token YOUR_TF_TOKEN
-# Or with short option
-python server.py -t YOUR_TF_TOKEN
-
 # Run with Terraform Cloud API token via environment variable
 export TFC_TOKEN=YOUR_TF_TOKEN
 python server.py
 
-# Run in background with token
-python server.py --token YOUR_TF_TOKEN > server.log 2>&1 & echo $! > server.pid
-# Or with environment variable
+# Run in background with environment variable
 export TFC_TOKEN=YOUR_TF_TOKEN
 python server.py > server.log 2>&1 & echo $! > server.pid
+
+# Using a .env file
+# Create a .env file with TFC_TOKEN=YOUR_TF_TOKEN
+python server.py
 ```
 
-The server checks for the token in the following order:
-1. `TFC_TOKEN` environment variable
-2. `--token` or `-t` command line argument
+The server uses the `TFC_TOKEN` environment variable for authentication. This can be set directly or through a `.env` file.
 
 When you provide a token via either method, the MCP tools can be used without explicitly passing the token each time. Organization names are always required as arguments since users may work with multiple organizations.
 
@@ -54,8 +49,10 @@ Currently, this MCP server provides the following functionality:
   - `get_terraform_user_info()` - Retrieves user information using the provided token
 
 - **Workspace Management Tools**:
-  - `list_workspaces(organization, page_number=1, page_size=20, all_pages=False, search_name=None, search_tags=None, search_exclude_tags=None, search_wildcard_name=None, sort=None, filter_project_id=None, filter_current_run_status=None, filter_tagged_key=None, filter_tagged_value=None)` - Lists workspaces in a specific organization with comprehensive filtering, sorting, and pagination options
+  - `list_workspaces(organization, page_number=1, page_size=20, all_pages=False, search_name="", search_tags="", search_exclude_tags="", search_wildcard_name="", sort="", filter_project_id="", filter_current_run_status="", filter_tagged_key="", filter_tagged_value="")` - Lists workspaces in a specific organization with comprehensive filtering, sorting, and pagination options
   - `get_workspace_details(organization, workspace_name)` - Gets detailed information about a specific workspace
+  - `create_workspace(organization, name, description="", terraform_version="", working_directory="", auto_apply=False, file_triggers_enabled=True, trigger_prefixes=[], trigger_patterns=[], queue_all_runs=False, speculative_enabled=True, global_remote_state=False, execution_mode="remote", allow_destroy_plan=True, auto_apply_run_trigger=False, project_id="", vcs_repo={}, tags=[])` - Creates a new workspace with many configurable options
+  - `update_workspace(organization, workspace_name, name="", description="", terraform_version="", working_directory="", auto_apply=None, file_triggers_enabled=None, trigger_prefixes=[], trigger_patterns=[], queue_all_runs=None, speculative_enabled=None, global_remote_state=None, execution_mode="", allow_destroy_plan=None, auto_apply_run_trigger=None, project_id="", vcs_repo={}, tags=[])` - Updates an existing workspace with configurable options
 
 The full set of Terraform Cloud API integrations is under development. See the [TASKS.md](./TASKS.md) file for the implementation roadmap.
 
@@ -75,15 +72,10 @@ The full set of Terraform Cloud API integrations is under development. See the [
 # From the project root directory (basic)
 claude mcp add terraform-cloud-mcp "$(pwd)/server.py"
 
-# Start server with token via command line and connect Claude Code in one command
-claude mcp add terraform-cloud-mcp "$(pwd)/server.py --token YOUR_TF_TOKEN"
-
 # Start server with token via environment variable
 claude mcp add terraform-cloud-mcp -e TFC_TOKEN=YOUR_TF_TOKEN -- "$(pwd)/server.py"
 
 # From any other directory, specify the full path
-claude mcp add terraform-cloud-mcp "/path/to/terraform-cloud-mcp/server.py --token YOUR_TF_TOKEN"
-# Or with environment variable
 claude mcp add terraform-cloud-mcp -e TFC_TOKEN=YOUR_TF_TOKEN -- "/path/to/terraform-cloud-mcp/server.py"
 ```
 
@@ -92,12 +84,12 @@ To verify the server was added:
 claude mcp list
 ```
 
-The token can be provided either through the `--token` command line argument or the `TFC_TOKEN` environment variable when starting the server. This allows you to use the default token in your Claude conversations without explicitly providing it each time.
+The token can be provided through the `TFC_TOKEN` environment variable when starting the server. This allows you to use the default token in your Claude conversations without explicitly providing it each time.
 
 ### Example Usage in Claude
 
 ```
-# If server was started without a token (neither environment variable nor command line)
+# If server was started without a token
 User: Can you validate this Terraform Cloud API token: my-tf-token-value
 Claude: [Uses validate_token and returns validation result]
 
@@ -107,7 +99,7 @@ Claude: [Uses list_workspaces tool and returns workspace list]
 User: Can you get details for workspace "production" in organization "example-org" using token: my-tf-token-value?
 Claude: [Uses get_workspace_details tool and returns workspace information]
 
-# If server was started with a token (via TFC_TOKEN environment variable or --token command line)
+# If server was started with a token (via TFC_TOKEN environment variable)
 User: Can you validate my Terraform Cloud API token?
 Claude: [Uses validate_token with default token and returns validation result]
 
@@ -126,8 +118,14 @@ Claude: [Uses get_workspace_details with default token but explicit organization
 
 Future examples (planned implementation):
 ```
+User: Can you create a new workspace in "example-org" called "staging" with auto-apply enabled?
+Claude: [Uses create_workspace tool to create a new workspace with auto_apply=True]
+
+User: Can you update my "staging" workspace in "example-org" to use a specific Terraform version?
+Claude: [Uses update_workspace tool to update the workspace with a specific terraform_version]
+
 User: Can you create a plan for my "production" workspace and explain what changes will be made?
-Claude: [Will use create_run tool to generate a plan and explain_plan tool to provide a human-readable summary]
+Claude: [Will use create_run tool to generate a plan and explain_plan tool to provide a human-readable summary when implemented]
 ```
 
 ## Development
