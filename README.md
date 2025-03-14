@@ -53,6 +53,11 @@ Currently, this MCP server provides the following functionality:
   - `get_workspace_details(organization, workspace_name)` - Gets detailed information about a specific workspace
   - `create_workspace(organization, name, description="", terraform_version="", working_directory="", auto_apply=False, file_triggers_enabled=True, trigger_prefixes=[], trigger_patterns=[], queue_all_runs=False, speculative_enabled=True, global_remote_state=False, execution_mode="remote", allow_destroy_plan=True, auto_apply_run_trigger=False, project_id="", vcs_repo={}, tags=[])` - Creates a new workspace with many configurable options
   - `update_workspace(organization, workspace_name, name="", description="", terraform_version="", working_directory="", auto_apply=None, file_triggers_enabled=None, trigger_prefixes=[], trigger_patterns=[], queue_all_runs=None, speculative_enabled=None, global_remote_state=None, execution_mode="", allow_destroy_plan=None, auto_apply_run_trigger=None, project_id="", vcs_repo={}, tags=[])` - Updates an existing workspace with configurable options
+  - `delete_workspace(organization, workspace_name)` - Deletes a workspace from an organization
+  - `safe_delete_workspace(organization, workspace_name)` - Safely deletes a workspace only if it's not managing any resources
+  - `lock_workspace(organization, workspace_name, reason="")` - Locks a workspace to prevent Terraform runs
+  - `unlock_workspace(organization, workspace_name)` - Unlocks a workspace to allow Terraform runs
+  - `force_unlock_workspace(organization, workspace_name)` - Force unlocks a workspace that may be locked by another user or process
 
 The full set of Terraform Cloud API integrations is under development. See the [TASKS.md](./TASKS.md) file for the implementation roadmap.
 
@@ -123,6 +128,21 @@ Claude: [Uses create_workspace tool to create a new workspace with auto_apply=Tr
 
 User: Can you update my "staging" workspace in "example-org" to use a specific Terraform version?
 Claude: [Uses update_workspace tool to update the workspace with a specific terraform_version]
+
+User: Can you delete my "dev-test" workspace in the "example-org" organization?
+Claude: [Uses delete_workspace tool to delete the specified workspace]
+
+User: I want to delete my "staging" workspace in "example-org" but only if it doesn't have any resources. Can you help with that?
+Claude: [Uses safe_delete_workspace tool to safely delete the workspace only if it has no resources]
+
+User: Can you lock my "production" workspace so no changes can be applied while we're doing maintenance?
+Claude: [Uses lock_workspace tool with a reason to lock the workspace]
+
+User: The maintenance is complete, can you unlock the "production" workspace now?
+Claude: [Uses unlock_workspace tool to unlock the workspace]
+
+User: Someone left the "staging" workspace locked, and they're out today. Can you force unlock it?
+Claude: [Uses force_unlock_workspace tool to force unlock the workspace]
 
 User: Can you create a plan for my "production" workspace and explain what changes will be made?
 Claude: [Will use create_run tool to generate a plan and explain_plan tool to provide a human-readable summary when implemented]

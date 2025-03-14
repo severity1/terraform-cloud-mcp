@@ -97,7 +97,7 @@ async def make_api_request(path: str, method: str = "GET", token: Optional[str] 
             elif method == "PATCH":
                 response = await client.patch(url, headers=headers, params=params, json=data)
             elif method == "DELETE":
-                response = await client.delete(url, headers=headers, params=params, json=data)
+                response = await client.delete(url, headers=headers, params=params)
             else:
                 return (False, {"error": f"Unsupported method: {method}"})
             
@@ -668,6 +668,221 @@ async def update_workspace(
         f"organizations/{organization}/workspaces/{workspace_name}",
         method="PATCH",
         data=payload
+    )
+    
+    if success:
+        return data
+    else:
+        return data  # Error info is already in the data dictionary
+
+@mcp.tool()
+async def delete_workspace(organization: str, workspace_name: str) -> dict:
+    """
+    Delete a workspace from an organization
+    
+    Args:
+        organization: The organization name (required)
+        workspace_name: The name of the workspace to delete (required)
+        
+    Returns:
+        Success message or error details
+    """
+    
+    # Validate organization name
+    valid, error_message = validate_organization(organization)
+    if not valid:
+        return {"error": error_message}
+    
+    if not workspace_name:
+        return {"error": "Workspace name is required"}
+    
+    # Make the API request
+    success, data = await make_api_request(
+        f"organizations/{organization}/workspaces/{workspace_name}",
+        method="DELETE"
+    )
+    
+    if success:
+        return {"status": "success", "message": f"Workspace '{workspace_name}' deleted successfully"}
+    else:
+        return data  # Error info is already in the data dictionary
+
+@mcp.tool()
+async def safe_delete_workspace(organization: str, workspace_name: str) -> dict:
+    """
+    Safely delete a workspace, but only if it's not managing any resources
+    
+    When you delete a Terraform workspace with resources, Terraform can no longer track
+    or manage that infrastructure. During a safe delete, Terraform only deletes the
+    workspace if it is not managing any resources.
+    
+    Args:
+        organization: The organization name (required)
+        workspace_name: The name of the workspace to delete (required)
+        
+    Returns:
+        Success message or error details
+    """
+    
+    # Validate organization name
+    valid, error_message = validate_organization(organization)
+    if not valid:
+        return {"error": error_message}
+    
+    if not workspace_name:
+        return {"error": "Workspace name is required"}
+    
+    # Make the safe-delete API request
+    success, data = await make_api_request(
+        f"organizations/{organization}/workspaces/{workspace_name}/actions/safe-delete",
+        method="POST"
+    )
+    
+    if success:
+        return {"status": "success", "message": f"Workspace '{workspace_name}' safely deleted successfully"}
+    else:
+        return data  # Error info is already in the data dictionary
+
+@mcp.tool()
+async def lock_workspace(organization: str, workspace_name: str, reason: str = "") -> dict:
+    """
+    Lock a workspace to prevent Terraform runs
+    
+    Args:
+        organization: The organization name (required)
+        workspace_name: The name of the workspace to lock (required)
+        reason: Optional reason for locking the workspace
+        
+    Returns:
+        Updated workspace details or error message
+    """
+    
+    # Validate organization name
+    valid, error_message = validate_organization(organization)
+    if not valid:
+        return {"error": error_message}
+    
+    if not workspace_name:
+        return {"error": "Workspace name is required"}
+    
+    # Build the request payload
+    payload = {
+        "data": {
+            "reason": reason if reason else "Locked via Terraform Cloud MCP Server"
+        }
+    }
+    
+    # First, get the workspace ID
+    id_success, id_data = await make_api_request(
+        f"organizations/{organization}/workspaces/{workspace_name}"
+    )
+    
+    if not id_success:
+        return id_data  # Return error from workspace lookup
+    
+    # Extract the workspace ID
+    try:
+        workspace_id = id_data["data"]["id"]
+    except (KeyError, TypeError):
+        return {"error": "Failed to get workspace ID"}
+    
+    # Make the API request
+    success, data = await make_api_request(
+        f"workspaces/{workspace_id}/actions/lock",
+        method="POST",
+        data=payload
+    )
+    
+    if success:
+        return data
+    else:
+        return data  # Error info is already in the data dictionary
+
+@mcp.tool()
+async def unlock_workspace(organization: str, workspace_name: str) -> dict:
+    """
+    Unlock a workspace to allow Terraform runs
+    
+    Args:
+        organization: The organization name (required)
+        workspace_name: The name of the workspace to unlock (required)
+        
+    Returns:
+        Updated workspace details or error message
+    """
+    
+    # Validate organization name
+    valid, error_message = validate_organization(organization)
+    if not valid:
+        return {"error": error_message}
+    
+    if not workspace_name:
+        return {"error": "Workspace name is required"}
+    
+    # First, get the workspace ID
+    id_success, id_data = await make_api_request(
+        f"organizations/{organization}/workspaces/{workspace_name}"
+    )
+    
+    if not id_success:
+        return id_data  # Return error from workspace lookup
+    
+    # Extract the workspace ID
+    try:
+        workspace_id = id_data["data"]["id"]
+    except (KeyError, TypeError):
+        return {"error": "Failed to get workspace ID"}
+    
+    # Make the API request
+    success, data = await make_api_request(
+        f"workspaces/{workspace_id}/actions/unlock",
+        method="POST"
+    )
+    
+    if success:
+        return data
+    else:
+        return data  # Error info is already in the data dictionary
+
+@mcp.tool()
+async def force_unlock_workspace(organization: str, workspace_name: str) -> dict:
+    """
+    Force unlock a workspace that may be locked by another user or process
+    
+    Args:
+        organization: The organization name (required)
+        workspace_name: The name of the workspace to force unlock (required)
+        
+    Returns:
+        Updated workspace details or error message
+    """
+    
+    # Validate organization name
+    valid, error_message = validate_organization(organization)
+    if not valid:
+        return {"error": error_message}
+    
+    if not workspace_name:
+        return {"error": "Workspace name is required"}
+    
+    # First, get the workspace ID
+    id_success, id_data = await make_api_request(
+        f"organizations/{organization}/workspaces/{workspace_name}"
+    )
+    
+    if not id_success:
+        return id_data  # Return error from workspace lookup
+    
+    # Extract the workspace ID
+    try:
+        workspace_id = id_data["data"]["id"]
+    except (KeyError, TypeError):
+        return {"error": "Failed to get workspace ID"}
+    
+    # Make the API request
+    success, data = await make_api_request(
+        f"workspaces/{workspace_id}/actions/force-unlock",
+        method="POST"
     )
     
     if success:
