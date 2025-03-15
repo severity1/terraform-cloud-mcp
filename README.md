@@ -6,7 +6,8 @@ A Model Context Protocol (MCP) server that integrates Claude with the Terraform 
 
 - **Authentication** - Validate tokens and get user information
 - **Workspace Management** - Create, read, update, delete, lock/unlock workspaces
-- **Future Features** - Run operations, state management, variables management, and more
+- **Run Management** - Create runs, list runs, get run details, apply/discard/cancel runs
+- **Future Features** - State management, variables management, and more
 
 ## Quick Start
 
@@ -150,7 +151,7 @@ Tools for controlling workspace access:
 
 ### Run Management Tools
 
-Tools for managing Terraform plan and apply operations:
+Tools for managing Terraform runs (plan, apply, and other operations):
 
 - `create_run(organization, workspace_name, ...)`  
   Create and queue a Terraform run in a workspace
@@ -306,6 +307,7 @@ Claude: [Uses force_cancel_run to immediately terminate the stuck run]
 
 User: I need to execute this run immediately, force execute it
 Claude: [Uses force_execute_run to bypass the queue and start the run]
+```
 
 ### Coming Soon
 
@@ -340,7 +342,7 @@ terraform-cloud-mcp/
 ├── tools/            # MCP tools implementation
 │   ├── __init__.py
 │   ├── auth.py       # Authentication tools
-│   ├── runs.py       # Run management tools (create, list, get details)
+│   ├── runs.py       # Run management tools (create, list, apply, discard, cancel runs)
 │   └── workspaces.py # Workspace management tools
 ├── utils/            # Utility functions
 │   ├── __init__.py
