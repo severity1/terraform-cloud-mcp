@@ -30,7 +30,10 @@ pip install -r requirements.txt
 The server supports multiple ways to provide your Terraform Cloud API token:
 
 ```bash
-# Basic usage (no token)
+# Using MCP development tools (recommended for development)
+mcp dev server.py
+
+# Using standard Python
 python server.py
 
 # With token via environment variable
@@ -49,14 +52,6 @@ When a token is provided, Claude can use it without you having to specify it in 
 
 ### Connecting with Claude
 
-#### Using Claude Desktop
-
-1. Open Claude Desktop
-2. Go to Settings → MCP Servers
-3. Add a new server with URL: http://localhost:8000
-4. Enable the server
-5. Start chatting with Claude
-
 #### Using Claude Code CLI
 
 ```bash
@@ -68,6 +63,10 @@ claude mcp add terraform-cloud-mcp -e TFC_TOKEN=YOUR_TF_TOKEN -- "$(pwd)/server.
 
 # Verify it was added
 claude mcp list
+
+# For testing, you can use the MCP Inspector
+# This automatically opens when running `mcp dev server.py`
+# MCP Inspector runs at http://localhost:5173
 ```
 
 ## Available Tools
@@ -175,6 +174,35 @@ Tools for managing Terraform plan and apply operations:
   Get detailed information about a specific run
   
   *Required:* `run_id`
+  
+- `apply_run(run_id, comment)`  
+  Apply a run that is paused waiting for confirmation after a plan
+  
+  *Required:* `run_id`  
+  *Optional:* `comment`
+  
+- `discard_run(run_id, comment)`  
+  Discard a run that is waiting for confirmation or priority
+  
+  *Required:* `run_id`  
+  *Optional:* `comment`
+  
+- `cancel_run(run_id, comment)`  
+  Cancel a run that is currently planning or applying
+  
+  *Required:* `run_id`  
+  *Optional:* `comment`
+  
+- `force_cancel_run(run_id, comment)`  
+  Forcefully cancel a run immediately (after a normal cancel)
+  
+  *Required:* `run_id`  
+  *Optional:* `comment`
+  
+- `force_execute_run(run_id)`  
+  Forcefully execute a pending run by canceling prior runs
+  
+  *Required:* `run_id`
 
 ## Example Conversations
 
@@ -261,12 +289,27 @@ Claude: [Lists runs with is_destroy=true across all workspaces]
 User: Get details for run ID "run-CZcmD7eagjhyX0vN"
 Claude: [Shows detailed information about the specific run]
 
-### Coming Soon
+### Run Actions
 
 ```
 User: Apply the pending run for "staging" workspace
-Claude: [Will use apply_run tool]
+Claude: [Uses apply_run to apply the waiting run]
 
+User: Cancel the run "run-CZcmD7eagjhyX0vN", it's taking too long
+Claude: [Uses cancel_run to safely interrupt the running process]
+
+User: Discard the plan for the "dev" workspace, those changes aren't needed
+Claude: [Uses discard_run to discard the pending run]
+
+User: Force cancel the stuck run in "production"
+Claude: [Uses force_cancel_run to immediately terminate the stuck run]
+
+User: I need to execute this run immediately, force execute it
+Claude: [Uses force_execute_run to bypass the queue and start the run]
+
+### Coming Soon
+
+```
 User: List all variables defined in "production"
 Claude: [Will use list_workspace_variables tool]
 
@@ -279,7 +322,7 @@ Claude: [Will use get_plan_output and explain_plan tools]
 ### Requirements
 
 - Python 3.9+
-- FastMCP
+- MCP (includes FastMCP and development tools)
 - Terraform Cloud API token
 
 ### Project Structure
@@ -321,13 +364,15 @@ If you encounter issues:
 
 1. Check server logs (debug logging is enabled by default)
 2. Note that `Processing request of type CallToolRequest` is informational, not an error
-3. For more verbose logging:
+3. Debug logging is already enabled in server.py:
 
 ```python
-# Add to server.py
+# Already in server.py
 import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
+
+4. If using `mcp dev server.py`, use the MCP Inspector at http://localhost:5173 to debug tool calls
 
 ## Contributing
 

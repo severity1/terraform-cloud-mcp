@@ -243,7 +243,7 @@ async def list_runs_in_workspace(
         return {"error": "Failed to get workspace ID"}
     
     # Build query parameters
-    params = {
+    params: Dict[str, Union[str, int]] = {
         "page[number]": page_number,
         "page[size]": page_size
     }
@@ -331,7 +331,7 @@ async def list_runs_in_organization(
         return {"error": error_message}
     
     # Build query parameters
-    params = {
+    params: Dict[str, Union[str, int]] = {
         "page[number]": page_number,
         "page[size]": page_size
     }
@@ -403,5 +403,190 @@ async def get_run_details(
     
     if success:
         return data
+    else:
+        return data  # Error info is already in the data dictionary
+        
+async def apply_run(
+    run_id: str,
+    comment: str = ""
+) -> dict:
+    """
+    Apply a run that is paused waiting for confirmation after a plan
+    
+    This applies runs in the "needs confirmation" and "policy checked" states.
+    
+    Args:
+        run_id: The ID of the run to apply (required)
+        comment: An optional comment about the run
+        
+    Returns:
+        Success message or error details
+    """
+    if not run_id:
+        return {"error": "Run ID is required"}
+    
+    # Build the request payload with optional comment
+    payload = {}
+    if comment:
+        payload = {"comment": comment}
+        
+    # Make the API request
+    success, data = await make_api_request(
+        f"runs/{run_id}/actions/apply",
+        method="POST",
+        data=payload
+    )
+    
+    if success:
+        return {"status": "success", "message": "Run apply has been queued"}
+    else:
+        return data  # Error info is already in the data dictionary
+        
+async def discard_run(
+    run_id: str,
+    comment: str = ""
+) -> dict:
+    """
+    Discard a run that is paused waiting for confirmation
+    
+    This discards runs in the "pending", "needs confirmation", "policy checked", 
+    and "policy override" states.
+    
+    Args:
+        run_id: The ID of the run to discard (required)
+        comment: An optional explanation for why the run was discarded
+        
+    Returns:
+        Success message or error details
+    """
+    if not run_id:
+        return {"error": "Run ID is required"}
+    
+    # Build the request payload with optional comment
+    payload = {}
+    if comment:
+        payload = {"comment": comment}
+        
+    # Make the API request
+    success, data = await make_api_request(
+        f"runs/{run_id}/actions/discard",
+        method="POST",
+        data=payload
+    )
+    
+    if success:
+        return {"status": "success", "message": "Run discard has been queued"}
+    else:
+        return data  # Error info is already in the data dictionary
+        
+async def cancel_run(
+    run_id: str,
+    comment: str = ""
+) -> dict:
+    """
+    Cancel a run that is currently planning or applying
+    
+    This is equivalent to hitting ctrl+c during a Terraform plan or apply on the CLI.
+    The running Terraform process is sent an INT signal to end its work safely.
+    
+    Args:
+        run_id: The ID of the run to cancel (required)
+        comment: An optional explanation for why the run was canceled
+        
+    Returns:
+        Success message or error details
+    """
+    if not run_id:
+        return {"error": "Run ID is required"}
+    
+    # Build the request payload with optional comment
+    payload = {}
+    if comment:
+        payload = {"comment": comment}
+        
+    # Make the API request
+    success, data = await make_api_request(
+        f"runs/{run_id}/actions/cancel",
+        method="POST",
+        data=payload
+    )
+    
+    if success:
+        return {"status": "success", "message": "Run cancel has been queued"}
+    else:
+        return data  # Error info is already in the data dictionary
+        
+async def force_cancel_run(
+    run_id: str,
+    comment: str = ""
+) -> dict:
+    """
+    Forcefully cancel a run immediately
+    
+    Unlike cancel_run, this action ends the run immediately and places it
+    into a canceled state. The workspace is immediately unlocked.
+    
+    Note: This endpoint requires that a normal cancel is performed first,
+    and a cool-off period has elapsed.
+    
+    Args:
+        run_id: The ID of the run to force cancel (required)
+        comment: An optional explanation for why the run was force canceled
+        
+    Returns:
+        Success message or error details
+    """
+    if not run_id:
+        return {"error": "Run ID is required"}
+    
+    # Build the request payload with optional comment
+    payload = {}
+    if comment:
+        payload = {"comment": comment}
+        
+    # Make the API request
+    success, data = await make_api_request(
+        f"runs/{run_id}/actions/force-cancel",
+        method="POST",
+        data=payload
+    )
+    
+    if success:
+        return {"status": "success", "message": "Run has been force canceled"}
+    else:
+        return data  # Error info is already in the data dictionary
+        
+async def force_execute_run(
+    run_id: str
+) -> dict:
+    """
+    Forcefully execute a run by canceling all prior runs
+    
+    This action cancels all prior runs that are not already complete,
+    unlocking the run's workspace and allowing the run to be executed.
+    This is the same as clicking "Run this plan now" in the UI.
+    
+    Prerequisites:
+    - The target run must be in the "pending" state
+    - The workspace must be locked by another run
+    - The run locking the workspace must be in a discardable state
+    
+    Args:
+        run_id: The ID of the run to execute (required)
+        
+    Returns:
+        Success message or error details
+    """
+    if not run_id:
+        return {"error": "Run ID is required"}
+    
+    # Make the API request (no payload)
+    success, data = await make_api_request(
+        f"runs/{run_id}/actions/force-execute",
+        method="POST"
+    )
+    
+    if success:
+        return {"status": "success", "message": "Run force-execution has been initiated"}
     else:
         return data  # Error info is already in the data dictionary
