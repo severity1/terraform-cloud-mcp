@@ -74,41 +74,80 @@ claude mcp list
 
 ### Authentication Tools
 
-| Tool | Description | Arguments |
-|------|-------------|-----------|
-| `validate_token()` | Validates a Terraform Cloud API token | None - Uses default token |
-| `get_terraform_user_info()` | Gets user information for the provided token | None - Uses default token |
+The following tools help validate and work with Terraform Cloud API tokens:
+
+- `validate_token()`  
+  Validates a Terraform Cloud API token
+
+- `get_terraform_user_info()`  
+  Gets user information for the provided token
 
 ### Workspace Management Tools
 
 #### List & Search
 
-| Tool | Description | Arguments |
-|------|-------------|-----------|
-| `list_workspaces()` | List workspaces with comprehensive filtering | • `organization`: Organization name (required)<br>• `page_number`: Page number (default: 1)<br>• `page_size`: Results per page (default: 20)<br>• `all_pages`: Fetch all pages (default: False)<br>• `search_name`: Filter by name (fuzzy)<br>• `search_tags`: Filter by tags (comma separated)<br>• `search_exclude_tags`: Exclude tags (comma separated)<br>• `search_wildcard_name`: Filter by wildcard name<br>• `sort`: Sort field and direction<br>• `filter_project_id`: Filter by project ID<br>• `filter_current_run_status`: Filter by run status<br>• `filter_tagged_key`: Filter by tag key<br>• `filter_tagged_value`: Filter by tag value |
-| `get_workspace_details()` | Get detailed workspace information | • `organization`: Organization name (required)<br>• `workspace_name`: Workspace name (required) |
+Tools for finding and inspecting workspaces:
+
+- `list_workspaces(organization, ...)`  
+  List and filter workspaces with comprehensive options
+  
+  *Required:* `organization` - Organization name  
+  *Optional:* Filtering by name, tags, pagination, sorting and more
+
+- `get_workspace_details(organization, workspace_name)`  
+  Get detailed information about a specific workspace
+  
+  *Required:* `organization`, `workspace_name`
 
 #### Create & Update
 
-| Tool | Description | Arguments |
-|------|-------------|-----------|
-| `create_workspace()` | Create a new workspace | • `organization`: Organization name (required)<br>• `name`: Workspace name (required)<br>• `description`: Workspace description<br>• `terraform_version`: Terraform version<br>• `working_directory`: Working directory<br>• `auto_apply`: Auto apply changes (default: False)<br>• `file_triggers_enabled`: Enable file triggers (default: True)<br>• `trigger_prefixes`: Path prefixes to trigger runs<br>• `trigger_patterns`: Glob patterns to trigger runs<br>• `queue_all_runs`: Queue all runs (default: False)<br>• `speculative_enabled`: Enable speculative plans (default: True)<br>• `global_remote_state`: Allow global state access (default: False)<br>• `execution_mode`: Execution mode (default: "remote")<br>• `allow_destroy_plan`: Allow destroy plans (default: True)<br>• `auto_apply_run_trigger`: Auto apply run triggers (default: False)<br>• `project_id`: Project ID<br>• `vcs_repo`: VCS repository settings<br>• `tags`: List of tags |
-| `update_workspace()` | Update an existing workspace | • `organization`: Organization name (required)<br>• `workspace_name`: Current workspace name (required)<br>• `name`: New workspace name<br>• `description`: Workspace description<br>• `terraform_version`: Terraform version<br>• `working_directory`: Working directory<br>• `auto_apply`: Auto apply changes<br>• `file_triggers_enabled`: Enable file triggers<br>• `trigger_prefixes`: Path prefixes to trigger runs<br>• `trigger_patterns`: Glob patterns to trigger runs<br>• `queue_all_runs`: Queue all runs<br>• `speculative_enabled`: Enable speculative plans<br>• `global_remote_state`: Allow global state access<br>• `execution_mode`: Execution mode<br>• `allow_destroy_plan`: Allow destroy plans<br>• `auto_apply_run_trigger`: Auto apply run triggers<br>• `project_id`: Project ID<br>• `vcs_repo`: VCS repository settings<br>• `tags`: List of tags |
+Tools for creating and modifying workspaces:
+
+- `create_workspace(organization, name, ...)`  
+  Create a new workspace with various configuration options
+  
+  *Required:* `organization`, `name`  
+  *Optional:* Configure Terraform version, VCS settings, execution mode, etc.
+
+- `update_workspace(organization, workspace_name, ...)`  
+  Update an existing workspace's configuration
+  
+  *Required:* `organization`, `workspace_name`  
+  *Optional:* Update name, description, settings, VCS connections, etc.
 
 #### Delete
 
-| Tool | Description | Arguments |
-|------|-------------|-----------|
-| `delete_workspace()` | Delete a workspace | • `organization`: Organization name (required)<br>• `workspace_name`: Workspace name (required) |
-| `safe_delete_workspace()` | Delete only if not managing resources | • `organization`: Organization name (required)<br>• `workspace_name`: Workspace name (required) |
+Tools for removing workspaces:
+
+- `delete_workspace(organization, workspace_name)`  
+  Delete a workspace and all its content
+  
+  *Required:* `organization`, `workspace_name`
+
+- `safe_delete_workspace(organization, workspace_name)`  
+  Delete only if the workspace isn't managing any resources
+  
+  *Required:* `organization`, `workspace_name`
 
 #### Lock & Unlock
 
-| Tool | Description | Arguments |
-|------|-------------|-----------|
-| `lock_workspace()` | Lock a workspace | • `organization`: Organization name (required)<br>• `workspace_name`: Workspace name (required)<br>• `reason`: Reason for locking (optional) |
-| `unlock_workspace()` | Unlock a workspace | • `organization`: Organization name (required)<br>• `workspace_name`: Workspace name (required) |
-| `force_unlock_workspace()` | Force unlock a workspace | • `organization`: Organization name (required)<br>• `workspace_name`: Workspace name (required) |
+Tools for controlling workspace access:
+
+- `lock_workspace(organization, workspace_name, reason)`  
+  Lock a workspace to prevent runs
+  
+  *Required:* `organization`, `workspace_name`  
+  *Optional:* `reason` - Explanation for the lock
+
+- `unlock_workspace(organization, workspace_name)`  
+  Unlock a workspace to allow runs
+  
+  *Required:* `organization`, `workspace_name`
+
+- `force_unlock_workspace(organization, workspace_name)`  
+  Force unlock a workspace locked by another user
+  
+  *Required:* `organization`, `workspace_name`
 
 ## Example Conversations
 
@@ -186,13 +225,37 @@ Claude: [Will use list_workspace_variables tool]
 - FastMCP
 - Terraform Cloud API token
 
+### Project Structure
+
+The code is organized into a modular structure:
+
+```
+terraform-cloud-mcp/
+├── api/              # API client and communication
+│   ├── __init__.py
+│   └── client.py     # HTTP client for Terraform Cloud API
+├── models/           # Data models
+│   ├── __init__.py
+│   └── auth.py       # Authentication models
+├── tools/            # MCP tools implementation
+│   ├── __init__.py
+│   ├── auth.py       # Authentication tools
+│   └── workspaces.py # Workspace management tools
+├── utils/            # Utility functions
+│   ├── __init__.py
+│   └── validators.py # Input validation
+├── server.py         # Main server entry point
+└── requirements.txt  # Project dependencies
+```
+
 ### Extending the Server
 
 To add new features:
-1. Edit `server.py` to implement additional tools or resources
-2. Follow the existing patterns for parameter validation and error handling
-3. Update documentation in README.md
-4. Add tests for new functionality
+1. Add new tools to the appropriate module in the `tools` directory
+2. Register new tools in `server.py`
+3. Follow the existing patterns for parameter validation and error handling
+4. Update documentation in README.md
+5. Add tests for new functionality
 
 ## Troubleshooting
 
