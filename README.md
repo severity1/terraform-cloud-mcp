@@ -149,6 +149,33 @@ Tools for controlling workspace access:
   
   *Required:* `organization`, `workspace_name`
 
+### Run Management Tools
+
+Tools for managing Terraform plan and apply operations:
+
+- `create_run(organization, workspace_name, ...)`  
+  Create and queue a Terraform run in a workspace
+  
+  *Required:* `organization`, `workspace_name`  
+  *Optional:* `message`, `auto_apply`, `is_destroy`, `refresh`, `refresh_only`, `plan_only`, `target_addrs`, `replace_addrs`, `variables`, and more configuration options
+
+- `list_runs_in_workspace(organization, workspace_name, ...)`  
+  List and filter runs in a specific workspace with comprehensive options
+  
+  *Required:* `organization`, `workspace_name`  
+  *Optional:* Pagination, filtering by status/operation/source, searching by user/commit
+
+- `list_runs_in_organization(organization, ...)`  
+  List and filter runs across an entire organization
+  
+  *Required:* `organization`  
+  *Optional:* Pagination, filtering by workspace/status/operation/source, searching by user/commit
+
+- `get_run_details(run_id)`  
+  Get detailed information about a specific run
+  
+  *Required:* `run_id`
+
 ## Example Conversations
 
 ### Authentication & Listing
@@ -204,17 +231,47 @@ User: Someone left "staging" locked and they're out today. Can you force unlock 
 Claude: [Force unlocks the workspace]
 ```
 
+### Run Management
+
+```
+User: Create a plan for my "production" workspace
+Claude: [Creates a plan-only run in the workspace]
+
+User: Create a destroy plan for "dev-test" workspace
+Claude: [Creates a destroy plan run in the workspace]
+
+User: Run a targeted plan in "staging" that only affects the database resources
+Claude: [Creates a plan with target_addrs for database resources]
+
+User: Create a plan with custom variables in the "development" workspace
+Claude: [Creates a run with custom variable values for that specific run]
+
+User: Create a run in "sandbox" workspace with auto-apply enabled
+Claude: [Creates a run with auto_apply=True to automatically apply after planning]
+
+User: List all runs in my "production" workspace
+Claude: [Lists all runs in the workspace with details]
+
+User: Show me runs in "example-org" that have errored in the last month
+Claude: [Lists runs with error status in the organization]
+
+User: Find all destroy plan runs in my organization
+Claude: [Lists runs with is_destroy=true across all workspaces]
+
+User: Get details for run ID "run-CZcmD7eagjhyX0vN"
+Claude: [Shows detailed information about the specific run]
+
 ### Coming Soon
 
 ```
-User: Create a plan for my "production" workspace and explain the changes
-Claude: [Will use create_run and explain_plan tools]
-
 User: Apply the pending run for "staging" workspace
 Claude: [Will use apply_run tool]
 
 User: List all variables defined in "production"
 Claude: [Will use list_workspace_variables tool]
+
+User: Show me the plan output and explain the changes
+Claude: [Will use get_plan_output and explain_plan tools]
 ```
 
 ## Development
@@ -240,6 +297,7 @@ terraform-cloud-mcp/
 ├── tools/            # MCP tools implementation
 │   ├── __init__.py
 │   ├── auth.py       # Authentication tools
+│   ├── runs.py       # Run management tools (create, list, get details)
 │   └── workspaces.py # Workspace management tools
 ├── utils/            # Utility functions
 │   ├── __init__.py

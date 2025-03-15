@@ -13,6 +13,7 @@ from mcp.server.fastmcp import FastMCP
 from api.client import TERRAFORM_CLOUD_API_URL
 import tools.auth as auth
 import tools.workspaces as workspaces
+import tools.runs as runs
 
 # Load environment variables from .env file
 load_dotenv()
@@ -51,6 +52,12 @@ mcp.tool()(workspaces.safe_delete_workspace)
 mcp.tool()(workspaces.lock_workspace)
 mcp.tool()(workspaces.unlock_workspace)
 mcp.tool()(workspaces.force_unlock_workspace)
+
+# Register run management tools
+mcp.tool()(runs.create_run)
+mcp.tool()(runs.list_runs_in_workspace)
+mcp.tool()(runs.list_runs_in_organization)
+mcp.tool()(runs.get_run_details)
 
 # Start server when run directly
 if __name__ == "__main__":
