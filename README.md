@@ -407,7 +407,6 @@ terraform-cloud-mcp/
 ├── server.py         # Main server entry point
 ├── pyproject.toml    # Project configuration and dependencies
 ├── mypy.ini          # Mypy type checking configuration
-├── RELEASE_NOTES.md  # Version history and changes
 └── uv.lock          # Dependency lock file for uv
 ```
 
@@ -444,7 +443,5 @@ Contributions are welcome! Please open an issue or pull request if you'd like to
 When contributing, please follow these guidelines:
 - Ensure all code includes proper type hints
 - Run mypy type checking before submitting PRs
-- Follow the code style guidelines in CLAUDE.md
 - Add tests for new functionality
 - Update documentation for any new features or changes
-- Add entries to RELEASE_NOTES.md for significant changes
