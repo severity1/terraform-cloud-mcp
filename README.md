@@ -18,12 +18,12 @@ A Model Context Protocol (MCP) server that integrates Claude with the Terraform 
 git clone https://github.com/yourusername/terraform-cloud-mcp.git
 cd terraform-cloud-mcp
 
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Create virtual environment and activate it
+uv venv
+source .venv/bin/activate
 
 # Install dependencies
-pip install -r requirements.txt
+uv pip install -e .
 ```
 
 ### Starting the Server
@@ -31,22 +31,25 @@ pip install -r requirements.txt
 The server supports multiple ways to provide your Terraform Cloud API token:
 
 ```bash
-# Using MCP development tools (recommended for development)
+# Using MCP dev tools (provides debugging tools)
 mcp dev server.py
 
-# Using standard Python
-python server.py
+# Using MCP run command
+mcp run server.py
+
+# Standard method
+uv run server.py
 
 # With token via environment variable
 export TFC_TOKEN=YOUR_TF_TOKEN
-python server.py
+uv run server.py
 
 # Using a .env file
 echo "TFC_TOKEN=YOUR_TF_TOKEN" > .env
-python server.py
+uv run server.py
 
 # Run in background
-python server.py > server.log 2>&1 & echo $! > server.pid
+uv run server.py > server.log 2>&1 & echo $! > server.pid
 ```
 
 When a token is provided, Claude can use it without you having to specify it in every command.
@@ -57,18 +60,46 @@ When a token is provided, Claude can use it without you having to specify it in 
 
 ```bash
 # Add the MCP server
-claude mcp add terraform-cloud-mcp "$(pwd)/server.py"
+claude mcp add terraform-cloud-mcp "uv run $(pwd)/server.py"
 
 # With token
-claude mcp add terraform-cloud-mcp -e TFC_TOKEN=YOUR_TF_TOKEN -- "$(pwd)/server.py"
+claude mcp add terraform-cloud-mcp -e TFC_TOKEN=YOUR_TF_TOKEN -- "uv run $(pwd)/server.py"
 
 # Verify it was added
 claude mcp list
 
-# For testing, you can use the MCP Inspector
-# This automatically opens when running `mcp dev server.py`
-# MCP Inspector runs at http://localhost:5173
+# For debugging, you can use MCP Inspector with 'mcp dev' command
 ```
+
+#### Using Claude Desktop
+
+Create a `claude_desktop_config.json` configuration file:
+
+```json
+{
+  "mcpServers": {
+    "terraform-cloud-mcp": {
+      "command": "/path/to/uv",
+      "args": [
+        "--directory",
+        "/path/to/terraform-cloud-mcp",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "TFC_TOKEN": "your_terraform_cloud_token"
+      }
+    }
+  }
+}
+```
+
+Replace the paths and token with your actual values:
+- Use the full path to the uv executable (find it with `which uv` on macOS/Linux or `where uv` on Windows)
+- Set the correct directory path to your terraform-cloud-mcp installation
+- Add your Terraform Cloud API token
+
+This configuration tells Claude Desktop how to start the MCP server automatically.
 
 ## Available Tools
 
@@ -289,6 +320,7 @@ Claude: [Lists runs with is_destroy=true across all workspaces]
 
 User: Get details for run ID "run-CZcmD7eagjhyX0vN"
 Claude: [Shows detailed information about the specific run]
+```
 
 ### Run Actions
 
@@ -323,8 +355,9 @@ Claude: [Will use get_plan_output and explain_plan tools]
 
 ### Requirements
 
-- Python 3.9+
+- Python 3.12+
 - MCP (includes FastMCP and development tools)
+- uv package manager (recommended) or pip
 - Terraform Cloud API token
 
 ### Project Structure
@@ -348,7 +381,8 @@ terraform-cloud-mcp/
 │   ├── __init__.py
 │   └── validators.py # Input validation
 ├── server.py         # Main server entry point
-└── requirements.txt  # Project dependencies
+├── pyproject.toml    # Project configuration and dependencies
+└── uv.lock          # Dependency lock file for uv
 ```
 
 ### Extending the Server
@@ -374,7 +408,8 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
 
-4. If using `mcp dev server.py`, use the MCP Inspector at http://localhost:5173 to debug tool calls
+4. If using `mcp dev server.py`, the MCP Inspector will automatically open at http://localhost:5173 for debugging
+5. Use the server logs to debug API calls and responses
 
 ## Contributing
 
