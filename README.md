@@ -2,6 +2,10 @@
 
 A Model Context Protocol (MCP) server that integrates Claude with the Terraform Cloud API, allowing Claude to manage your Terraform infrastructure through natural conversation.
 
+![Version](https://img.shields.io/badge/version-0.6.0-blue)
+![Python](https://img.shields.io/badge/python-3.12+-green)
+![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
+
 ## Features
 
 - **Authentication** - Validate tokens and get user information
@@ -360,6 +364,26 @@ Claude: [Will use get_plan_output and explain_plan tools]
 - uv package manager (recommended) or pip
 - Terraform Cloud API token
 
+### Type Checking
+
+This project uses mypy for static type checking to enhance code quality and catch type-related bugs early:
+
+```bash
+# Install mypy
+uv pip install mypy
+
+# Run type checking
+uv run -m mypy .
+```
+
+Type checking configuration is available in both `pyproject.toml` and `mypy.ini`. The configuration enforces strict typing rules including:
+
+- Disallowing untyped definitions
+- Warning on returning Any types
+- Checking completeness of function definitions
+- Namespace packages support
+- Module-specific configurations
+
 ### Project Structure
 
 The code is organized into a modular structure:
@@ -382,6 +406,7 @@ terraform-cloud-mcp/
 │   └── validators.py # Input validation
 ├── server.py         # Main server entry point
 ├── pyproject.toml    # Project configuration and dependencies
+├── mypy.ini          # Mypy type checking configuration
 └── uv.lock          # Dependency lock file for uv
 ```
 
@@ -414,3 +439,9 @@ logging.basicConfig(level=logging.DEBUG)
 ## Contributing
 
 Contributions are welcome! Please open an issue or pull request if you'd like to contribute to this project.
+
+When contributing, please follow these guidelines:
+- Ensure all code includes proper type hints
+- Run mypy type checking before submitting PRs
+- Add tests for new functionality
+- Update documentation for any new features or changes
