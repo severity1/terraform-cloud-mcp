@@ -15,7 +15,7 @@ A Model Context Protocol (MCP) server that integrates Claude with the Terraform 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/terraform-cloud-mcp.git
+git clone https://github.com/severity1/terraform-cloud-mcp.git
 cd terraform-cloud-mcp
 
 # Create virtual environment and activate it
