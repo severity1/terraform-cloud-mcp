@@ -1,0 +1,14 @@
+[project]
+name = "terraform-cloud-mcp"
+version = "0.5.0"
+description = "A Model Context Protocol (MCP) server that integrates Claude with the Terraform Cloud API, allowing Claude to manage your Terraform infrastructure through natural conversation."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dotenv>=0.9.9",
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.4.1",
+]
+
+[tool.setuptools]
+packages = ["api", "models", "tools", "utils"]
