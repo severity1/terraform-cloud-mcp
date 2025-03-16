@@ -15,43 +15,62 @@ DEFAULT_TOKEN = os.getenv("TFC_TOKEN")
 if DEFAULT_TOKEN:
     logging.info("Default token provided (masked for security)")
 
-async def make_api_request(path: str, method: str = "GET", token: Optional[str] = None, params: dict = {}, data: dict = {}) -> Tuple[bool, dict]:
+
+async def make_api_request(
+    path: str,
+    method: str = "GET",
+    token: Optional[str] = None,
+    params: dict = {},
+    data: dict = {},
+) -> Tuple[bool, dict]:
     """
     Make a request to the Terraform Cloud API
-    
+
     Args:
         path: API path to request (without base URL)
         method: HTTP method (default: GET)
         token: API token (defaults to DEFAULT_TOKEN)
         params: Query parameters for the request (optional)
         data: JSON data for POST/PATCH requests (optional)
-        
+
     Returns:
         Tuple of (success, data) where data is either the response JSON or an error dict
     """
     if not token:
         token = DEFAULT_TOKEN
-        
+
     if not token:
-        return (False, {"error": "Token is required. Please set the TFC_TOKEN environment variable."})
-    
+        return (
+            False,
+            {
+                "error": "Token is required. Please set the TFC_TOKEN environment variable."
+            },
+        )
+
     try:
-        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/vnd.api+json"}
-        
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/vnd.api+json",
+        }
+
         async with httpx.AsyncClient() as client:
             url = f"{TERRAFORM_CLOUD_API_URL}/{path}"
-            
+
             if method == "GET":
                 response = await client.get(url, headers=headers, params=params)
             elif method == "POST":
-                response = await client.post(url, headers=headers, params=params, json=data)
+                response = await client.post(
+                    url, headers=headers, params=params, json=data
+                )
             elif method == "PATCH":
-                response = await client.patch(url, headers=headers, params=params, json=data)
+                response = await client.patch(
+                    url, headers=headers, params=params, json=data
+                )
             elif method == "DELETE":
                 response = await client.delete(url, headers=headers, params=params)
             else:
                 return (False, {"error": f"Unsupported method: {method}"})
-            
+
             # Handle different success response codes
             if response.status_code in [200, 201, 202, 204]:
                 if response.status_code == 204:  # No content

@@ -1,6 +1,6 @@
 [project]
 name = "terraform-cloud-mcp"
-version = "0.5.0"
+version = "0.6.0"
 description = "A Model Context Protocol (MCP) server that integrates Claude with the Terraform Cloud API, allowing Claude to manage your Terraform infrastructure through natural conversation."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -12,3 +12,35 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["api", "models", "tools", "utils"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+namespace_packages = true
+explicit_package_bases = true
+ignore_missing_imports = true
+
+# Exclude the main package name from checks
+exclude = [
+    "^terraform-cloud-mcp$",
+]
+
+# Focus only on individual modules
+[[tool.mypy.overrides]]
+module = ["api.*", "models.*", "tools.*", "utils.*"]
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["server"]
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["mcp.*", "dotenv.*", "httpx.*"]
+ignore_missing_imports = true
