@@ -11,6 +11,7 @@ A Model Context Protocol (MCP) server that integrates Claude with the Terraform 
 - **Authentication** - Validate tokens and get user information
 - **Workspace Management** - Create, read, update, delete, lock/unlock workspaces
 - **Run Management** - Create runs, list runs, get run details, apply/discard/cancel runs
+- **Organization Management** - List organizations, get organization details
 - **Future Features** - State management, variables management, and more
 
 ## Quick Start
@@ -154,15 +155,17 @@ Tools for creating and modifying workspaces:
 
 Tools for removing workspaces:
 
-- `delete_workspace(organization, workspace_name)`  
+- `delete_workspace(organization, workspace_name, confirm)`  
   Delete a workspace and all its content
   
-  *Required:* `organization`, `workspace_name`
+  *Required:* `organization`, `workspace_name`  
+  *Optional:* `confirm` - Set to True to confirm deletion (default: False, returns confirmation message first)
 
-- `safe_delete_workspace(organization, workspace_name)`  
+- `safe_delete_workspace(organization, workspace_name, confirm)`  
   Delete only if the workspace isn't managing any resources
   
-  *Required:* `organization`, `workspace_name`
+  *Required:* `organization`, `workspace_name`  
+  *Optional:* `confirm` - Set to True to confirm deletion (default: False, returns confirmation message first)
 
 #### Lock & Unlock
 
@@ -240,6 +243,39 @@ Tools for managing Terraform runs (plan, apply, and other operations):
   
   *Required:* `run_id`
 
+### Organization Management Tools
+
+Tools for working with Terraform Cloud organizations:
+
+- `get_organization_details(organization, include)`  
+  Get detailed information about a specific organization
+  
+  *Required:* `organization`  
+  *Optional:* `include` - Related resources to include (e.g., "entitlement-set")
+
+- `list_organizations(page_number, page_size, query, query_email, query_name)`  
+  List and filter organizations
+  
+  *Optional:* Pagination controls, search by name and email
+
+- `create_organization(name, email, ...)`  
+  Create a new organization with configurable settings
+  
+  *Required:* `name`, `email`  
+  *Optional:* Authentication policy, session settings, execution mode, etc.
+
+- `update_organization(organization, ...)`  
+  Update an existing organization's settings
+  
+  *Required:* `organization`  
+  *Optional:* New name, email, authentication policy, session settings, etc.
+
+- `delete_organization(organization, confirm)`  
+  Delete an organization and all its content
+  
+  *Required:* `organization`  
+  *Optional:* `confirm` - Set to True to confirm deletion (default: False, returns confirmation message first)
+
 ## Example Conversations
 
 ### Authentication & Listing
@@ -276,10 +312,16 @@ User: Update my "staging" workspace to use Terraform version 1.5.0
 Claude: [Updates the workspace with the specified version]
 
 User: Delete my "dev-test" workspace in "example-org"
-Claude: [Deletes the workspace]
+Claude: [Warns about deletion consequences and asks for confirmation]
+
+User: Yes, please delete the workspace
+Claude: [Deletes the workspace after confirmation]
 
 User: Delete my "staging" workspace but only if it's not managing any resources
-Claude: [Uses safe_delete_workspace to safely delete the workspace]
+Claude: [Warns about deletion consequences and asks for confirmation]
+
+User: Yes, proceed with the safe delete
+Claude: [Uses safe_delete_workspace to safely delete the workspace after confirmation]
 ```
 
 ### Locking Workspaces
@@ -324,6 +366,37 @@ Claude: [Lists runs with is_destroy=true across all workspaces]
 
 User: Get details for run ID "run-CZcmD7eagjhyX0vN"
 Claude: [Shows detailed information about the specific run]
+```
+
+### Organization Management
+
+```
+User: List all my Terraform Cloud organizations
+Claude: [Lists all organizations the token has access to]
+
+User: Show me details for my "example-org" organization
+Claude: [Displays detailed information about the organization]
+
+User: Get information about "example-org" including its entitlement set
+Claude: [Shows organization details with entitlement information included]
+
+User: Find organizations with "prod" in their name
+Claude: [Lists organizations matching the search query]
+
+User: Create a new organization named "terraform-demo" with my email "admin@example.com"
+Claude: [Creates a new organization with the provided details]
+
+User: Update my "terraform-demo" organization to enable cost estimation
+Claude: [Updates the organization with cost estimation enabled]
+
+User: Change the email address for "terraform-demo" to "terraform@example.com"
+Claude: [Updates the organization's email address]
+
+User: Delete the "test-org" organization
+Claude: [Warns about the consequences and asks for confirmation]
+
+User: Yes, I'm sure. Delete the "test-org" organization
+Claude: [Deletes the organization after receiving confirmation]
 ```
 
 ### Run Actions
@@ -399,6 +472,7 @@ terraform-cloud-mcp/
 ├── tools/            # MCP tools implementation
 │   ├── __init__.py
 │   ├── auth.py       # Authentication tools
+│   ├── organizations.py # Organization management tools
 │   ├── runs.py       # Run management tools (create, list, apply, discard, cancel runs)
 │   └── workspaces.py # Workspace management tools
 ├── utils/            # Utility functions
