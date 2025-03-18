@@ -489,16 +489,19 @@ async def update_workspace(
         return data  # Error info is already in the data dictionary
 
 
-async def delete_workspace(organization: str, workspace_name: str) -> dict:
+async def delete_workspace(
+    organization: str, workspace_name: str, confirm: bool = False
+) -> dict:
     """
     Delete a workspace from an organization
 
     Args:
         organization: The organization name (required)
         workspace_name: The name of the workspace to delete (required)
+        confirm: Set to True to confirm deletion, otherwise returns a confirmation request (default: False)
 
     Returns:
-        Success message or error details
+        Success message, confirmation request, or error details
     """
 
     # Validate organization name
@@ -508,6 +511,15 @@ async def delete_workspace(organization: str, workspace_name: str) -> dict:
 
     if not workspace_name:
         return {"error": "Workspace name is required"}
+
+    # If not confirmed, return a confirmation request
+    if not confirm:
+        return {
+            "status": "confirmation_required",
+            "message": f"WARNING: You're about to delete workspace '{workspace_name}' in organization '{organization}'. This will delete ALL configurations, variables, state files, and run history. This action cannot be undone. Call this function again with confirm=True to proceed.",
+            "organization": organization,
+            "workspace_name": workspace_name,
+        }
 
     # Make the API request
     success, data = await make_api_request(
@@ -523,7 +535,9 @@ async def delete_workspace(organization: str, workspace_name: str) -> dict:
         return data  # Error info is already in the data dictionary
 
 
-async def safe_delete_workspace(organization: str, workspace_name: str) -> dict:
+async def safe_delete_workspace(
+    organization: str, workspace_name: str, confirm: bool = False
+) -> dict:
     """
     Safely delete a workspace, but only if it's not managing any resources
 
@@ -534,9 +548,10 @@ async def safe_delete_workspace(organization: str, workspace_name: str) -> dict:
     Args:
         organization: The organization name (required)
         workspace_name: The name of the workspace to delete (required)
+        confirm: Set to True to confirm deletion, otherwise returns a confirmation request (default: False)
 
     Returns:
-        Success message or error details
+        Success message, confirmation request, or error details
     """
 
     # Validate organization name
@@ -546,6 +561,15 @@ async def safe_delete_workspace(organization: str, workspace_name: str) -> dict:
 
     if not workspace_name:
         return {"error": "Workspace name is required"}
+
+    # If not confirmed, return a confirmation request
+    if not confirm:
+        return {
+            "status": "confirmation_required",
+            "message": f"WARNING: You're about to safely delete workspace '{workspace_name}' in organization '{organization}'. This will only proceed if the workspace is not managing any resources. If successful, this will delete all configurations, variables, and run history. Call this function again with confirm=True to proceed.",
+            "organization": organization,
+            "workspace_name": workspace_name,
+        }
 
     # Make the safe-delete API request
     success, data = await make_api_request(
