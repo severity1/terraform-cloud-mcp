@@ -11,7 +11,7 @@ A Model Context Protocol (MCP) server that integrates Claude with the Terraform 
 - **Authentication** - Validate tokens and get user information
 - **Workspace Management** - Create, read, update, delete, lock/unlock workspaces
 - **Run Management** - Create runs, list runs, get run details, apply/discard/cancel runs
-- **Organization Management** - List organizations, get organization details
+- **Organization Management** - List organizations, get organization details, view organization entitlements
 - **Future Features** - State management, variables management, and more
 
 ## Quick Start
@@ -253,6 +253,11 @@ Tools for working with Terraform Cloud organizations:
   *Required:* `organization`  
   *Optional:* `include` - Related resources to include (e.g., "entitlement-set")
 
+- `get_organization_entitlements(organization)`  
+  Show entitlement set for organization features including feature limits
+  
+  *Required:* `organization`
+
 - `list_organizations(page_number, page_size, query, query_email, query_name)`  
   List and filter organizations
   
@@ -278,145 +283,15 @@ Tools for working with Terraform Cloud organizations:
 
 ## Example Conversations
 
-### Authentication & Listing
+Detailed example conversations for each functional area are available in the docs/tools directory:
 
-```
-# Using explicit token
-User: Can you validate this Terraform Cloud API token: my-tf-token-value
-Claude: [Validates token and confirms it's working]
+- [Authentication](docs/tools/authentication-conversation.md)
+- [Workspace Management](docs/tools/workspace-management-conversation.md)
+- [Run Management](docs/tools/runs-management-conversation.md)
+- [Organization Management](docs/tools/organizations-management-conversation.md)
+- [Organization Entitlements](docs/tools/organization-entitlements-conversation.md)
 
-# Using default token (if server started with TFC_TOKEN)
-User: Can you validate my Terraform Cloud API token?
-Claude: [Validates token and confirms it's working]
-
-User: List all my workspaces in "example-org"
-Claude: [Lists all workspaces in the organization]
-
-User: Find all workspaces in "example-org" with names containing "prod"
-Claude: [Lists matching workspaces with "prod" in their names]
-
-User: List workspaces in "example-org" with the "environment:production" tag
-Claude: [Lists workspaces with that specific tag]
-```
-
-### Workspace Management
-
-```
-User: Get details for the "production" workspace in "example-org"
-Claude: [Shows detailed information about the workspace]
-
-User: Create a new workspace in "example-org" called "staging" with auto-apply enabled
-Claude: [Creates the requested workspace]
-
-User: Update my "staging" workspace to use Terraform version 1.5.0
-Claude: [Updates the workspace with the specified version]
-
-User: Delete my "dev-test" workspace in "example-org"
-Claude: [Warns about deletion consequences and asks for confirmation]
-
-User: Yes, please delete the workspace
-Claude: [Deletes the workspace after confirmation]
-
-User: Delete my "staging" workspace but only if it's not managing any resources
-Claude: [Warns about deletion consequences and asks for confirmation]
-
-User: Yes, proceed with the safe delete
-Claude: [Uses safe_delete_workspace to safely delete the workspace after confirmation]
-```
-
-### Locking Workspaces
-
-```
-User: Lock my "production" workspace while we do maintenance
-Claude: [Locks the workspace with the provided reason]
-
-User: The maintenance is complete, unlock "production" now
-Claude: [Unlocks the workspace]
-
-User: Someone left "staging" locked and they're out today. Can you force unlock it?
-Claude: [Force unlocks the workspace]
-```
-
-### Run Management
-
-```
-User: Create a plan for my "production" workspace
-Claude: [Creates a plan-only run in the workspace]
-
-User: Create a destroy plan for "dev-test" workspace
-Claude: [Creates a destroy plan run in the workspace]
-
-User: Run a targeted plan in "staging" that only affects the database resources
-Claude: [Creates a plan with target_addrs for database resources]
-
-User: Create a plan with custom variables in the "development" workspace
-Claude: [Creates a run with custom variable values for that specific run]
-
-User: Create a run in "sandbox" workspace with auto-apply enabled
-Claude: [Creates a run with auto_apply=True to automatically apply after planning]
-
-User: List all runs in my "production" workspace
-Claude: [Lists all runs in the workspace with details]
-
-User: Show me runs in "example-org" that have errored in the last month
-Claude: [Lists runs with error status in the organization]
-
-User: Find all destroy plan runs in my organization
-Claude: [Lists runs with is_destroy=true across all workspaces]
-
-User: Get details for run ID "run-CZcmD7eagjhyX0vN"
-Claude: [Shows detailed information about the specific run]
-```
-
-### Organization Management
-
-```
-User: List all my Terraform Cloud organizations
-Claude: [Lists all organizations the token has access to]
-
-User: Show me details for my "example-org" organization
-Claude: [Displays detailed information about the organization]
-
-User: Get information about "example-org" including its entitlement set
-Claude: [Shows organization details with entitlement information included]
-
-User: Find organizations with "prod" in their name
-Claude: [Lists organizations matching the search query]
-
-User: Create a new organization named "terraform-demo" with my email "admin@example.com"
-Claude: [Creates a new organization with the provided details]
-
-User: Update my "terraform-demo" organization to enable cost estimation
-Claude: [Updates the organization with cost estimation enabled]
-
-User: Change the email address for "terraform-demo" to "terraform@example.com"
-Claude: [Updates the organization's email address]
-
-User: Delete the "test-org" organization
-Claude: [Warns about the consequences and asks for confirmation]
-
-User: Yes, I'm sure. Delete the "test-org" organization
-Claude: [Deletes the organization after receiving confirmation]
-```
-
-### Run Actions
-
-```
-User: Apply the pending run for "staging" workspace
-Claude: [Uses apply_run to apply the waiting run]
-
-User: Cancel the run "run-CZcmD7eagjhyX0vN", it's taking too long
-Claude: [Uses cancel_run to safely interrupt the running process]
-
-User: Discard the plan for the "dev" workspace, those changes aren't needed
-Claude: [Uses discard_run to discard the pending run]
-
-User: Force cancel the stuck run in "production"
-Claude: [Uses force_cancel_run to immediately terminate the stuck run]
-
-User: I need to execute this run immediately, force execute it
-Claude: [Uses force_execute_run to bypass the queue and start the run]
-```
+These examples demonstrate common use cases and the natural conversational flow when using Claude with Terraform Cloud MCP.
 
 ### Coming Soon
 

@@ -53,6 +53,7 @@ mcp.tool()(runs.force_execute_run)
 
 # Register organization management tools
 mcp.tool()(organizations.get_organization_details)
+mcp.tool()(organizations.get_organization_entitlements)
 mcp.tool()(organizations.list_organizations)
 mcp.tool()(organizations.create_organization)
 mcp.tool()(organizations.update_organization)
