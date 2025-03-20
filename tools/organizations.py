@@ -41,10 +41,10 @@ async def get_organization_details(organization: str, include: str = "") -> dict
 async def get_organization_entitlements(organization: str) -> dict:
     """
     Show entitlement set for organization features
-    
+
     Args:
         organization: The organization name to retrieve entitlements for (required)
-    
+
     Returns:
         Entitlement set details including feature limits and entitlements
     """
@@ -52,12 +52,12 @@ async def get_organization_entitlements(organization: str) -> dict:
     valid, error_message = validate_organization(organization)
     if not valid:
         return {"error": error_message}
-    
+
     # Make the API request to the entitlement-set endpoint
     success, data = await make_api_request(
         f"organizations/{organization}/entitlement-set"
     )
-    
+
     if success:
         return data
     else:
