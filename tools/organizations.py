@@ -1,6 +1,6 @@
 """Organization management tools for Terraform Cloud MCP"""
 
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any
 
 from api.client import make_api_request
 from utils.validators import validate_organization

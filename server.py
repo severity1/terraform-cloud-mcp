@@ -3,15 +3,11 @@
 Terraform Cloud MCP Server
 """
 import logging
-import os
-import argparse
-import sys
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
 # Import tools and models
-from api.client import TERRAFORM_CLOUD_API_URL
-import tools.auth as auth
+import tools.account as account
 import tools.workspaces as workspaces
 import tools.runs as runs
 import tools.organizations as organizations
@@ -25,9 +21,8 @@ logging.basicConfig(level=logging.DEBUG)
 # Create server instance
 mcp = FastMCP("Terraform Cloud MCP Server")
 
-# Register authentication tools
-mcp.tool()(auth.validate_token)
-mcp.tool()(auth.get_terraform_user_info)
+# Register account management tools
+mcp.tool()(account.get_account_details)
 
 # Register workspace management tools
 mcp.tool()(workspaces.list_workspaces)

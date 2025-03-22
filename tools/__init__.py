@@ -1,7 +1,9 @@
 """MCP tools for Terraform Cloud"""
 
 # Import tools for easier access
-import tools.auth as auth
-import tools.workspaces as workspaces
-import tools.runs as runs
-import tools.organizations as organizations
+from tools import account
+from tools import workspaces
+from tools import runs
+from tools import organizations
+
+__all__ = ["account", "workspaces", "runs", "organizations"]

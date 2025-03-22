@@ -1,6 +1,6 @@
 """Workspace management tools for Terraform Cloud MCP"""
 
-from typing import Optional, List, Dict, Any, Dict, MutableMapping
+from typing import Optional, List, Any, Dict
 
 from api.client import make_api_request
 from utils.validators import validate_organization
