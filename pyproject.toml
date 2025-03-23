@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "terraform-cloud-mcp"
 version = "0.8.0"
@@ -10,7 +14,13 @@ dependencies = [
     "mcp[cli]>=1.4.1",
 ]
 
-[tool.setuptools]
+[project.scripts]
+terraform-cloud-mcp = "server:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
 packages = ["api", "models", "tools", "utils"]
 
 [tool.mypy]
