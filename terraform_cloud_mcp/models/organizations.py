@@ -9,7 +9,7 @@ from typing import Optional, Union
 
 from pydantic import Field, ConfigDict
 
-from .base import APIRequest
+from models.base import APIRequest
 
 
 class CollaboratorAuthPolicy(str, Enum):

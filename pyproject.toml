@@ -13,15 +13,13 @@ dependencies = [
     "httpx>=0.28.1",
     "mcp[cli]>=1.4.1",
 ]
+packages = ["terraform_cloud_mcp", "api", "models", "tools", "utils"]
 
 [project.scripts]
-terraform-cloud-mcp = "server:main"
+terraform-cloud-mcp = "terraform_cloud_mcp.server:mcp.run"
 
 [tool.hatch.metadata]
 allow-direct-references = true
-
-[tool.hatch.build.targets.wheel]
-packages = ["api", "models", "tools", "utils"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -36,11 +34,6 @@ strict_optional = true
 namespace_packages = true
 explicit_package_bases = true
 ignore_missing_imports = true
-
-# Exclude the main package name from checks
-exclude = [
-    "^terraform-cloud-mcp$",
-]
 
 # Focus only on individual modules
 [[tool.mypy.overrides]]

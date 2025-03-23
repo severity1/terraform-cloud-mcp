@@ -310,7 +310,7 @@ wheels = [
 [[package]]
 name = "terraform-cloud-mcp"
 version = "0.8.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "dotenv" },
     { name = "httpx" },

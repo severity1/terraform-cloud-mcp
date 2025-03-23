@@ -1,22 +1,35 @@
 # Terraform Cloud MCP Server
 
-A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your Terraform infrastructure through natural conversation. Compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, Glama, and more.
+A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your Terraform infrastructure through natural conversation. Compatible with any MCP-supporting platform, including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, Glama, and more.
 
 ![Version](https://img.shields.io/badge/version-0.8.0-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 
+---
+
 ## Features
 
-- **Account Management** - Get account details for authenticated users or service accounts
-- **Workspace Management** - Create, read, update, delete, lock/unlock workspaces
-- **Run Management** - Create runs, list runs, get run details, apply/discard/cancel runs
-- **Organization Management** - List, create, update, delete organizations, and view organization entitlements
-- **Future Features** - State management, variables management, and more
+- **Account Management**: Get account details for authenticated users or service accounts.
+- **Workspace Management**: Create, read, update, delete, lock/unlock workspaces.
+- **Run Management**: Create runs, list runs, get run details, apply/discard/cancel runs.
+- **Organization Management**: List, create, update, delete organizations, and view organization entitlements.
+- **Future Features**: State management, variables management, and more.
+
+---
 
 ## Quick Start
 
-### Setup
+### Prerequisites
+
+- Python 3.12+
+- MCP (includes FastMCP and development tools)
+- `uv` package manager (recommended) or `pip`
+- Terraform Cloud API token
+
+---
+
+### Installation
 
 ```bash
 # Clone the repository
@@ -27,58 +40,137 @@ cd terraform-cloud-mcp
 uv venv
 source .venv/bin/activate
 
-# Install dependencies
-uv pip install -e .
+# Install package
+uv pip install .
 ```
 
-### Starting the Server
+### Adding to Claude Environments
 
-The server supports multiple ways to provide your Terraform Cloud API token:
+#### Adding to Claude Code CLI
 
 ```bash
-# Using MCP dev tools (provides debugging tools)
-mcp dev server.py
-
-# Using MCP run command
-mcp run server.py
-
-# Standard method
-uv run server.py
-
-# With token via environment variable
-export TFC_TOKEN=YOUR_TF_TOKEN
-uv run server.py
-
-# Using a .env file
-echo "TFC_TOKEN=YOUR_TF_TOKEN" > .env
-uv run server.py
-
-# Run in background
-uv run server.py > server.log 2>&1 & echo $! > server.pid
+# Add to Claude Code with your Terraform Cloud token
+claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -s user terraform-cloud-mcp -- "terraform-cloud-mcp"
 ```
 
-When a token is provided, Claude can use it without you having to specify it in every command.
-
-### Connecting with MCP-Compatible Assistants
-
-#### Using Claude Code CLI
-
-```bash
-# Add the MCP server
-claude mcp add terraform-cloud-mcp "uv run $(pwd)/server.py"
-
-# With token
-claude mcp add terraform-cloud-mcp -e TFC_TOKEN=YOUR_TF_TOKEN -- "uv run $(pwd)/server.py"
-
-# Verify it was added
-claude mcp list
-
-# For debugging, you can use MCP Inspector with 'mcp dev' command
-```
-
-#### Using Claude Desktop
+#### Adding to Claude Desktop
 
 Create a `claude_desktop_config.json` configuration file:
+
+```json
+{
+  "mcpServers": {
+    "terraform-cloud-mcp": {
+      "command": "terraform-cloud-mcp",
+      "env": {
+        "TFC_TOKEN": "your_terraform_cloud_token"
+      }
+    }
+  }
+}
+```
+
+Replace `your_terraform_cloud_token` with your actual Terraform Cloud API token.
+
+#### Other MCP-Compatible Platforms
+
+For other platforms (like Cursor, Copilot Studio, or Glama), follow their platform-specific instructions for adding an MCP server. Most platforms require:
+1. The server path or command to start the server.
+2. Environment variables for the Terraform Cloud API token.
+3. Configuration to auto-start the server when needed.
+
+---
+
+## Available Tools
+
+### Account Tools
+
+- `get_account_details()`: Gets account information for the authenticated user or service account.
+
+### Workspace Management Tools
+
+#### List & Search
+- `list_workspaces(organization, ...)`: List and filter workspaces.
+- `get_workspace_details(organization, workspace_name)`: Get detailed information about a specific workspace.
+
+#### Create & Update
+- `create_workspace(organization, name, ...)`: Create a new workspace.
+- `update_workspace(organization, workspace_name, ...)`: Update an existing workspace's configuration.
+
+#### Delete
+- `delete_workspace(organization, workspace_name, confirm)`: Delete a workspace and all its content.
+- `safe_delete_workspace(organization, workspace_name, confirm)`: Delete only if the workspace isn't managing any resources.
+
+#### Lock & Unlock
+- `lock_workspace(organization, workspace_name, reason)`: Lock a workspace to prevent runs.
+- `unlock_workspace(organization, workspace_name)`: Unlock a workspace to allow runs.
+- `force_unlock_workspace(organization, workspace_name)`: Force unlock a workspace locked by another user.
+
+### Run Management Tools
+
+- `create_run(organization, workspace_name, ...)`: Create and queue a Terraform run in a workspace.
+- `list_runs_in_workspace(organization, workspace_name, ...)`: List and filter runs in a specific workspace.
+- `list_runs_in_organization(organization, ...)`: List and filter runs across an entire organization.
+- `get_run_details(run_id)`: Get detailed information about a specific run.
+- `apply_run(run_id, comment)`: Apply a run waiting for confirmation.
+- `discard_run(run_id, comment)`: Discard a run waiting for confirmation.
+- `cancel_run(run_id, comment)`: Cancel a run currently planning or applying.
+- `force_cancel_run(run_id, comment)`: Forcefully cancel a run immediately.
+- `force_execute_run(run_id)`: Forcefully execute a pending run by canceling prior runs.
+
+### Organization Management Tools
+
+- `get_organization_details(organization)`: Get detailed information about a specific organization.
+- `get_organization_entitlements(organization)`: Show entitlement set for organization features.
+- `list_organizations(...)`: List and filter organizations.
+- `create_organization(name, email, ...)`: Create a new organization.
+- `update_organization(organization, ...)`: Update an existing organization's settings.
+- `delete_organization(organization)`: Delete an organization and all its content.
+
+---
+
+## Development Guide
+
+### Development Setup
+
+If you're contributing to or modifying the codebase, use this development setup:
+
+```bash
+# Clone the repository
+git clone https://github.com/severity1/terraform-cloud-mcp.git
+cd terraform-cloud-mcp
+
+# Create virtual environment and activate it
+uv venv
+source .venv/bin/activate
+
+# Install in development mode (editable)
+uv pip install -e .
+
+# Install development dependencies
+uv pip install black mypy pydantic ruff
+```
+
+For development work, the editable installation (`-e` flag) is essential as it allows you to modify the code and have changes reflected immediately without reinstalling the package.
+
+---
+
+### Adding to Claude Code (Development Mode)
+
+For development work with Claude Code CLI, you can add the MCP server as follows:
+
+```bash
+# Add to Claude Code with your development path and token
+claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -s user terraform-cloud-mcp -- "$(pwd)/terraform_cloud_mcp/server.py"
+```
+
+This points Claude Code to your local development version rather than the installed package. Replace `YOUR_TF_TOKEN` with your actual Terraform Cloud API token.
+
+---
+
+### Adding to Claude Desktop (Development Mode)
+
+For development work with Claude Desktop, create a `claude_desktop_config.json` configuration file:
 
 ```json
 {
@@ -89,7 +181,7 @@ Create a `claude_desktop_config.json` configuration file:
         "--directory",
         "/path/to/terraform-cloud-mcp",
         "run",
-        "server.py"
+        "terraform_cloud_mcp/server.py"
       ],
       "env": {
         "TFC_TOKEN": "your_terraform_cloud_token"
@@ -99,306 +191,104 @@ Create a `claude_desktop_config.json` configuration file:
 }
 ```
 
-Replace the paths and token with your actual values:
-- Use the full path to the uv executable (find it with `which uv` on macOS/Linux or `where uv` on Windows)
-- Set the correct directory path to your terraform-cloud-mcp installation
-- Add your Terraform Cloud API token
+Replace the placeholders with the following:
+- `/path/to/uv`: The full path to the `uv` executable (find it with `which uv` on macOS/Linux or `where uv` on Windows).
+- `/path/to/terraform-cloud-mcp`: The full path to your local `terraform-cloud-mcp` project directory.
+- `your_terraform_cloud_token`: Your actual Terraform Cloud API token.
 
-This configuration tells Claude Desktop how to start the MCP server automatically.
+This configuration tells Claude Desktop how to start the MCP server automatically in development mode.
 
-#### Using Other MCP-Compatible Platforms
+---
 
-For other platforms that support MCP (like Cursor, Copilot Studio, or Glama), follow the platform-specific instructions for adding an MCP server. Most platforms will require:
+### Development Commands
 
-1. The server path or command to start the server
-2. Environment variables for the Terraform Cloud API token
-3. Configuration to auto-start the server when needed
-
-## Available Tools
-
-### Account Tools
-
-The following tools help work with Terraform Cloud account details:
-
-- `get_account_details()`  
-  Gets account information for the authenticated user or service account
-
-### Workspace Management Tools
-
-#### List & Search
-
-Tools for finding and inspecting workspaces:
-
-- `list_workspaces(organization, ...)`  
-  List and filter workspaces with comprehensive options
-  
-  *Required:* `organization` - Organization name  
-  *Optional:* Filtering by name, tags, pagination, sorting and more
-
-- `get_workspace_details(organization, workspace_name)`  
-  Get detailed information about a specific workspace
-  
-  *Required:* `organization`, `workspace_name`
-
-#### Create & Update
-
-Tools for creating and modifying workspaces:
-
-- `create_workspace(organization, name, ...)`  
-  Create a new workspace with various configuration options
-  
-  *Required:* `organization`, `name`  
-  *Optional:* Configure Terraform version, VCS settings, execution mode, etc.
-
-- `update_workspace(organization, workspace_name, ...)`  
-  Update an existing workspace's configuration
-  
-  *Required:* `organization`, `workspace_name`  
-  *Optional:* Update name, description, settings, VCS connections, etc.
-
-#### Delete
-
-Tools for removing workspaces:
-
-- `delete_workspace(organization, workspace_name, confirm)`  
-  Delete a workspace and all its content
-  
-  *Required:* `organization`, `workspace_name`  
-  *Optional:* `confirm` - Set to True to confirm deletion (default: False, returns confirmation message first)
-
-- `safe_delete_workspace(organization, workspace_name, confirm)`  
-  Delete only if the workspace isn't managing any resources
-  
-  *Required:* `organization`, `workspace_name`  
-  *Optional:* `confirm` - Set to True to confirm deletion (default: False, returns confirmation message first)
-
-#### Lock & Unlock
-
-Tools for controlling workspace access:
-
-- `lock_workspace(organization, workspace_name, reason)`  
-  Lock a workspace to prevent runs
-  
-  *Required:* `organization`, `workspace_name`  
-  *Optional:* `reason` - Explanation for the lock
-
-- `unlock_workspace(organization, workspace_name)`  
-  Unlock a workspace to allow runs
-  
-  *Required:* `organization`, `workspace_name`
-
-- `force_unlock_workspace(organization, workspace_name)`  
-  Force unlock a workspace locked by another user
-  
-  *Required:* `organization`, `workspace_name`
-
-### Run Management Tools
-
-Tools for managing Terraform runs (plan, apply, and other operations):
-
-- `create_run(organization, workspace_name, ...)`  
-  Create and queue a Terraform run in a workspace
-  
-  *Required:* `organization`, `workspace_name`  
-  *Optional:* `message`, `auto_apply`, `is_destroy`, `refresh`, `refresh_only`, `plan_only`, `target_addrs`, `replace_addrs`, `variables`, and more configuration options
-
-- `list_runs_in_workspace(organization, workspace_name, ...)`  
-  List and filter runs in a specific workspace with comprehensive options
-  
-  *Required:* `organization`, `workspace_name`  
-  *Optional:* Pagination, filtering by status/operation/source, searching by user/commit
-
-- `list_runs_in_organization(organization, ...)`  
-  List and filter runs across an entire organization
-  
-  *Required:* `organization`  
-  *Optional:* Pagination, filtering by workspace/status/operation/source, searching by user/commit
-
-- `get_run_details(run_id)`  
-  Get detailed information about a specific run
-  
-  *Required:* `run_id`
-  
-- `apply_run(run_id, comment)`  
-  Apply a run that is paused waiting for confirmation after a plan
-  
-  *Required:* `run_id`  
-  *Optional:* `comment`
-  
-- `discard_run(run_id, comment)`  
-  Discard a run that is waiting for confirmation or priority
-  
-  *Required:* `run_id`  
-  *Optional:* `comment`
-  
-- `cancel_run(run_id, comment)`  
-  Cancel a run that is currently planning or applying
-  
-  *Required:* `run_id`  
-  *Optional:* `comment`
-  
-- `force_cancel_run(run_id, comment)`  
-  Forcefully cancel a run immediately (after a normal cancel)
-  
-  *Required:* `run_id`  
-  *Optional:* `comment`
-  
-- `force_execute_run(run_id)`  
-  Forcefully execute a pending run by canceling prior runs
-  
-  *Required:* `run_id`
-
-### Organization Management Tools
-
-Tools for working with Terraform Cloud organizations:
-
-- `get_organization_details(organization)`  
-  Get detailed information about a specific organization
-  
-  *Required:* `organization`
-
-- `get_organization_entitlements(organization)`  
-  Show entitlement set for organization features including feature limits
-  
-  *Required:* `organization`
-
-- `list_organizations(page_number, page_size, query, query_email, query_name)`  
-  List and filter organizations
-  
-  *Optional:* Pagination controls, search by name and email
-
-- `create_organization(name, email, ...)`  
-  Create a new organization with configurable settings
-  
-  *Required:* `name`, `email`  
-  *Optional:* Authentication policy, session settings, execution mode, etc.
-
-- `update_organization(organization, ...)`  
-  Update an existing organization's settings
-  
-  *Required:* `organization`  
-  *Optional:* New name, email, authentication policy, session settings, etc.
-
-- `delete_organization(organization)`  
-  Delete an organization and all its content
-  
-  *Required:* `organization`
-
-## Example Conversations
-
-Detailed example conversations for each functional area are available in the docs/tools directory:
-
-- [Account Management](docs/tools/account.md)
-- [Workspace Management](docs/tools/workspace-management-conversation.md)
-- [Run Management](docs/tools/runs-management-conversation.md)
-- [Organization Management](docs/tools/organizations-management-conversation.md)
-- [Organization Entitlements](docs/tools/organization-entitlements-conversation.md)
-
-These examples demonstrate common use cases and the natural conversational flow when using AI assistants with Terraform Cloud MCP.
-
-### Coming Soon
-
-```
-User: List all variables defined in "production"
-Claude: [Will use list_workspace_variables tool]
-
-User: Show me the plan output and explain the changes
-Claude: [Will use get_plan_output and explain_plan tools]
-```
-
-## Development
-
-### Requirements
-
-- Python 3.12+
-- MCP (includes FastMCP and development tools)
-- uv package manager (recommended) or pip
-- Terraform Cloud API token
-
-### Type Checking
-
-This project uses mypy for static type checking to enhance code quality and catch type-related bugs early:
+The project uses a comprehensive set of tools for quality assurance:
 
 ```bash
-# Install mypy
-uv pip install mypy
+# Run the server in development mode with MCP Inspector UI
+mcp dev terraform_cloud_mcp/server.py
+
+# Debug with PDB
+TFC_TOKEN=your_token uv run -m pdb terraform_cloud_mcp/server.py
 
 # Run type checking
 uv run -m mypy .
+
+# Run linter
+uv run -m ruff check .
+
+# Auto-fix linting issues
+uv run -m ruff check --fix .
+
+# Format code with Black
+uv run -m black .
+
+# Run tests (when available)
+uv run -m unittest discover tests
 ```
 
 Type checking configuration is available in both `pyproject.toml` and `mypy.ini`. The configuration enforces strict typing rules including:
 
 - Disallowing untyped definitions
-- Warning on returning Any types
+- Warning on returning `Any` types
 - Checking completeness of function definitions
 - Namespace packages support
 - Module-specific configurations
 
-### Project Structure
+---
 
-The code is organized into a modular structure:
+### Additional Commands
 
+```bash
+# Using MCP dev tools (provides debugging tools)
+mcp dev terraform_cloud_mcp/server.py
+
+# Using MCP run command
+mcp run terraform_cloud_mcp/server.py
+
+# Standard method
+uv run terraform_cloud_mcp/server.py
+
+# With token via environment variable
+export TFC_TOKEN=YOUR_TF_TOKEN
+uv run terraform_cloud_mcp/server.py
+
+# Using a .env file
+echo "TFC_TOKEN=YOUR_TF_TOKEN" > .env
+uv run terraform_cloud_mcp/server.py
 ```
-terraform-cloud-mcp/
-├── api/              # API client and communication
-│   ├── __init__.py
-│   └── client.py     # HTTP client for Terraform Cloud API
-├── models/           # Data models
-│   ├── __init__.py
-│   ├── account.py    # Account models
-│   ├── base.py       # Base models
-│   └── organizations.py # Organization models
-├── tools/            # MCP tools implementation
-│   ├── __init__.py
-│   ├── account.py    # Account tools
-│   ├── organizations.py # Organization management tools
-│   ├── runs.py       # Run management tools (create, list, apply, discard, cancel runs)
-│   └── workspaces.py # Workspace management tools
-├── utils/            # Utility functions
-│   ├── __init__.py
-│   └── decorators.py # Utility decorators
-├── server.py         # Main server entry point
-├── pyproject.toml    # Project configuration and dependencies
-├── mypy.ini          # Mypy type checking configuration
-└── uv.lock          # Dependency lock file for uv
-```
+
+---
 
 ### Extending the Server
 
-To add new features:
-1. Add new tools to the appropriate module in the `tools` directory
-2. Register new tools in `server.py`
-3. Follow the existing patterns for parameter validation and error handling:
-   - Use `models/organizations.py` as reference for creating Pydantic models with explicit field aliases
-   - Use `tools/organizations.py` as reference for implementing API endpoints
-   - Use the `handle_api_errors` decorator from `utils/decorators.py` for error handling
-4. Update documentation in README.md
-5. Add tests for new functionality
+1. Add new tools to the appropriate module in the `terraform_cloud_mcp/tools` directory.
+2. Register new tools in `terraform_cloud_mcp/server.py`.
+3. Follow existing patterns for parameter validation and error handling.
+4. Ensure all functions include proper type hints and docstrings.
+5. Update documentation in `README.md`.
+6. Add tests for new functionality.
+
+---
 
 ## Troubleshooting
 
-If you encounter issues:
+1. Check server logs (debug logging is enabled by default).
+2. Use the MCP Inspector (http://localhost:5173) for debugging.
+3. Debug logging is already enabled in `server.py`:
+   ```python
+   import logging
+   logging.basicConfig(level=logging.DEBUG)
+   ```
 
-1. Check server logs (debug logging is enabled by default)
-2. Note that `Processing request of type CallToolRequest` is informational, not an error
-3. Debug logging is already enabled in server.py:
-
-```python
-# Already in server.py
-import logging
-logging.basicConfig(level=logging.DEBUG)
-```
-
-4. If using `mcp dev server.py`, the MCP Inspector will automatically open at http://localhost:5173 for debugging
-5. Use the server logs to debug API calls and responses
+---
 
 ## Contributing
 
 Contributions are welcome! Please open an issue or pull request if you'd like to contribute to this project.
 
-When contributing, please follow these guidelines:
-- Ensure all code includes proper type hints
-- Run mypy type checking before submitting PRs
-- Add tests for new functionality
-- Update documentation for any new features or changes
+Guidelines:
+- Ensure all code includes proper type hints.
+- Run mypy type checking before submitting PRs.
+- Add tests for new functionality.
+- Update documentation for any new features or changes.
