@@ -180,5 +180,3 @@ cython_debug/
 examples/
 ISSUES.md
 TASKS.md
-CLAUDE.md
-PYDANTIC.md
