@@ -3,7 +3,6 @@
 from typing import Optional, List, Dict, Any, Union
 
 from api.client import make_api_request
-from utils.validators import validate_organization
 
 # Run operation constants
 RUN_OPERATIONS = [
@@ -97,11 +96,6 @@ async def create_run(
     Returns:
         The created run details
     """
-
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
 
     if not workspace_name:
         return {"error": "Workspace name is required"}
@@ -241,10 +235,6 @@ async def list_runs_in_workspace(
     Returns:
         List of runs with pagination information
     """
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
 
     if not workspace_name:
         return {"error": "Workspace name is required"}
@@ -345,10 +335,6 @@ async def list_runs_in_organization(
     Returns:
         List of runs with pagination information
     """
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
 
     # Build query parameters
     params: Dict[str, Union[str, int]] = {

@@ -1,17 +1,17 @@
 # Terraform Cloud MCP Server
 
-A Model Context Protocol (MCP) server that integrates Claude with the Terraform Cloud API, allowing Claude to manage your Terraform infrastructure through natural conversation.
+A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your Terraform infrastructure through natural conversation. Compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, Glama, and more.
 
-![Version](https://img.shields.io/badge/version-0.6.0-blue)
+![Version](https://img.shields.io/badge/version-0.8.0-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 
 ## Features
 
-- **Authentication** - Validate tokens and get user information
+- **Account Management** - Get account details for authenticated users or service accounts
 - **Workspace Management** - Create, read, update, delete, lock/unlock workspaces
 - **Run Management** - Create runs, list runs, get run details, apply/discard/cancel runs
-- **Organization Management** - List organizations, get organization details
+- **Organization Management** - List, create, update, delete organizations, and view organization entitlements
 - **Future Features** - State management, variables management, and more
 
 ## Quick Start
@@ -59,7 +59,7 @@ uv run server.py > server.log 2>&1 & echo $! > server.pid
 
 When a token is provided, Claude can use it without you having to specify it in every command.
 
-### Connecting with Claude
+### Connecting with MCP-Compatible Assistants
 
 #### Using Claude Code CLI
 
@@ -106,17 +106,22 @@ Replace the paths and token with your actual values:
 
 This configuration tells Claude Desktop how to start the MCP server automatically.
 
+#### Using Other MCP-Compatible Platforms
+
+For other platforms that support MCP (like Cursor, Copilot Studio, or Glama), follow the platform-specific instructions for adding an MCP server. Most platforms will require:
+
+1. The server path or command to start the server
+2. Environment variables for the Terraform Cloud API token
+3. Configuration to auto-start the server when needed
+
 ## Available Tools
 
-### Authentication Tools
+### Account Tools
 
-The following tools help validate and work with Terraform Cloud API tokens:
+The following tools help work with Terraform Cloud account details:
 
-- `validate_token()`  
-  Validates a Terraform Cloud API token
-
-- `get_terraform_user_info()`  
-  Gets user information for the provided token
+- `get_account_details()`  
+  Gets account information for the authenticated user or service account
 
 ### Workspace Management Tools
 
@@ -247,11 +252,15 @@ Tools for managing Terraform runs (plan, apply, and other operations):
 
 Tools for working with Terraform Cloud organizations:
 
-- `get_organization_details(organization, include)`  
+- `get_organization_details(organization)`  
   Get detailed information about a specific organization
   
-  *Required:* `organization`  
-  *Optional:* `include` - Related resources to include (e.g., "entitlement-set")
+  *Required:* `organization`
+
+- `get_organization_entitlements(organization)`  
+  Show entitlement set for organization features including feature limits
+  
+  *Required:* `organization`
 
 - `list_organizations(page_number, page_size, query, query_email, query_name)`  
   List and filter organizations
@@ -270,153 +279,22 @@ Tools for working with Terraform Cloud organizations:
   *Required:* `organization`  
   *Optional:* New name, email, authentication policy, session settings, etc.
 
-- `delete_organization(organization, confirm)`  
+- `delete_organization(organization)`  
   Delete an organization and all its content
   
-  *Required:* `organization`  
-  *Optional:* `confirm` - Set to True to confirm deletion (default: False, returns confirmation message first)
+  *Required:* `organization`
 
 ## Example Conversations
 
-### Authentication & Listing
+Detailed example conversations for each functional area are available in the docs/tools directory:
 
-```
-# Using explicit token
-User: Can you validate this Terraform Cloud API token: my-tf-token-value
-Claude: [Validates token and confirms it's working]
+- [Account Management](docs/tools/account.md)
+- [Workspace Management](docs/tools/workspace-management-conversation.md)
+- [Run Management](docs/tools/runs-management-conversation.md)
+- [Organization Management](docs/tools/organizations-management-conversation.md)
+- [Organization Entitlements](docs/tools/organization-entitlements-conversation.md)
 
-# Using default token (if server started with TFC_TOKEN)
-User: Can you validate my Terraform Cloud API token?
-Claude: [Validates token and confirms it's working]
-
-User: List all my workspaces in "example-org"
-Claude: [Lists all workspaces in the organization]
-
-User: Find all workspaces in "example-org" with names containing "prod"
-Claude: [Lists matching workspaces with "prod" in their names]
-
-User: List workspaces in "example-org" with the "environment:production" tag
-Claude: [Lists workspaces with that specific tag]
-```
-
-### Workspace Management
-
-```
-User: Get details for the "production" workspace in "example-org"
-Claude: [Shows detailed information about the workspace]
-
-User: Create a new workspace in "example-org" called "staging" with auto-apply enabled
-Claude: [Creates the requested workspace]
-
-User: Update my "staging" workspace to use Terraform version 1.5.0
-Claude: [Updates the workspace with the specified version]
-
-User: Delete my "dev-test" workspace in "example-org"
-Claude: [Warns about deletion consequences and asks for confirmation]
-
-User: Yes, please delete the workspace
-Claude: [Deletes the workspace after confirmation]
-
-User: Delete my "staging" workspace but only if it's not managing any resources
-Claude: [Warns about deletion consequences and asks for confirmation]
-
-User: Yes, proceed with the safe delete
-Claude: [Uses safe_delete_workspace to safely delete the workspace after confirmation]
-```
-
-### Locking Workspaces
-
-```
-User: Lock my "production" workspace while we do maintenance
-Claude: [Locks the workspace with the provided reason]
-
-User: The maintenance is complete, unlock "production" now
-Claude: [Unlocks the workspace]
-
-User: Someone left "staging" locked and they're out today. Can you force unlock it?
-Claude: [Force unlocks the workspace]
-```
-
-### Run Management
-
-```
-User: Create a plan for my "production" workspace
-Claude: [Creates a plan-only run in the workspace]
-
-User: Create a destroy plan for "dev-test" workspace
-Claude: [Creates a destroy plan run in the workspace]
-
-User: Run a targeted plan in "staging" that only affects the database resources
-Claude: [Creates a plan with target_addrs for database resources]
-
-User: Create a plan with custom variables in the "development" workspace
-Claude: [Creates a run with custom variable values for that specific run]
-
-User: Create a run in "sandbox" workspace with auto-apply enabled
-Claude: [Creates a run with auto_apply=True to automatically apply after planning]
-
-User: List all runs in my "production" workspace
-Claude: [Lists all runs in the workspace with details]
-
-User: Show me runs in "example-org" that have errored in the last month
-Claude: [Lists runs with error status in the organization]
-
-User: Find all destroy plan runs in my organization
-Claude: [Lists runs with is_destroy=true across all workspaces]
-
-User: Get details for run ID "run-CZcmD7eagjhyX0vN"
-Claude: [Shows detailed information about the specific run]
-```
-
-### Organization Management
-
-```
-User: List all my Terraform Cloud organizations
-Claude: [Lists all organizations the token has access to]
-
-User: Show me details for my "example-org" organization
-Claude: [Displays detailed information about the organization]
-
-User: Get information about "example-org" including its entitlement set
-Claude: [Shows organization details with entitlement information included]
-
-User: Find organizations with "prod" in their name
-Claude: [Lists organizations matching the search query]
-
-User: Create a new organization named "terraform-demo" with my email "admin@example.com"
-Claude: [Creates a new organization with the provided details]
-
-User: Update my "terraform-demo" organization to enable cost estimation
-Claude: [Updates the organization with cost estimation enabled]
-
-User: Change the email address for "terraform-demo" to "terraform@example.com"
-Claude: [Updates the organization's email address]
-
-User: Delete the "test-org" organization
-Claude: [Warns about the consequences and asks for confirmation]
-
-User: Yes, I'm sure. Delete the "test-org" organization
-Claude: [Deletes the organization after receiving confirmation]
-```
-
-### Run Actions
-
-```
-User: Apply the pending run for "staging" workspace
-Claude: [Uses apply_run to apply the waiting run]
-
-User: Cancel the run "run-CZcmD7eagjhyX0vN", it's taking too long
-Claude: [Uses cancel_run to safely interrupt the running process]
-
-User: Discard the plan for the "dev" workspace, those changes aren't needed
-Claude: [Uses discard_run to discard the pending run]
-
-User: Force cancel the stuck run in "production"
-Claude: [Uses force_cancel_run to immediately terminate the stuck run]
-
-User: I need to execute this run immediately, force execute it
-Claude: [Uses force_execute_run to bypass the queue and start the run]
-```
+These examples demonstrate common use cases and the natural conversational flow when using AI assistants with Terraform Cloud MCP.
 
 ### Coming Soon
 
@@ -468,16 +346,18 @@ terraform-cloud-mcp/
 │   └── client.py     # HTTP client for Terraform Cloud API
 ├── models/           # Data models
 │   ├── __init__.py
-│   └── auth.py       # Authentication models
+│   ├── account.py    # Account models
+│   ├── base.py       # Base models
+│   └── organizations.py # Organization models
 ├── tools/            # MCP tools implementation
 │   ├── __init__.py
-│   ├── auth.py       # Authentication tools
+│   ├── account.py    # Account tools
 │   ├── organizations.py # Organization management tools
 │   ├── runs.py       # Run management tools (create, list, apply, discard, cancel runs)
 │   └── workspaces.py # Workspace management tools
 ├── utils/            # Utility functions
 │   ├── __init__.py
-│   └── validators.py # Input validation
+│   └── decorators.py # Utility decorators
 ├── server.py         # Main server entry point
 ├── pyproject.toml    # Project configuration and dependencies
 ├── mypy.ini          # Mypy type checking configuration
@@ -489,7 +369,10 @@ terraform-cloud-mcp/
 To add new features:
 1. Add new tools to the appropriate module in the `tools` directory
 2. Register new tools in `server.py`
-3. Follow the existing patterns for parameter validation and error handling
+3. Follow the existing patterns for parameter validation and error handling:
+   - Use `models/organizations.py` as reference for creating Pydantic models with explicit field aliases
+   - Use `tools/organizations.py` as reference for implementing API endpoints
+   - Use the `handle_api_errors` decorator from `utils/decorators.py` for error handling
 4. Update documentation in README.md
 5. Add tests for new functionality
 
