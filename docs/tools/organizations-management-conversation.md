@@ -79,18 +79,15 @@ Here are the details for the "example-org" organization:
 
 This organization is on the Team & Governance tier with active cost estimation features and standard remote execution setup.
 
-**User**: Get information about "example-org" including its entitlement set
+**User**: Get information about "example-org" organization
 
-**Claude**: I'll retrieve the details for "example-org" along with its entitlement set.
+**Claude**: I'll retrieve the details for the "example-org" organization.
 
 ```python
-org_details = await get_organization_details(
-    organization="example-org", 
-    include="entitlement-set"
-)
+org_details = await get_organization_details(organization="example-org")
 ```
 
-Here are the details for the "example-org" organization including its entitlement set:
+Here are the details for the "example-org" organization:
 
 **Basic Information:**
 - Name: example-org
@@ -100,25 +97,7 @@ Here are the details for the "example-org" organization including its entitlemen
 - Email: admin@example.com
 - Plan Type: Team & Governance
 
-**Entitlements:**
-- Private Module Registry: Yes
-- Sentinel Policies: Yes
-- Teams: Yes
-- Cost Estimation: Yes
-- VCS Integrations: Yes
-- SSO: No
-- Agents: No
-- Audit Logging: No
-
-**Resource Limits:**
-- User Limit: 25
-- Team Limit: Unlimited
-- Workspace Limit: Unlimited
-- Policy Limit: 15
-- Policy Set Limit: 20
-- Run Task Limit: 10
-
-The organization has access to team management features, policy as code, cost estimation, and the private module registry. It does not have access to SSO or audit logging features, which are typically available only on Enterprise plans.
+The organization is on the Team & Governance tier. If you'd like to see the organization's entitlements and feature limits, I can retrieve that information separately.
 
 **User**: What are the entitlements for my "example-org" organization?
 
@@ -275,35 +254,10 @@ The organization's notification email has been changed to terraform@example.com.
 
 **User**: Delete the "test-org" organization
 
-**Claude**: I'll help you delete the "test-org" organization. This is a significant action that requires confirmation.
+**Claude**: I'll help you delete the "test-org" organization. This is a significant action that will permanently delete all resources.
 
 ```python
-delete_response = await delete_organization(
-    organization="test-org",
-    confirm=False
-)
-```
-
-**WARNING: Confirmation Required**
-
-You've requested to delete the "test-org" organization. This action:
-- Will permanently delete ALL workspaces in the organization
-- Will delete ALL state files and state versions
-- Will delete ALL configuration versions and runs
-- Will remove ALL team memberships and organization access
-- Cannot be undone
-
-To confirm deletion of the "test-org" organization, please explicitly confirm that you want to proceed.
-
-**User**: Yes, I'm sure. Delete the "test-org" organization
-
-**Claude**: I'll proceed with deleting the "test-org" organization as confirmed.
-
-```python
-delete_response = await delete_organization(
-    organization="test-org", 
-    confirm=True
-)
+delete_response = await delete_organization(organization="test-org")
 ```
 
 **Organization Deletion Successful**
@@ -315,3 +269,5 @@ The "test-org" organization has been permanently deleted. All associated resourc
 - All variables, policy sets, and modules
 
 The organization name "test-org" is now available for use again if you wish to recreate it in the future.
+
+**Note**: This operation is irreversible. All data associated with the organization has been permanently deleted.

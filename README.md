@@ -252,11 +252,10 @@ Tools for managing Terraform runs (plan, apply, and other operations):
 
 Tools for working with Terraform Cloud organizations:
 
-- `get_organization_details(organization, include)`  
+- `get_organization_details(organization)`  
   Get detailed information about a specific organization
   
-  *Required:* `organization`  
-  *Optional:* `include` - Related resources to include (e.g., "entitlement-set")
+  *Required:* `organization`
 
 - `get_organization_entitlements(organization)`  
   Show entitlement set for organization features including feature limits
@@ -280,11 +279,10 @@ Tools for working with Terraform Cloud organizations:
   *Required:* `organization`  
   *Optional:* New name, email, authentication policy, session settings, etc.
 
-- `delete_organization(organization, confirm)`  
+- `delete_organization(organization)`  
   Delete an organization and all its content
   
-  *Required:* `organization`  
-  *Optional:* `confirm` - Set to True to confirm deletion (default: False, returns confirmation message first)
+  *Required:* `organization`
 
 ## Example Conversations
 

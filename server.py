@@ -52,7 +52,7 @@ mcp.tool()(organizations.get_organization_entitlements)
 mcp.tool()(organizations.list_organizations)
 mcp.tool()(organizations.create_organization)
 mcp.tool()(organizations.update_organization)
-mcp.tool()(organizations.delete_organization)  # Uses confirm=False pattern
+mcp.tool()(organizations.delete_organization)
 
 # Start server when run directly
 if __name__ == "__main__":
