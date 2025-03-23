@@ -1,17 +1,17 @@
 # Terraform Cloud MCP Server
 
-A Model Context Protocol (MCP) server that integrates Claude with the Terraform Cloud API, allowing Claude to manage your Terraform infrastructure through natural conversation.
+A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your Terraform infrastructure through natural conversation. Compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, Glama, and more.
 
-![Version](https://img.shields.io/badge/version-0.6.0-blue)
+![Version](https://img.shields.io/badge/version-0.8.0-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 
 ## Features
 
-- **Authentication** - Validate tokens and get user information
+- **Account Management** - Get account details for authenticated users or service accounts
 - **Workspace Management** - Create, read, update, delete, lock/unlock workspaces
 - **Run Management** - Create runs, list runs, get run details, apply/discard/cancel runs
-- **Organization Management** - List organizations, get organization details, view organization entitlements
+- **Organization Management** - List, create, update, delete organizations, and view organization entitlements
 - **Future Features** - State management, variables management, and more
 
 ## Quick Start
@@ -59,7 +59,7 @@ uv run server.py > server.log 2>&1 & echo $! > server.pid
 
 When a token is provided, Claude can use it without you having to specify it in every command.
 
-### Connecting with Claude
+### Connecting with MCP-Compatible Assistants
 
 #### Using Claude Code CLI
 
@@ -106,17 +106,22 @@ Replace the paths and token with your actual values:
 
 This configuration tells Claude Desktop how to start the MCP server automatically.
 
+#### Using Other MCP-Compatible Platforms
+
+For other platforms that support MCP (like Cursor, Copilot Studio, or Glama), follow the platform-specific instructions for adding an MCP server. Most platforms will require:
+
+1. The server path or command to start the server
+2. Environment variables for the Terraform Cloud API token
+3. Configuration to auto-start the server when needed
+
 ## Available Tools
 
-### Authentication Tools
+### Account Tools
 
-The following tools help validate and work with Terraform Cloud API tokens:
+The following tools help work with Terraform Cloud account details:
 
-- `validate_token()`  
-  Validates a Terraform Cloud API token
-
-- `get_terraform_user_info()`  
-  Gets user information for the provided token
+- `get_account_details()`  
+  Gets account information for the authenticated user or service account
 
 ### Workspace Management Tools
 
@@ -285,13 +290,13 @@ Tools for working with Terraform Cloud organizations:
 
 Detailed example conversations for each functional area are available in the docs/tools directory:
 
-- [Authentication](docs/tools/authentication-conversation.md)
+- [Account Management](docs/tools/account.md)
 - [Workspace Management](docs/tools/workspace-management-conversation.md)
 - [Run Management](docs/tools/runs-management-conversation.md)
 - [Organization Management](docs/tools/organizations-management-conversation.md)
 - [Organization Entitlements](docs/tools/organization-entitlements-conversation.md)
 
-These examples demonstrate common use cases and the natural conversational flow when using Claude with Terraform Cloud MCP.
+These examples demonstrate common use cases and the natural conversational flow when using AI assistants with Terraform Cloud MCP.
 
 ### Coming Soon
 
@@ -343,16 +348,18 @@ terraform-cloud-mcp/
 │   └── client.py     # HTTP client for Terraform Cloud API
 ├── models/           # Data models
 │   ├── __init__.py
-│   └── auth.py       # Authentication models
+│   ├── account.py    # Account models
+│   ├── base.py       # Base models
+│   └── organizations.py # Organization models
 ├── tools/            # MCP tools implementation
 │   ├── __init__.py
-│   ├── auth.py       # Authentication tools
+│   ├── account.py    # Account tools
 │   ├── organizations.py # Organization management tools
 │   ├── runs.py       # Run management tools (create, list, apply, discard, cancel runs)
 │   └── workspaces.py # Workspace management tools
 ├── utils/            # Utility functions
 │   ├── __init__.py
-│   └── validators.py # Input validation
+│   └── decorators.py # Utility decorators
 ├── server.py         # Main server entry point
 ├── pyproject.toml    # Project configuration and dependencies
 ├── mypy.ini          # Mypy type checking configuration
@@ -364,7 +371,10 @@ terraform-cloud-mcp/
 To add new features:
 1. Add new tools to the appropriate module in the `tools` directory
 2. Register new tools in `server.py`
-3. Follow the existing patterns for parameter validation and error handling
+3. Follow the existing patterns for parameter validation and error handling:
+   - Use `models/organizations.py` as reference for creating Pydantic models with explicit field aliases
+   - Use `tools/organizations.py` as reference for implementing API endpoints
+   - Use the `handle_api_errors` decorator from `utils/decorators.py` for error handling
 4. Update documentation in README.md
 5. Add tests for new functionality
 

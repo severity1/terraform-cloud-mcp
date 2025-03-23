@@ -7,8 +7,10 @@ Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/account
 from typing import Dict, Any
 
 from api.client import api_request
+from utils.decorators import handle_api_errors
 
 
+@handle_api_errors
 async def get_account_details() -> Dict[str, Any]:
     """
     Get account details for a Terraform Cloud API token
@@ -26,4 +28,4 @@ async def get_account_details() -> Dict[str, Any]:
     Returns:
         Raw API response with account information from Terraform Cloud
     """
-    return await api_request(path="account/details", method="GET")
+    return await api_request("account/details")

@@ -1,4 +1,8 @@
-"""Terraform Cloud API client"""
+"""Terraform Cloud API client
+
+This module provides functions for making requests to the Terraform Cloud API.
+It handles authentication, request formatting, and response processing.
+"""
 
 import os
 import logging
@@ -6,11 +10,10 @@ from typing import Optional, Dict, Tuple, TypeVar, Union, Any
 import httpx
 from pydantic import BaseModel
 
-# Constants
+# Base URL for Terraform Cloud API v2
 TERRAFORM_CLOUD_API_URL = "https://app.terraform.io/api/v2"
 
-# Store default token from environment variable
-# Security note: API tokens are sensitive data and should never be logged or exposed
+# Get API token from environment
 DEFAULT_TOKEN = os.getenv("TFC_TOKEN")
 
 if DEFAULT_TOKEN:
@@ -107,20 +110,26 @@ async def api_request(
     data: Union[dict, BaseModel] = {},
 ) -> Dict[str, Any]:
     """
-    Make a request to the Terraform Cloud API.
-    Returns raw API response without validation.
+    Make a request to the Terraform Cloud API and return the raw response.
+    
+    This is the preferred function for all API interactions. It handles:
+    - Token management (from parameters or environment)
+    - Pydantic model serialization
+    - HTTP method selection
+    - Response processing
+    - Error handling and security (token redaction)
 
     Args:
         path: API path to request (without base URL)
         method: HTTP method (default: GET)
-        token: API token (defaults to DEFAULT_TOKEN)
-        params: Query parameters for the request (optional)
-        data: JSON data or Pydantic model for POST/PATCH requests (optional)
+        token: API token (defaults to DEFAULT_TOKEN from environment)
+        params: Query parameters for the request
+        data: JSON data (as dict or Pydantic model) for POST/PATCH requests
 
     Returns:
         Raw API response as a dictionary
     """
-    # Get token from environment if not provided
+    # Use token from environment if not explicitly provided
     if not token:
         token = DEFAULT_TOKEN
 
@@ -129,13 +138,13 @@ async def api_request(
             "error": "Token is required. Please set the TFC_TOKEN environment variable."
         }
 
-    # Convert data to dict if it's a BaseModel
+    # Convert Pydantic model to dict if needed
     request_data = data
     if isinstance(data, BaseModel):
-        # Use standard Pydantic serialization - Pydantic v2
         request_data = data.model_dump(exclude_unset=True)  # type: ignore
 
     try:
+        # Set standard headers for Terraform Cloud API
         headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/vnd.api+json",
@@ -144,34 +153,41 @@ async def api_request(
         async with httpx.AsyncClient() as client:
             url = f"{TERRAFORM_CLOUD_API_URL}/{path}"
 
-            if method == "GET":
-                response = await client.get(url, headers=headers, params=params)
-            elif method == "POST":
-                response = await client.post(
-                    url, headers=headers, params=params, json=request_data
-                )
-            elif method == "PATCH":
-                response = await client.patch(
-                    url, headers=headers, params=params, json=request_data
-                )
-            elif method == "DELETE":
-                response = await client.delete(url, headers=headers, params=params)
-            else:
+            # Map HTTP methods to httpx client methods
+            methods: Dict[str, Any] = {
+                "GET": client.get,
+                "POST": client.post,
+                "PATCH": client.patch,
+                "DELETE": client.delete,
+            }
+            
+            # Get the appropriate method function or return error for unsupported methods
+            method_func = methods.get(method)
+            if not method_func:
                 return {"error": f"Unsupported method: {method}"}
+            
+            # Build request parameters based on HTTP method
+            kwargs = {"headers": headers, "params": params}
+            if method in ["POST", "PATCH"]:
+                json_data = request_data if isinstance(request_data, dict) else {}
+                kwargs["json"] = json_data
+            
+            # Execute the request    
+            response = await method_func(url, **kwargs)
 
-            # Handle different response codes
-            if response.status_code in [200, 201, 202]:
-                # Return JSON response directly - verify it's a dict
+            # Handle response based on status code
+            if 200 <= response.status_code < 300:  # Success range
+                if response.status_code == 204:  # No content
+                    return {"status": "success"}
+                
+                # Parse and return JSON response
                 result = response.json()
                 if isinstance(result, dict):
                     return result
                 else:
-                    # Wrap non-dict responses
-                    return {"data": result}
-            elif response.status_code == 204:  # No content
-                return {"status": "success"}
+                    return {"data": result}  # Wrap non-dict responses
             else:
-                # Error case, try to get error details
+                # Process error responses
                 try:
                     return {
                         "error": f"API request failed: {response.status_code}",
@@ -180,7 +196,7 @@ async def api_request(
                 except ValueError:
                     return {"error": f"API request failed: {response.status_code}"}
     except Exception as e:
-        # Ensure no sensitive data is included in error messages
+        # Redact token from error messages for security
         error_message = str(e)
         if token and token in error_message:
             error_message = error_message.replace(token, "[REDACTED]")

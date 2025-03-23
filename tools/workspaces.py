@@ -3,7 +3,6 @@
 from typing import Optional, List, Any, Dict
 
 from api.client import make_api_request
-from utils.validators import validate_organization
 
 
 async def list_workspaces(
@@ -42,11 +41,6 @@ async def list_workspaces(
     Returns:
         List of workspaces with pagination information
     """
-
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
 
     # Validate pagination parameters
     if page_number < 1:
@@ -156,11 +150,6 @@ async def get_workspace_details(organization: str, workspace_name: str) -> dict:
         Workspace details
     """
 
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
-
     if not workspace_name:
         return {"error": "Workspace name is required"}
 
@@ -220,11 +209,6 @@ async def create_workspace(
     Returns:
         The created workspace details
     """
-
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
 
     if not name:
         return {"error": "Workspace name is required"}
@@ -385,11 +369,6 @@ async def update_workspace(
         The updated workspace details
     """
 
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
-
     if not workspace_name:
         return {"error": "Current workspace name is required"}
 
@@ -504,11 +483,6 @@ async def delete_workspace(
         Success message, confirmation request, or error details
     """
 
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
-
     if not workspace_name:
         return {"error": "Workspace name is required"}
 
@@ -554,11 +528,6 @@ async def safe_delete_workspace(
         Success message, confirmation request, or error details
     """
 
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
-
     if not workspace_name:
         return {"error": "Workspace name is required"}
 
@@ -600,11 +569,6 @@ async def lock_workspace(
     Returns:
         Updated workspace details or error message
     """
-
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
 
     if not workspace_name:
         return {"error": "Workspace name is required"}
@@ -653,11 +617,6 @@ async def unlock_workspace(organization: str, workspace_name: str) -> dict:
         Updated workspace details or error message
     """
 
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
-
     if not workspace_name:
         return {"error": "Workspace name is required"}
 
@@ -697,11 +656,6 @@ async def force_unlock_workspace(organization: str, workspace_name: str) -> dict
     Returns:
         Updated workspace details or error message
     """
-
-    # Validate organization name
-    valid, error_message = validate_organization(organization)
-    if not valid:
-        return {"error": error_message}
 
     if not workspace_name:
         return {"error": "Workspace name is required"}
