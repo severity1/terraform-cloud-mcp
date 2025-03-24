@@ -111,7 +111,7 @@ async def api_request(
 ) -> Dict[str, Any]:
     """
     Make a request to the Terraform Cloud API and return the raw response.
-    
+
     This is the preferred function for all API interactions. It handles:
     - Token management (from parameters or environment)
     - Pydantic model serialization
@@ -160,26 +160,26 @@ async def api_request(
                 "PATCH": client.patch,
                 "DELETE": client.delete,
             }
-            
+
             # Get the appropriate method function or return error for unsupported methods
             method_func = methods.get(method)
             if not method_func:
                 return {"error": f"Unsupported method: {method}"}
-            
+
             # Build request parameters based on HTTP method
             kwargs = {"headers": headers, "params": params}
             if method in ["POST", "PATCH"]:
                 json_data = request_data if isinstance(request_data, dict) else {}
                 kwargs["json"] = json_data
-            
-            # Execute the request    
+
+            # Execute the request
             response = await method_func(url, **kwargs)
 
             # Handle response based on status code
             if 200 <= response.status_code < 300:  # Success range
                 if response.status_code == 204:  # No content
                     return {"status": "success"}
-                
+
                 # Parse and return JSON response
                 result = response.json()
                 if isinstance(result, dict):

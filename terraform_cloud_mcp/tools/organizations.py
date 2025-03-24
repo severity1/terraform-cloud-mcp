@@ -4,10 +4,9 @@ This module implements the /organizations endpoints of the Terraform Cloud API.
 Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations
 """
 
-from typing import Dict, Any
-
 from api.client import api_request
 from utils.decorators import handle_api_errors
+from models.base import APIResponse
 from models.organizations import (
     OrganizationCreateRequest,
     OrganizationUpdateRequest,
@@ -16,7 +15,7 @@ from models.organizations import (
 
 
 @handle_api_errors
-async def get_organization_details(organization: str) -> Dict[str, Any]:
+async def get_organization_details(organization: str) -> APIResponse:
     """
     Get details for a specific organization
 
@@ -30,7 +29,7 @@ async def get_organization_details(organization: str) -> Dict[str, Any]:
 
 
 @handle_api_errors
-async def get_organization_entitlements(organization: str) -> Dict[str, Any]:
+async def get_organization_entitlements(organization: str) -> APIResponse:
     """
     Show entitlement set for organization features
 
@@ -50,7 +49,7 @@ async def list_organizations(
     query: str = "",
     query_email: str = "",
     query_name: str = "",
-) -> Dict[str, Any]:
+) -> APIResponse:
     """
     List organizations with filtering options
 
@@ -88,7 +87,7 @@ async def list_organizations(
 
 
 @handle_api_errors
-async def create_organization(name: str, email: str, **kwargs) -> Dict[str, Any]:
+async def create_organization(name: str, email: str, **kwargs) -> APIResponse:
     """
     Create a new organization in Terraform Cloud
 
@@ -130,7 +129,7 @@ async def create_organization(name: str, email: str, **kwargs) -> Dict[str, Any]
 
 
 @handle_api_errors
-async def update_organization(organization: str, **kwargs) -> Dict[str, Any]:
+async def update_organization(organization: str, **kwargs) -> APIResponse:
     """
     Update an existing organization in Terraform Cloud
 
@@ -177,7 +176,7 @@ async def update_organization(organization: str, **kwargs) -> Dict[str, Any]:
 
 
 @handle_api_errors
-async def delete_organization(organization: str) -> Dict[str, Any]:
+async def delete_organization(organization: str) -> APIResponse:
     """
     Delete an organization from Terraform Cloud
 
