@@ -2,7 +2,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your Terraform infrastructure through natural conversation. Compatible with any MCP-supporting platform, including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, Glama, and more.
 
-![Version](https://img.shields.io/badge/version-0.8.0-blue)
+![Version](https://img.shields.io/badge/version-0.8.3-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 
