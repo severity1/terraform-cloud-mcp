@@ -3,6 +3,7 @@
 from typing import Optional, List, Dict, Any, Union
 
 from api.client import make_api_request
+from models.base import APIResponse
 
 # Run operation constants
 RUN_OPERATIONS = [
@@ -70,7 +71,7 @@ async def create_run(
     save_plan: bool = False,
     configuration_version_id: str = "",
     debugging_mode: bool = False,
-) -> dict:
+) -> APIResponse:
     """
     Create a run in a workspace
 
@@ -213,7 +214,7 @@ async def list_runs_in_workspace(
     search_user: str = "",
     search_commit: str = "",
     search_basic: str = "",
-) -> dict:
+) -> APIResponse:
     """
     List runs in a workspace with comprehensive filtering and pagination
 
@@ -313,7 +314,7 @@ async def list_runs_in_organization(
     search_user: str = "",
     search_commit: str = "",
     search_basic: str = "",
-) -> dict:
+) -> APIResponse:
     """
     List runs in an organization with comprehensive filtering and pagination
 
@@ -385,7 +386,7 @@ async def list_runs_in_organization(
         return data  # Error info is already in the data dictionary
 
 
-async def get_run_details(run_id: str) -> dict:
+async def get_run_details(run_id: str) -> APIResponse:
     """
     Get detailed information about a specific run
 
@@ -407,7 +408,7 @@ async def get_run_details(run_id: str) -> dict:
         return data  # Error info is already in the data dictionary
 
 
-async def apply_run(run_id: str, comment: str = "") -> dict:
+async def apply_run(run_id: str, comment: str = "") -> APIResponse:
     """
     Apply a run that is paused waiting for confirmation after a plan
 
@@ -439,7 +440,7 @@ async def apply_run(run_id: str, comment: str = "") -> dict:
         return data  # Error info is already in the data dictionary
 
 
-async def discard_run(run_id: str, comment: str = "") -> dict:
+async def discard_run(run_id: str, comment: str = "") -> APIResponse:
     """
     Discard a run that is paused waiting for confirmation
 
@@ -472,7 +473,7 @@ async def discard_run(run_id: str, comment: str = "") -> dict:
         return data  # Error info is already in the data dictionary
 
 
-async def cancel_run(run_id: str, comment: str = "") -> dict:
+async def cancel_run(run_id: str, comment: str = "") -> APIResponse:
     """
     Cancel a run that is currently planning or applying
 
@@ -505,7 +506,7 @@ async def cancel_run(run_id: str, comment: str = "") -> dict:
         return data  # Error info is already in the data dictionary
 
 
-async def force_cancel_run(run_id: str, comment: str = "") -> dict:
+async def force_cancel_run(run_id: str, comment: str = "") -> APIResponse:
     """
     Forcefully cancel a run immediately
 
@@ -541,7 +542,7 @@ async def force_cancel_run(run_id: str, comment: str = "") -> dict:
         return data  # Error info is already in the data dictionary
 
 
-async def force_execute_run(run_id: str) -> dict:
+async def force_execute_run(run_id: str) -> APIResponse:
     """
     Forcefully execute a run by canceling all prior runs
 
