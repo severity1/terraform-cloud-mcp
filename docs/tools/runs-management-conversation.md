@@ -9,9 +9,16 @@ This document shows example conversations with Claude using the Terraform Cloud 
 **Claude**: I'll create a plan-only run in your "production" workspace.
 
 ```python
-run = await create_run(
+# First, get the workspace ID for the production workspace
+workspace = await get_workspace_details(
     organization="example-org",
-    workspace_name="production",
+    workspace_name="production"
+)
+workspace_id = workspace["data"]["id"]
+
+# Create the run using the workspace ID
+run = await create_run(
+    workspace_id=workspace_id,
     message="Plan requested via Claude",
     plan_only=True
 )
@@ -33,9 +40,16 @@ The run has been queued and will start shortly. Since this is a plan-only run, y
 **Claude**: I'll create a destroy plan for your "dev-test" workspace.
 
 ```python
-run = await create_run(
+# First, get the workspace ID for the dev-test workspace
+workspace = await get_workspace_details(
     organization="example-org",
-    workspace_name="dev-test",
+    workspace_name="dev-test"
+)
+workspace_id = workspace["data"]["id"]
+
+# Create the run using the workspace ID
+run = await create_run(
+    workspace_id=workspace_id,
     message="Destroy plan requested via Claude",
     is_destroy=True,
     plan_only=True
@@ -59,9 +73,16 @@ This run will create a plan to destroy all resources managed by the "dev-test" w
 **Claude**: I'll create a targeted plan in the "staging" workspace that only affects database resources.
 
 ```python
-run = await create_run(
+# First, get the workspace ID for the staging workspace
+workspace = await get_workspace_details(
     organization="example-org",
-    workspace_name="staging",
+    workspace_name="staging"
+)
+workspace_id = workspace["data"]["id"]
+
+# Create the run using the workspace ID
+run = await create_run(
+    workspace_id=workspace_id,
     message="Targeted plan for database resources only",
     target_addrs=["module.database", "aws_rds_cluster.main", "aws_rds_instance.replicas"]
 )
@@ -87,9 +108,16 @@ The run has been queued and will start shortly. This plan will only show changes
 **Claude**: I'll create a run with custom variables in the "development" workspace.
 
 ```python
-run = await create_run(
+# First, get the workspace ID for the development workspace
+workspace = await get_workspace_details(
     organization="example-org",
-    workspace_name="development",
+    workspace_name="development"
+)
+workspace_id = workspace["data"]["id"]
+
+# Create the run using the workspace ID
+run = await create_run(
+    workspace_id=workspace_id,
     message="Plan with custom variable values",
     variables=[
         {"key": "environment", "value": "dev"},
@@ -119,9 +147,16 @@ These custom variable values will override the workspace's default values for th
 **Claude**: I'll create a run with auto-apply enabled in the "sandbox" workspace.
 
 ```python
-run = await create_run(
+# First, get the workspace ID for the sandbox workspace
+workspace = await get_workspace_details(
     organization="example-org",
-    workspace_name="sandbox",
+    workspace_name="sandbox"
+)
+workspace_id = workspace["data"]["id"]
+
+# Create the run using the workspace ID
+run = await create_run(
+    workspace_id=workspace_id,
     message="Run with auto-apply enabled",
     auto_apply=True
 )
@@ -145,9 +180,16 @@ The run has been queued and will start shortly. Since auto-apply is enabled for 
 **Claude**: I'll list all runs in your "production" workspace.
 
 ```python
-runs = await list_runs_in_workspace(
-    organization="example-org",
+# First, get the workspace ID for the production workspace
+workspace = await get_workspace_details(
+    organization="example-org", 
     workspace_name="production"
+)
+workspace_id = workspace["data"]["id"]
+
+# List runs using the workspace ID
+runs = await list_runs_in_workspace(
+    workspace_id=workspace_id
 )
 ```
 

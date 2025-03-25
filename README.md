@@ -2,7 +2,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your Terraform infrastructure through natural conversation. Compatible with any MCP-supporting platform, including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, Glama, and more.
 
-![Version](https://img.shields.io/badge/version-0.8.3-blue)
+![Version](https://img.shields.io/badge/version-0.8.4-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 
@@ -113,10 +113,8 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 
 ### Run Management Tools
 
-> **Note**: The Runs API will be migrated to Pydantic models in a future update.
-
-- `create_run(organization, workspace_name, ...)`: Create and queue a Terraform run in a workspace.
-- `list_runs_in_workspace(organization, workspace_name, ...)`: List and filter runs in a specific workspace.
+- `create_run(workspace_id, params)`: Create and queue a Terraform run in a workspace using its ID.
+- `list_runs_in_workspace(workspace_id, ...)`: List and filter runs in a specific workspace using its ID.
 - `list_runs_in_organization(organization, ...)`: List and filter runs across an entire organization.
 - `get_run_details(run_id)`: Get detailed information about a specific run.
 - `apply_run(run_id, comment)`: Apply a run waiting for confirmation.
@@ -138,7 +136,7 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 
 ## Development Guide
 
-> **Note**: The project is currently migrating all tools to use explicit Pydantic models for request validation and parameter handling instead of `**kwargs`. See the workspace and organization implementations for the reference pattern to follow.
+> **Note**: The project is currently migrating all tools to use explicit Pydantic models for request validation and parameter handling instead of `**kwargs`. See the workspace, organization, and runs implementations for the reference pattern to follow.
 
 ### Development Setup
 
