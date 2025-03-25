@@ -90,23 +90,30 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 ### Workspace Management Tools
 
 #### List & Search
-- `list_workspaces(organization, ...)`: List and filter workspaces.
-- `get_workspace_details(organization, workspace_name)`: Get detailed information about a specific workspace.
+- `list_workspaces(organization, page_number, page_size, search)`: List and filter workspaces.
+- `get_workspace_details(workspace_id, organization, workspace_name)`: Get detailed information about a specific workspace.
 
 #### Create & Update
-- `create_workspace(organization, name, ...)`: Create a new workspace.
-- `update_workspace(organization, workspace_name, ...)`: Update an existing workspace's configuration.
+- `create_workspace(organization, name, params)`: Create a new workspace with optional parameters.
+- `update_workspace(organization, workspace_name, params)`: Update an existing workspace's configuration.
 
 #### Delete
-- `delete_workspace(organization, workspace_name, confirm)`: Delete a workspace and all its content.
-- `safe_delete_workspace(organization, workspace_name, confirm)`: Delete only if the workspace isn't managing any resources.
+- `delete_workspace(organization, workspace_name)`: Delete a workspace and all its content.
+- `safe_delete_workspace(organization, workspace_name)`: Delete only if the workspace isn't managing any resources.
 
 #### Lock & Unlock
-- `lock_workspace(organization, workspace_name, reason)`: Lock a workspace to prevent runs.
-- `unlock_workspace(organization, workspace_name)`: Unlock a workspace to allow runs.
-- `force_unlock_workspace(organization, workspace_name)`: Force unlock a workspace locked by another user.
+- `lock_workspace(workspace_id, reason)`: Lock a workspace to prevent runs.
+- `unlock_workspace(workspace_id)`: Unlock a workspace to allow runs.
+- `force_unlock_workspace(workspace_id)`: Force unlock a workspace locked by another user.
+
+#### Data Retention
+- `set_data_retention_policy(workspace_id, days)`: Set a data retention policy.
+- `get_data_retention_policy(workspace_id)`: Get the current data retention policy.
+- `delete_data_retention_policy(workspace_id)`: Delete the data retention policy.
 
 ### Run Management Tools
+
+> **Note**: The Runs API will be migrated to Pydantic models in a future update.
 
 - `create_run(organization, workspace_name, ...)`: Create and queue a Terraform run in a workspace.
 - `list_runs_in_workspace(organization, workspace_name, ...)`: List and filter runs in a specific workspace.
@@ -122,14 +129,16 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 
 - `get_organization_details(organization)`: Get detailed information about a specific organization.
 - `get_organization_entitlements(organization)`: Show entitlement set for organization features.
-- `list_organizations(...)`: List and filter organizations.
-- `create_organization(name, email, ...)`: Create a new organization.
-- `update_organization(organization, ...)`: Update an existing organization's settings.
+- `list_organizations(page_number, page_size, query, query_email, query_name)`: List and filter organizations.
+- `create_organization(name, email, params)`: Create a new organization with optional parameters.
+- `update_organization(organization, params)`: Update an existing organization's settings.
 - `delete_organization(organization)`: Delete an organization and all its content.
 
 ---
 
 ## Development Guide
+
+> **Note**: The project is currently migrating all tools to use explicit Pydantic models for request validation and parameter handling instead of `**kwargs`. See the workspace and organization implementations for the reference pattern to follow.
 
 ### Development Setup
 
@@ -262,12 +271,19 @@ uv run terraform_cloud_mcp/server.py
 
 ### Extending the Server
 
-1. Add new tools to the appropriate module in the `terraform_cloud_mcp/tools` directory.
-2. Register new tools in `terraform_cloud_mcp/server.py`.
-3. Follow existing patterns for parameter validation and error handling.
-4. Ensure all functions include proper type hints and docstrings.
-5. Update documentation in `README.md`.
-6. Add tests for new functionality.
+1. Add model classes in the `terraform_cloud_mcp/models` directory:
+   - Define enums for constrained choices
+   - Create request models inheriting from `APIRequest`
+   - Create a `*Params` model for function parameters
+2. Add tool functions in the `terraform_cloud_mcp/tools` directory:
+   - Accept typed `params` objects instead of `**kwargs`
+   - Use the `@handle_api_errors` decorator
+   - Return `APIResponse` type
+3. Register new tools in `terraform_cloud_mcp/server.py`.
+4. Follow the Pydantic pattern for parameter validation and error handling.
+5. Ensure all functions include proper type hints and docstrings.
+6. Update documentation in `README.md`.
+7. Add tests for new functionality.
 
 ---
 
