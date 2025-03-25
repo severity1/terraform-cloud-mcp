@@ -63,7 +63,7 @@ class WorkspaceListRequest(APIRequest):
     These parameters map to the query parameters in the workspace listing API.
     """
 
-    organization_name: str = Field(
+    organization: str = Field(
         ..., description="The name of the organization to list workspaces from"
     )
     page_number: Optional[int] = Field(1, ge=1, description="Page number to fetch")
@@ -194,8 +194,8 @@ class WorkspaceCreateRequest(BaseWorkspaceRequest):
     requirements for creating workspaces.
     """
 
-    # Override organization_name and name to make them required for creation
-    organization_name: str = Field(
+    # Override organization and name to make them required for creation
+    organization: str = Field(
         ..., description="The name of the organization to create the workspace in"
     )
     name: str = Field(..., description="Name of the workspace")
@@ -206,15 +206,36 @@ class WorkspaceUpdateRequest(BaseWorkspaceRequest):
     Request model for updating a Terraform Cloud workspace.
 
     Validates and structures the request according to the Terraform Cloud API
-    requirements for updating workspaces. All fields except organization_name and workspace_name
+    requirements for updating workspaces. All fields except organization and workspace_name
     are optional.
     """
 
     # Add fields which are required for updates but not part of the workspace attributes payload
-    organization_name: str = Field(
+    organization: str = Field(
         ..., description="The name of the organization that owns the workspace"
     )
     workspace_name: str = Field(..., description="The name of the workspace to update")
+
+
+class WorkspaceParams(BaseWorkspaceRequest):
+    """
+    Parameters for workspace operations without routing fields.
+
+    This model provides all optional parameters that can be used when creating or updating
+    workspaces, reusing the field definitions from BaseWorkspaceRequest.
+
+    Usage:
+        params = WorkspaceParams(description="A new workspace", auto_apply=True)
+        create_workspace("my-org", "my-workspace", params)
+    """
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        extra="ignore",
+    )
+
+    # All fields are inherited from BaseWorkspaceRequest
 
 
 # Response handling is implemented through raw dictionaries

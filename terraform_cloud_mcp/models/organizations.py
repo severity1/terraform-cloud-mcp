@@ -140,4 +140,25 @@ class OrganizationUpdateRequest(BaseOrganizationRequest):
     organization: str = Field(..., description="The name of the organization to update")
 
 
+class OrganizationParams(BaseOrganizationRequest):
+    """
+    Parameters for organization operations without routing fields.
+
+    This model provides all optional parameters that can be used when creating or updating
+    organizations, reusing the field definitions from BaseOrganizationRequest.
+
+    Usage:
+        params = OrganizationParams(email="new@example.com", cost_estimation_enabled=True)
+        create_organization("my-org", params)
+    """
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        extra="ignore",
+    )
+
+    # All fields are inherited from BaseOrganizationRequest
+
+
 # Response handling is implemented through raw dictionaries

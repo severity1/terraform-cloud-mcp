@@ -4,6 +4,8 @@ This module provides tools for managing workspaces in Terraform Cloud.
 Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces
 """
 
+from typing import Optional
+
 from api.client import api_request
 from utils.decorators import handle_api_errors
 from models.base import APIResponse
@@ -11,30 +13,34 @@ from models.workspaces import (
     WorkspaceCreateRequest,
     WorkspaceUpdateRequest,
     WorkspaceListRequest,
+    WorkspaceParams,
 )
 
 
 @handle_api_errors
-async def create_workspace(organization_name: str, name: str, **kwargs) -> APIResponse:
+async def create_workspace(
+    organization: str, name: str, params: Optional[WorkspaceParams] = None
+) -> APIResponse:
     """
     Create a new workspace in an organization.
 
     Args:
-        organization_name: The name of the organization
+        organization: The name of the organization
         name: The name to give the workspace
-        **kwargs: Additional workspace attributes (see WorkspaceCreateRequest)
+        params: Additional workspace parameters (optional)
 
     Returns:
         The created workspace data
     """
-    # Create request using Pydantic model
-    request = WorkspaceCreateRequest(
-        organization_name=organization_name, name=name, **kwargs
-    )
+    # Extract parameters from the params object if provided
+    param_dict = params.model_dump(exclude_none=True) if params else {}
 
-    # Extract attributes for payload, excluding organization_name which is part of the URL
+    # Create request using Pydantic model
+    request = WorkspaceCreateRequest(organization=organization, name=name, **param_dict)
+
+    # Extract attributes for payload, excluding organization which is part of the URL
     attributes = request.model_dump(
-        by_alias=True, exclude={"organization_name"}, exclude_none=True
+        by_alias=True, exclude={"organization"}, exclude_none=True
     )
 
     # Create API payload
@@ -42,51 +48,62 @@ async def create_workspace(organization_name: str, name: str, **kwargs) -> APIRe
 
     # Make API request
     return await api_request(
-        f"organizations/{organization_name}/workspaces", method="POST", data=payload
+        f"organizations/{organization}/workspaces", method="POST", data=payload
     )
 
 
 @handle_api_errors
 async def update_workspace(
-    organization_name: str, workspace_name: str, **kwargs
+    organization: str, workspace_name: str, params: Optional[WorkspaceParams] = None
 ) -> APIResponse:
     """
     Update an existing workspace.
 
     Args:
-        organization_name: The name of the organization that owns the workspace
+        organization: The name of the organization that owns the workspace
         workspace_name: The name of the workspace to update
-        **kwargs: Workspace attributes to update (see WorkspaceUpdateRequest)
+        params: Workspace parameters to update (optional)
 
     Returns:
         The updated workspace data
     """
+    # Extract parameters from the params object if provided
+    param_dict = params.model_dump(exclude_none=True) if params else {}
+
     # Create request using Pydantic model
     request = WorkspaceUpdateRequest(
-        organization_name=organization_name, workspace_name=workspace_name, **kwargs
+        organization=organization, workspace_name=workspace_name, **param_dict
     )
 
     # Extract attributes for payload, excluding fields not part of the attributes
     attributes = request.model_dump(
         by_alias=True,
-        exclude={"organization_name", "workspace_name"},
+        exclude={"organization", "workspace_name"},
         exclude_none=True,
     )
 
     # Create API payload
     payload = {"data": {"type": "workspaces", "attributes": attributes}}
 
+    # Debug print
+    print(f"DEBUG: Update workspace payload: {payload}")
+
     # Make API request
-    return await api_request(
-        f"organizations/{organization_name}/workspaces/{workspace_name}",
+    response = await api_request(
+        f"organizations/{organization}/workspaces/{workspace_name}",
         method="PATCH",
         data=payload,
     )
 
+    # Debug print
+    print(f"DEBUG: Update workspace response: {response}")
+
+    return response
+
 
 @handle_api_errors
 async def list_workspaces(
-    organization_name: str,
+    organization: str,
     page_number: int = 1,
     page_size: int = 20,
     search: str = "",
@@ -95,7 +112,7 @@ async def list_workspaces(
     List workspaces in an organization.
 
     Args:
-        organization_name: The name of the organization to list workspaces from
+        organization: The name of the organization to list workspaces from
         page_number: The page number to return (default: 1)
         page_size: The number of items per page (default: 20, max: 100)
         search: Optional search string to filter workspaces
@@ -105,7 +122,7 @@ async def list_workspaces(
     """
     # Create request using Pydantic model for validation
     request = WorkspaceListRequest(
-        organization_name=organization_name,
+        organization=organization,
         page_number=page_number,
         page_size=page_size,
         search=search,
@@ -122,17 +139,17 @@ async def list_workspaces(
 
     # Make API request
     return await api_request(
-        f"organizations/{organization_name}/workspaces", method="GET", params=params
+        f"organizations/{organization}/workspaces", method="GET", params=params
     )
 
 
 @handle_api_errors
-async def delete_workspace(organization_name: str, workspace_name: str) -> APIResponse:
+async def delete_workspace(organization: str, workspace_name: str) -> APIResponse:
     """
     Delete a workspace.
 
     Args:
-        organization_name: The name of the organization that owns the workspace
+        organization: The name of the organization that owns the workspace
         workspace_name: The name of the workspace to delete
 
     Returns:
@@ -140,20 +157,18 @@ async def delete_workspace(organization_name: str, workspace_name: str) -> APIRe
     """
     # Make API request
     return await api_request(
-        f"organizations/{organization_name}/workspaces/{workspace_name}",
+        f"organizations/{organization}/workspaces/{workspace_name}",
         method="DELETE",
     )
 
 
 @handle_api_errors
-async def safe_delete_workspace(
-    organization_name: str, workspace_name: str
-) -> APIResponse:
+async def safe_delete_workspace(organization: str, workspace_name: str) -> APIResponse:
     """
     Safely delete a workspace by first checking if it can be deleted.
 
     Args:
-        organization_name: The name of the organization that owns the workspace
+        organization: The name of the organization that owns the workspace
         workspace_name: The name of the workspace to delete
 
     Returns:
@@ -161,7 +176,7 @@ async def safe_delete_workspace(
     """
     # Make API request
     return await api_request(
-        f"organizations/{organization_name}/workspaces/{workspace_name}/actions/safe-delete",
+        f"organizations/{organization}/workspaces/{workspace_name}/actions/safe-delete",
         method="POST",
     )
 
@@ -281,30 +296,30 @@ async def delete_data_retention_policy(workspace_id: str) -> APIResponse:
 
 @handle_api_errors
 async def get_workspace_details(
-    workspace_id: str = "", organization_name: str = "", workspace_name: str = ""
+    workspace_id: str = "", organization: str = "", workspace_name: str = ""
 ) -> APIResponse:
     """
     Get details for a specific workspace, identified either by ID or by org name and workspace name.
 
     Args:
         workspace_id: The ID of the workspace (mutually exclusive with org+name)
-        organization_name: The name of the organization (required if workspace_id not provided)
+        organization: The name of the organization (required if workspace_id not provided)
         workspace_name: The name of the workspace (required if workspace_id not provided)
 
     Returns:
         The workspace details
     """
-    # Ensure we have either workspace_id OR both organization_name and workspace_name
-    if not workspace_id and not (organization_name and workspace_name):
+    # Ensure we have either workspace_id OR both organization and workspace_name
+    if not workspace_id and not (organization and workspace_name):
         raise ValueError(
-            "Either workspace_id OR both organization_name and workspace_name must be provided"
+            "Either workspace_id OR both organization and workspace_name must be provided"
         )
 
     # Determine API path based on provided parameters
     if workspace_id:
         path = f"workspaces/{workspace_id}"
     else:
-        path = f"organizations/{organization_name}/workspaces/{workspace_name}"
+        path = f"organizations/{organization}/workspaces/{workspace_name}"
 
     # Make API request
     return await api_request(path, method="GET")

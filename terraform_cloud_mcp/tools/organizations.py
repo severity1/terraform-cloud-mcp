@@ -4,6 +4,8 @@ This module implements the /organizations endpoints of the Terraform Cloud API.
 Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations
 """
 
+from typing import Optional
+
 from api.client import api_request
 from utils.decorators import handle_api_errors
 from models.base import APIResponse
@@ -11,6 +13,7 @@ from models.organizations import (
     OrganizationCreateRequest,
     OrganizationUpdateRequest,
     OrganizationListRequest,
+    OrganizationParams,
 )
 
 
@@ -87,32 +90,25 @@ async def list_organizations(
 
 
 @handle_api_errors
-async def create_organization(name: str, email: str, **kwargs) -> APIResponse:
+async def create_organization(
+    name: str, email: str, params: Optional[OrganizationParams] = None
+) -> APIResponse:
     """
     Create a new organization in Terraform Cloud
 
     Args:
         name: The name of the organization (required)
         email: Admin email address (required)
-        **kwargs: Additional optional organization attributes with defaults defined in the model:
-            - session_timeout: Session timeout after inactivity in minutes (default: 20160)
-            - session_remember: Session expiration in minutes (default: 20160)
-            - collaborator_auth_policy: Authentication policy ('password' or 'two_factor_mandatory') (default: 'password')
-            - cost_estimation_enabled: Whether cost estimation is enabled for all workspaces (default: False)
-            - send_passing_statuses_for_untriggered_speculative_plans: Whether to send VCS status updates (default: False)
-            - aggregated_commit_status_enabled: Whether to aggregate VCS status updates (default: True)
-            - speculative_plan_management_enabled: Whether to enable automatic cancellation of plan-only runs (default: True)
-            - owners_team_saml_role_id: SAML only - the name of the "owners" team (default: None)
-            - assessments_enforced: Whether to compel health assessments for all eligible workspaces (default: False)
-            - allow_force_delete_workspaces: Whether workspace admins can delete workspaces with resources (default: False)
-            - default_execution_mode: Default execution mode ('remote', 'local', or 'agent') (default: 'remote')
-            - default_agent_pool_id: The ID of the agent pool (required when default_execution_mode is 'agent')
+        params: Additional organization parameters (optional)
 
     Returns:
         The created organization details or error information
     """
+    # Extract parameters from the params object if provided
+    param_dict = params.model_dump(exclude_none=True) if params else {}
+
     # Create request using Pydantic model with defaults
-    request = OrganizationCreateRequest(name=name, email=email, **kwargs)
+    request = OrganizationCreateRequest(name=name, email=email, **param_dict)
 
     # Create API payload directly
     attributes = request.model_dump(by_alias=True, exclude_none=True)
@@ -129,33 +125,24 @@ async def create_organization(name: str, email: str, **kwargs) -> APIResponse:
 
 
 @handle_api_errors
-async def update_organization(organization: str, **kwargs) -> APIResponse:
+async def update_organization(
+    organization: str, params: Optional[OrganizationParams] = None
+) -> APIResponse:
     """
     Update an existing organization in Terraform Cloud
 
     Args:
         organization: The name of the organization to update (required)
-        **kwargs: Optional attributes to update, including:
-            - name: New name for the organization
-            - email: New admin email address
-            - session_timeout: Session timeout after inactivity in minutes
-            - session_remember: Session expiration in minutes
-            - collaborator_auth_policy: Authentication policy ('password' or 'two_factor_mandatory')
-            - cost_estimation_enabled: Whether cost estimation is enabled for all workspaces
-            - send_passing_statuses_for_untriggered_speculative_plans: Whether to send VCS status updates
-            - aggregated_commit_status_enabled: Whether to aggregate VCS status updates
-            - speculative_plan_management_enabled: Whether to enable automatic cancellation of plan-only runs
-            - owners_team_saml_role_id: SAML only - the name of the "owners" team
-            - assessments_enforced: Whether to compel health assessments for all eligible workspaces
-            - allow_force_delete_workspaces: Whether workspace admins can delete workspaces with resources
-            - default_execution_mode: Default execution mode ('remote', 'local', or 'agent')
-            - default_agent_pool_id: The ID of the agent pool (required when default_execution_mode is 'agent')
+        params: Organization parameters to update (optional)
 
     Returns:
         The updated organization details or error information
     """
+    # Extract parameters from the params object if provided
+    param_dict = params.model_dump(exclude_none=True) if params else {}
+
     # Create request using Pydantic model
-    request = OrganizationUpdateRequest(organization=organization, **kwargs)
+    request = OrganizationUpdateRequest(organization=organization, **param_dict)
 
     # Create API payload directly
     attributes = request.model_dump(
