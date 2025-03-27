@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
 # Import tools and models
-import tools.account as account
-import tools.workspaces as workspaces
-import tools.runs as runs
-import tools.organizations as organizations
+from terraform_cloud_mcp.tools import account
+from terraform_cloud_mcp.tools import workspaces
+from terraform_cloud_mcp.tools import runs
+from terraform_cloud_mcp.tools import organizations
 
 # Load environment variables from .env file
 load_dotenv()

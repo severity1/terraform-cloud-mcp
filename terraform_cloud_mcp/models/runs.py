@@ -7,13 +7,27 @@ Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import Field, ConfigDict
+from pydantic import Field
 
-from models.base import APIRequest
+from .base import APIRequest
 
 
 class RunOperation(str, Enum):
-    """Operation options for runs."""
+    """Operation options for runs in Terraform Cloud.
+
+    Defines the different types of operations a run can perform:
+    - PLAN_ONLY: Create a plan without applying changes
+    - PLAN_AND_APPLY: Create a plan and apply if approved
+    - SAVE_PLAN: Save the plan for later use
+    - REFRESH_ONLY: Only refresh state without planning changes
+    - DESTROY: Destroy all resources
+    - EMPTY_APPLY: Apply even with no changes detected
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
+
+    See:
+        docs/models/run_examples.md for usage examples
+    """
 
     PLAN_ONLY = "plan_only"
     PLAN_AND_APPLY = "plan_and_apply"
@@ -24,7 +38,17 @@ class RunOperation(str, Enum):
 
 
 class RunStatus(str, Enum):
-    """Status options for runs."""
+    """Status options for runs in Terraform Cloud.
+
+    Defines the various states a run can be in during its lifecycle,
+    from initial creation through planning, policy checks, application,
+    and completion or cancellation.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
+
+    See:
+        docs/models/run_examples.md for usage examples
+    """
 
     PENDING = "pending"
     FETCHING = "fetching"
@@ -56,7 +80,18 @@ class RunStatus(str, Enum):
 
 
 class RunSource(str, Enum):
-    """Source options for runs."""
+    """Source options for runs in Terraform Cloud.
+
+    Identifies the origin of a run:
+    - TFE_UI: Created through the Terraform Cloud web interface
+    - TFE_API: Created through the API
+    - TFE_CONFIGURATION_VERSION: Created by uploading a configuration version
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
+
+    See:
+        docs/models/run_examples.md for usage examples
+    """
 
     TFE_UI = "tfe-ui"
     TFE_API = "tfe-api"
@@ -64,7 +99,18 @@ class RunSource(str, Enum):
 
 
 class RunStatusGroup(str, Enum):
-    """Status group options for runs."""
+    """Status group options for categorizing runs.
+
+    Groups run statuses into categories for filtering:
+    - NON_FINAL: Runs that are still in progress
+    - FINAL: Runs that have reached a terminal state
+    - DISCARDABLE: Runs that can be discarded
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
+
+    See:
+        docs/models/run_examples.md for usage examples
+    """
 
     NON_FINAL = "non_final"
     FINAL = "final"
@@ -72,112 +118,167 @@ class RunStatusGroup(str, Enum):
 
 
 class RunVariable(APIRequest):
-    """Model for run-specific variables."""
+    """Model for run-specific variables.
 
-    key: str = Field(..., description="Variable key")
-    value: str = Field(..., description="Variable value")
+    Run variables are used to provide input values for a specific run,
+    which override any workspace variables for that run only.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#create-a-run
+
+    See:
+        docs/models/run_examples.md for usage examples
+    """
+
+    key: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="Variable key",
+        min_length=1,
+        max_length=128,
+    )
+    value: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="Variable value",
+        max_length=256,
+    )
 
 
 class RunListInWorkspaceRequest(APIRequest):
-    """
-    Request parameters for listing runs in a workspace.
+    """Request parameters for listing runs in a workspace.
 
-    These parameters map to the query parameters in the runs API.
+    Used with the GET /workspaces/{workspace_id}/runs endpoint to retrieve
+    and filter run data for a specific workspace.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
+
+    See:
+        docs/models/run_examples.md for usage examples
     """
 
-    workspace_id: str = Field(..., description="The workspace ID to list runs for")
+    workspace_id: str = Field(
+        ...,
+        description="The workspace ID to list runs for",
+        pattern=r"^ws-[a-zA-Z0-9]{16}$",  # Standardized workspace ID pattern
+    )
     page_number: Optional[int] = Field(1, ge=1, description="Page number to fetch")
     page_size: Optional[int] = Field(
         20, ge=1, le=100, description="Number of results per page"
     )
     filter_operation: Optional[str] = Field(
-        None, description="Filter runs by operation type, comma-separated"
+        None,
+        description="Filter runs by operation type, comma-separated",
+        max_length=100,
     )
     filter_status: Optional[str] = Field(
-        None, description="Filter runs by status, comma-separated"
+        None, description="Filter runs by status, comma-separated", max_length=100
     )
     filter_source: Optional[str] = Field(
-        None, description="Filter runs by source, comma-separated"
+        None, description="Filter runs by source, comma-separated", max_length=100
     )
     filter_status_group: Optional[str] = Field(
-        None, description="Filter runs by status group"
+        None, description="Filter runs by status group", max_length=50
     )
     filter_timeframe: Optional[str] = Field(
-        None, description="Filter runs by timeframe"
+        None, description="Filter runs by timeframe", max_length=50
     )
     filter_agent_pool_names: Optional[str] = Field(
-        None, description="Filter runs by agent pool names, comma-separated"
+        None,
+        description="Filter runs by agent pool names, comma-separated",
+        max_length=100,
     )
     search_user: Optional[str] = Field(
-        None, description="Search for runs by VCS username"
+        None, description="Search for runs by VCS username", max_length=100
     )
     search_commit: Optional[str] = Field(
-        None, description="Search for runs by commit SHA"
+        None, description="Search for runs by commit SHA", max_length=40
     )
     search_basic: Optional[str] = Field(
         None,
         description="Basic search across run ID, message, commit SHA, and username",
+        max_length=100,
     )
 
 
 class RunListInOrganizationRequest(APIRequest):
-    """
-    Request parameters for listing runs in an organization.
+    """Request parameters for listing runs in an organization.
 
     These parameters map to the query parameters in the runs API.
+    The endpoint returns a paginated list of runs across all workspaces in an organization,
+    with options for filtering by workspace name, status, and other criteria.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-an-organization
+
+    See:
+        docs/models/run_examples.md for usage examples
     """
 
-    organization: str = Field(..., description="The organization name")
+    organization: str = Field(
+        ...,
+        description="The organization name",
+        min_length=3,
+        pattern=r"^[a-z0-9][-a-z0-9_]*[a-z0-9]$",
+    )
     page_number: Optional[int] = Field(1, ge=1, description="Page number to fetch")
     page_size: Optional[int] = Field(
         20, ge=1, le=100, description="Number of results per page"
     )
     filter_operation: Optional[str] = Field(
-        None, description="Filter runs by operation type, comma-separated"
+        None,
+        description="Filter runs by operation type, comma-separated",
+        max_length=100,
     )
     filter_status: Optional[str] = Field(
-        None, description="Filter runs by status, comma-separated"
+        None, description="Filter runs by status, comma-separated", max_length=100
     )
     filter_source: Optional[str] = Field(
-        None, description="Filter runs by source, comma-separated"
+        None, description="Filter runs by source, comma-separated", max_length=100
     )
     filter_status_group: Optional[str] = Field(
-        None, description="Filter runs by status group"
+        None, description="Filter runs by status group", max_length=50
     )
     filter_timeframe: Optional[str] = Field(
-        None, description="Filter runs by timeframe"
+        None, description="Filter runs by timeframe", max_length=50
     )
     filter_agent_pool_names: Optional[str] = Field(
-        None, description="Filter runs by agent pool names, comma-separated"
+        None,
+        description="Filter runs by agent pool names, comma-separated",
+        max_length=100,
     )
     filter_workspace_names: Optional[str] = Field(
-        None, description="Filter runs by workspace names, comma-separated"
+        None,
+        description="Filter runs by workspace names, comma-separated",
+        max_length=250,
     )
     search_user: Optional[str] = Field(
-        None, description="Search for runs by VCS username"
+        None, description="Search for runs by VCS username", max_length=100
     )
     search_commit: Optional[str] = Field(
-        None, description="Search for runs by commit SHA"
+        None, description="Search for runs by commit SHA", max_length=40
     )
     search_basic: Optional[str] = Field(
         None,
         description="Basic search across run ID, message, commit SHA, and username",
+        max_length=100,
     )
 
 
 class BaseRunRequest(APIRequest):
     """Base class for run requests with common fields.
 
-    This includes all fields that are commonly used in request payloads for the run
-    creation API.
+    Common fields shared across run creation and management APIs.
+    Provides field definitions and validation rules for run operations.
+
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run
+
+    Note:
+        Consolidates common parameters for consistency across endpoints
+
+    See:
+        docs/models/run_examples.md for usage examples
     """
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        extra="ignore",
-    )
+    # Inherits model_config from APIRequest -> BaseModelConfig
 
     # Optional fields with their defaults
     message: Optional[str] = Field(None, description="Message to include with the run")
@@ -237,61 +338,87 @@ class BaseRunRequest(APIRequest):
 
 
 class RunCreateRequest(BaseRunRequest):
-    """
-    Request model for creating a Terraform Cloud run.
+    """Request model for creating a Terraform Cloud run.
 
     Validates and structures the request according to the Terraform Cloud API
-    requirements for creating runs.
+    requirements for creating runs. The model inherits common run attributes from
+    BaseRunRequest and adds workspace_id as a required parameter.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#create-a-run
+
+    Note:
+        This inherits all configuration fields from BaseRunRequest
+        and adds workspace_id as a required parameter.
+        This model is typically used internally by the create_run tool function,
+        which accepts parameters directly and constructs the request object.
+
+    See:
+        docs/models/run_examples.md for usage examples
     """
 
     # Required fields
-    workspace_id: str = Field(..., description="The workspace ID to execute the run in (required)")
+    workspace_id: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="The workspace ID to execute the run in (required)",
+        pattern=r"^ws-[a-zA-Z0-9]{16}$",  # Standardized workspace ID pattern
+    )
 
     # Optional fields specific to run creation
     configuration_version_id: Optional[str] = Field(
         None,
         alias="configuration-version-id",
         description="The configuration version ID to use",
+        pattern=r"^cv-[a-zA-Z0-9]{16}$",
     )
 
 
 class RunActionRequest(APIRequest):
-    """
-    Base request model for run actions like apply, discard, cancel, etc.
+    """Base request model for run actions like apply, discard, cancel, etc.
 
-    This model provides common fields used in run action requests.
+    This model provides common fields used in run action requests such as
+    applying, discarding, or canceling runs. It includes the run ID and
+    an optional comment field that can be included with the action.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#apply-a-run
+
+    Note:
+        This model is used for multiple run action endpoints that share the
+        same basic structure but perform different operations on the run.
+
+    See:
+        docs/models/run_examples.md for usage examples
     """
 
-    run_id: str = Field(..., description="The ID of the run to perform an action on")
+    run_id: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="The ID of the run to perform an action on",
+        pattern=r"^run-[a-zA-Z0-9]{16}$",
+    )
     comment: Optional[str] = Field(
-        None, description="An optional comment about the run"
+        None,
+        # No alias needed as field name matches API field name
+        description="An optional comment about the run",
     )
 
 
 class RunParams(BaseRunRequest):
-    """
-    Parameters for run operations without routing fields.
+    """Parameters for run operations without routing fields.
 
     This model provides all optional parameters that can be used when creating runs,
     reusing the field definitions from BaseRunRequest.
 
-    Usage:
-        params = RunParams(message="Triggered by API", auto_apply=True)
-        create_run("my-org", "my-workspace", params)
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#create-a-run
+
+    Note:
+        All fields are inherited from BaseRunRequest.
+
+    See:
+        docs/models/run_examples.md for usage examples
     """
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        extra="ignore",
-    )
-
-    # All fields are inherited from BaseRunRequest
-    configuration_version_id: Optional[str] = Field(
-        None,
-        alias="configuration-version-id",
-        description="The configuration version ID to use",
-    )
+    # Inherits model_config and all fields from BaseRunRequest
 
 
 # Response handling is implemented through raw dictionaries

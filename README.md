@@ -1,10 +1,11 @@
 # Terraform Cloud MCP Server
 
-A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your Terraform infrastructure through natural conversation. Compatible with any MCP-supporting platform, including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, Glama, and more.
+A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.4-blue)
+![Version](https://img.shields.io/badge/version-0.8.5-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
+![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
 
 ---
 
@@ -136,7 +137,7 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 
 ## Development Guide
 
-> **Note**: The project is currently migrating all tools to use explicit Pydantic models for request validation and parameter handling instead of `**kwargs`. See the workspace, organization, and runs implementations for the reference pattern to follow.
+> **Note**: This project uses explicit Pydantic models for request validation and parameter handling. Common patterns like JSON:API payload construction have been extracted to utility functions in `utils/payload.py` and `utils/request.py` following KISS and DRY principles.
 
 ### Development Setup
 
@@ -207,9 +208,58 @@ This configuration tells Claude Desktop how to start the MCP server automaticall
 
 ---
 
+## Code Structure
+
+The project follows a modular structure organized by domain and responsibility:
+
+```
+terraform_cloud_mcp/
+├── api/                 # API client and core request handling
+│   ├── __init__.py
+│   └── client.py        # Core API client with error handling
+├── models/              # Pydantic data models for validation
+│   ├── __init__.py
+│   ├── account.py       # Account-related models
+│   ├── base.py          # Base model classes and shared types
+│   ├── organizations.py # Organization models
+│   ├── runs.py          # Run management models
+│   └── workspaces.py    # Workspace management models
+├── tools/               # Tool implementations exposed via MCP
+│   ├── __init__.py
+│   ├── account.py       # Account management tools
+│   ├── organizations.py # Organization management tools
+│   ├── runs.py          # Run management tools
+│   └── workspaces.py    # Workspace management tools
+├── utils/               # Shared utilities
+│   ├── __init__.py
+│   ├── decorators.py    # Error handling decorators
+│   ├── payload.py       # JSON:API payload utilities
+│   └── request.py       # Request parameter utilities
+└── server.py            # MCP server entry point
+```
+
+### Architecture
+
+The project follows a layered architecture:
+
+1. **Models Layer** (`models/`): Pydantic data models for validation and serialization
+2. **API Layer** (`api/`): Core HTTP client for Terraform Cloud API communication
+3. **Utilities Layer** (`utils/`): Shared helper functions and decorators 
+4. **Tools Layer** (`tools/`): User-facing tool implementations that compose the other layers
+5. **Server Layer** (`server.py`): MCP protocol implementation and tool registration
+
+### Code Quality Guidelines
+
+The project follows strict code quality guidelines including:
+
+- **KISS Commenting**: Comments explain only non-obvious "why" behind code choices, not "what"
+- **DRY Pattern**: Common code patterns use utility functions to reduce duplication
+- **Strong Type Safety**: Comprehensive type hints and Pydantic validation throughout
+- **Consistent Documentation**: Clear, standardized docstrings with Args/Returns sections
+
 ### Development Commands
 
-The project uses a comprehensive set of tools for quality assurance:
+The project uses these tools for quality assurance:
 
 ```bash
 # Run the server in development mode with MCP Inspector UI
@@ -276,6 +326,11 @@ uv run terraform_cloud_mcp/server.py
 2. Add tool functions in the `terraform_cloud_mcp/tools` directory:
    - Accept typed `params` objects instead of `**kwargs`
    - Use the `@handle_api_errors` decorator
+   - Use utility functions from `utils/payload.py` for JSON:API payloads:
+     - `create_api_payload()` for standard payload creation
+     - `add_relationship()` for resource relationships
+   - Use utility functions from `utils/request.py` for parameters:
+     - `pagination_params()` for standard pagination parameters
    - Return `APIResponse` type
 3. Register new tools in `terraform_cloud_mcp/server.py`.
 4. Follow the Pydantic pattern for parameter validation and error handling.
@@ -285,10 +340,22 @@ uv run terraform_cloud_mcp/server.py
 
 ---
 
+## Documentation
+
+The codebase includes comprehensive documentation:
+
+- **Code Comments**: Focused on explaining the "why" behind implementation decisions
+- **Docstrings**: All public functions and classes include detailed docstrings
+- **Example Files**: The `docs/` directory contains detailed examples for each domain:
+  - `docs/models/`: Usage examples for all model types
+  - `docs/tools/`: Detailed usage examples for each tool
+  - `docs/standards.md`: Comprehensive coding standards guidelines
+  - `docs/conversations/`: Sample conversation flows with the API
+
 ## Troubleshooting
 
-1. Check server logs (debug logging is enabled by default).
-2. Use the MCP Inspector (http://localhost:5173) for debugging.
+1. Check server logs (debug logging is enabled by default)
+2. Use the MCP Inspector (http://localhost:5173) for debugging
 3. Debug logging is already enabled in `server.py`:
    ```python
    import logging

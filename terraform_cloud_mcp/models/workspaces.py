@@ -4,29 +4,26 @@ This module contains models for Terraform Cloud workspace-related requests.
 Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces
 """
 
-from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from pydantic import Field, ConfigDict
+from pydantic import Field
 
-from models.base import APIRequest
-
-
-class ExecutionMode(str, Enum):
-    """Execution mode options for workspaces."""
-
-    REMOTE = "remote"
-    LOCAL = "local"
-    AGENT = "agent"
+from .base import APIRequest, ExecutionMode
 
 
 class VcsRepoConfig(APIRequest):
-    """VCS repository configuration for a workspace."""
+    """VCS repository configuration for a workspace.
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        extra="ignore",
-    )
+    Defines version control system repository configuration for a workspace,
+    including branch, repository identifier, OAuth token, and other settings.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces
+
+    See:
+        docs/models/workspace_examples.md for usage examples
+    """
+
+    # Inherits model_config from APIRequest -> BaseModelConfig
 
     branch: Optional[str] = Field(
         None, description="The repository branch that Terraform executes from"
@@ -57,14 +54,21 @@ class VcsRepoConfig(APIRequest):
 
 
 class WorkspaceListRequest(APIRequest):
-    """
-    Request parameters for listing workspaces in an organization.
+    """Request parameters for listing workspaces in an organization.
 
-    These parameters map to the query parameters in the workspace listing API.
+    Defines the parameters for the workspace listing API including pagination
+    and search filtering options.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces#list-workspaces
+
+    See:
+        docs/models/workspace_examples.md for usage examples
     """
 
     organization: str = Field(
-        ..., description="The name of the organization to list workspaces from"
+        ...,
+        # No alias needed as field name matches API field name
+        description="The name of the organization to list workspaces from",
     )
     page_number: Optional[int] = Field(1, ge=1, description="Page number to fetch")
     page_size: Optional[int] = Field(
@@ -76,20 +80,30 @@ class WorkspaceListRequest(APIRequest):
 class BaseWorkspaceRequest(APIRequest):
     """Base class for workspace create and update requests with common fields.
 
-    This includes all fields that are commonly used in request payloads for the workspace
-    creation and update APIs.
+    This includes common fields used in request payloads for workspace
+    creation and update APIs, providing a foundation for more specific workspace models.
+
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces
+
+    Note:
+        This class inherits model_config from APIRequest -> BaseModelConfig and provides
+        default values for most fields based on Terraform Cloud API defaults.
+
+    See:
+        docs/models/workspace_examples.md for detailed field descriptions and usage examples
     """
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        extra="ignore",
-    )
-
     # Fields common to both create and update requests with API defaults from docs
-    name: Optional[str] = Field(None, description="Name of the workspace")
-    description: Optional[str] = Field(None, description="Description of the workspace")
+    name: Optional[str] = Field(
+        None,
+        # No alias needed as field name matches API field name
+        description="Name of the workspace",
+    )
+    description: Optional[str] = Field(
+        None,
+        # No alias needed as field name matches API field name
+        description="Description of the workspace",
+    )
     execution_mode: Optional[Union[str, ExecutionMode]] = Field(
         ExecutionMode.REMOTE,
         alias="execution-mode",
@@ -187,55 +201,83 @@ class BaseWorkspaceRequest(APIRequest):
 
 
 class WorkspaceCreateRequest(BaseWorkspaceRequest):
-    """
-    Request model for creating a Terraform Cloud workspace.
+    """Request model for creating a Terraform Cloud workspace.
 
     Validates and structures the request according to the Terraform Cloud API
-    requirements for creating workspaces.
+    requirements for creating workspaces. Extends BaseWorkspaceRequest with
+    required fields for creation.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces#create-a-workspace
+
+    Note:
+        This inherits all configuration fields from BaseWorkspaceRequest
+        while making organization and name required.
+
+    See:
+        docs/models/workspace_examples.md for usage examples
     """
 
     # Override organization and name to make them required for creation
     organization: str = Field(
-        ..., description="The name of the organization to create the workspace in"
+        ...,
+        # No alias needed as field name matches API field name
+        description="The name of the organization to create the workspace in",
     )
-    name: str = Field(..., description="Name of the workspace")
+    name: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="Name of the workspace",
+    )
 
 
 class WorkspaceUpdateRequest(BaseWorkspaceRequest):
-    """
-    Request model for updating a Terraform Cloud workspace.
+    """Request model for updating a Terraform Cloud workspace.
 
-    Validates and structures the request according to the Terraform Cloud API
-    requirements for updating workspaces. All fields except organization and workspace_name
-    are optional.
+    Validates and structures the request for updating workspaces. Extends BaseWorkspaceRequest
+    with routing fields while keeping all configuration fields optional.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces#update-a-workspace
+
+    Note:
+        This inherits all configuration fields from BaseWorkspaceRequest
+        and adds required routing fields for the update operation.
+
+    See:
+        docs/models/workspace_examples.md for usage examples
     """
 
     # Add fields which are required for updates but not part of the workspace attributes payload
     organization: str = Field(
-        ..., description="The name of the organization that owns the workspace"
+        ...,
+        # No alias needed as field name matches API field name
+        description="The name of the organization that owns the workspace",
     )
-    workspace_name: str = Field(..., description="The name of the workspace to update")
+    workspace_name: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="The name of the workspace to update",
+    )
 
 
 class WorkspaceParams(BaseWorkspaceRequest):
+    """Parameters for workspace operations without routing fields.
+
+    This model provides all optional parameters for creating or updating workspaces,
+    reusing field definitions from BaseWorkspaceRequest. It separates configuration
+    parameters from routing information like organization and workspace name.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces
+
+    Note:
+        When updating a workspace, use this model to specify only the attributes
+        you want to change. Unspecified attributes retain their current values.
+        All fields are inherited from BaseWorkspaceRequest.
+
+    See:
+        docs/models/workspace_examples.md for usage examples
     """
-    Parameters for workspace operations without routing fields.
 
-    This model provides all optional parameters that can be used when creating or updating
-    workspaces, reusing the field definitions from BaseWorkspaceRequest.
-
-    Usage:
-        params = WorkspaceParams(description="A new workspace", auto_apply=True)
-        create_workspace("my-org", "my-workspace", params)
-    """
-
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        extra="ignore",
-    )
-
-    # All fields are inherited from BaseWorkspaceRequest
+    # Inherits model_config and all fields from BaseWorkspaceRequest
 
 
 # Response handling is implemented through raw dictionaries

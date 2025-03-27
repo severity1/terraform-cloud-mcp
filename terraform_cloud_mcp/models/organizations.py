@@ -4,64 +4,152 @@ This module contains models for Terraform Cloud organization-related requests.
 Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations
 """
 
-from enum import Enum
 from typing import Optional, Union
 
-from pydantic import Field, ConfigDict
+from pydantic import Field
 
-from models.base import APIRequest
-
-
-class CollaboratorAuthPolicy(str, Enum):
-    """Authentication policy options for organization collaborators."""
-
-    PASSWORD = "password"
-    TWO_FACTOR_MANDATORY = "two_factor_mandatory"
+from .base import APIRequest, CollaboratorAuthPolicy, ExecutionMode
 
 
-class ExecutionMode(str, Enum):
-    """Execution mode options for workspaces."""
+class OrganizationDetailsRequest(APIRequest):
+    """Request model for getting organization details.
 
-    REMOTE = "remote"
-    LOCAL = "local"
-    AGENT = "agent"
+    This model is used for the GET /organizations/{name} endpoint. The endpoint
+    returns detailed information about an organization including its name,
+    external ID, created date, and all organization-level settings.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#show-an-organization
+
+    See:
+        docs/models/organization_examples.md for usage examples
+    """
+
+    organization: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="The name of the organization to retrieve details for",
+        min_length=3,
+        pattern=r"^[a-z0-9][-a-z0-9_]*[a-z0-9]$",
+    )
+
+
+class OrganizationEntitlementsRequest(APIRequest):
+    """Request model for getting organization entitlements.
+
+    This model is used for the GET /organizations/{name}/entitlement-set endpoint.
+    The endpoint returns information about which features and capabilities are
+    available to the organization based on its subscription tier.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#show-the-entitlement-set
+
+    See:
+        docs/models/organization_examples.md for usage examples
+    """
+
+    organization: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="The name of the organization to retrieve entitlements for",
+        min_length=3,
+        pattern=r"^[a-z0-9][-a-z0-9_]*[a-z0-9]$",
+    )
+
+
+class OrganizationDeleteRequest(APIRequest):
+    """Request model for deleting an organization.
+
+    This model is used for the DELETE /organizations/{name} endpoint.
+    Deleting an organization is a permanent action and cannot be undone.
+    All workspaces, configurations, and associated resources will be deleted.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#delete-an-organization
+
+    Warning:
+        This is a destructive operation that cannot be undone. Organization names
+        are globally unique and cannot be recreated with the same name later.
+
+    See:
+        docs/models/organization_examples.md for usage examples
+    """
+
+    organization: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="The name of the organization to delete",
+        min_length=3,
+        pattern=r"^[a-z0-9][-a-z0-9_]*[a-z0-9]$",
+    )
 
 
 class OrganizationListRequest(APIRequest):
-    """
-    Request parameters for listing organizations.
+    """Request parameters for listing organizations.
 
     These parameters map to the query parameters in the organizations API.
+    The endpoint returns a paginated list of organizations that the authenticated
+    user has access to, along with their details.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#list-organizations
+
+    See:
+        docs/models/organization_examples.md for usage examples
     """
 
     page_number: Optional[int] = Field(1, ge=1, description="Page number to fetch")
     page_size: Optional[int] = Field(
         20, ge=1, le=100, description="Number of results per page"
     )
-    query: Optional[str] = Field(None, description="Search query for name and email")
-    query_email: Optional[str] = Field(None, description="Search query for email")
-    query_name: Optional[str] = Field(None, description="Search query for name")
+    query: Optional[str] = Field(
+        None, description="Search query for name and email", max_length=100
+    )
+    query_email: Optional[str] = Field(
+        None, description="Search query for email", max_length=100
+    )
+    query_name: Optional[str] = Field(
+        None, description="Search query for name", max_length=100
+    )
 
 
 class BaseOrganizationRequest(APIRequest):
-    """Base class for organization create and update requests with common fields."""
+    """Base class for organization create and update requests with common fields.
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        extra="ignore",
-    )
+    This includes all fields that are commonly used in request payloads for the organization
+    creation and update APIs.
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations
+
+    Note:
+        This class inherits model_config from APIRequest -> BaseModelConfig
+
+    See:
+        docs/models/organization_examples.md for fields and usage examples
+    """
 
     # Fields common to both create and update requests with API defaults from docs
-    name: Optional[str] = Field(None, description="Name of the organization")
-    email: Optional[str] = Field(None, description="Admin email address")
+    name: Optional[str] = Field(
+        None,
+        # No alias needed as field name matches API field name
+        description="Name of the organization",
+        min_length=3,
+        pattern=r"^[a-z0-9][-a-z0-9_]*[a-z0-9]$",
+    )
+    email: Optional[str] = Field(
+        None,
+        # No alias needed as field name matches API field name
+        description="Admin email address",
+        pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+    )
     session_timeout: Optional[int] = Field(
         20160,
         alias="session-timeout",
         description="Session timeout after inactivity in minutes",
+        ge=1,
+        le=43200,  # 30 days in minutes
     )
     session_remember: Optional[int] = Field(
-        20160, alias="session-remember", description="Session expiration in minutes"
+        20160,
+        alias="session-remember",
+        description="Session expiration in minutes",
+        ge=1,
+        le=43200,  # 30 days in minutes
     )
     collaborator_auth_policy: Optional[Union[str, CollaboratorAuthPolicy]] = Field(
         CollaboratorAuthPolicy.PASSWORD,
@@ -116,11 +204,19 @@ class BaseOrganizationRequest(APIRequest):
 
 
 class OrganizationCreateRequest(BaseOrganizationRequest):
-    """
-    Request model for creating a Terraform Cloud organization.
+    """Request model for creating a Terraform Cloud organization.
 
     Validates and structures the request according to the Terraform Cloud API
     requirements for creating organizations.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#create-an-organization
+
+    Note:
+        This inherits all configuration fields from BaseOrganizationRequest
+        while making name and email required.
+
+    See:
+        docs/models/organization_examples.md for usage examples
     """
 
     # Override name and email to make them required for creation
@@ -129,36 +225,45 @@ class OrganizationCreateRequest(BaseOrganizationRequest):
 
 
 class OrganizationUpdateRequest(BaseOrganizationRequest):
-    """
-    Request model for updating a Terraform Cloud organization.
+    """Request model for updating a Terraform Cloud organization.
 
     Validates and structures the request according to the Terraform Cloud API
     requirements for updating organizations. All fields are optional.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#update-an-organization
+
+    Note:
+        This inherits all configuration fields from BaseOrganizationRequest
+        and adds a required organization field for routing.
+
+    See:
+        docs/models/organization_examples.md for usage examples
     """
 
     # Add organization field which is required for updates but not part of the attributes
-    organization: str = Field(..., description="The name of the organization to update")
+    organization: str = Field(
+        ...,
+        # No alias needed as field name matches API field name
+        description="The name of the organization to update",
+    )
 
 
 class OrganizationParams(BaseOrganizationRequest):
-    """
-    Parameters for organization operations without routing fields.
+    """Parameters for organization operations without routing fields.
 
     This model provides all optional parameters that can be used when creating or updating
     organizations, reusing the field definitions from BaseOrganizationRequest.
 
-    Usage:
-        params = OrganizationParams(email="new@example.com", cost_estimation_enabled=True)
-        create_organization("my-org", params)
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations
+
+    Note:
+        All fields are inherited from BaseOrganizationRequest.
+
+    See:
+        docs/models/organization_examples.md for usage examples
     """
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        extra="ignore",
-    )
-
-    # All fields are inherited from BaseOrganizationRequest
+    # Inherits model_config and all fields from BaseOrganizationRequest
 
 
 # Response handling is implemented through raw dictionaries
