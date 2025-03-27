@@ -2,7 +2,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.5-blue)
+![Version](https://img.shields.io/badge/version-0.8.6-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -57,14 +57,22 @@ claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -s user terraform-cloud-mcp -- "terraf
 #### Adding to Claude Desktop
 
 Create a `claude_desktop_config.json` configuration file:
+- mac: ~/Library/Application Support/Claude/claude_desktop_config.json
+- win: %APPDATA%\Claude\claude_desktop_config.json
 
 ```json
 {
   "mcpServers": {
     "terraform-cloud-mcp": {
-      "command": "terraform-cloud-mcp",
+      "command": "/path/to/uv", # Get this by running: `which uv`
+      "args": [
+        "--directory",
+        "/path/to/your/terraform-cloud-mcp", # Full path to this project
+        "run",
+        "terraform-cloud-mcp"
+      ],
       "env": {
-        "TFC_TOKEN": "your_terraform_cloud_token"
+        "TFC_TOKEN": "my token..." # replace with actual token
       }
     }
   }
