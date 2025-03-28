@@ -54,6 +54,11 @@ mcp.tool()(organizations.create_organization)
 mcp.tool()(organizations.update_organization)
 mcp.tool()(organizations.delete_organization)
 
-# Start server when run directly
+def main() -> None:
+    """Run the Terraform Cloud MCP server."""
+
+    mcp.run(transport="stdio")
+
+
 if __name__ == "__main__":
-    mcp.run()
+    main() 

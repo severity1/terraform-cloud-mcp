@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "terraform-cloud-mcp"
-version = "0.8.5"
+version = "0.8.6"
 description = "A Model Context Protocol (MCP) server that integrates Claude with the Terraform Cloud API, allowing Claude to manage your Terraform infrastructure through natural conversation."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -16,7 +16,7 @@ dependencies = [
 packages = ["terraform_cloud_mcp", "api", "models", "tools", "utils"]
 
 [project.scripts]
-terraform-cloud-mcp = "terraform_cloud_mcp.server:mcp.run"
+terraform-cloud-mcp = "terraform_cloud_mcp.server:main"
 
 [tool.hatch.metadata]
 allow-direct-references = true

@@ -4,6 +4,10 @@ This directory contains supplementary documentation for the Terraform Cloud MCP 
 
 ## Structure
 
+### Development & Contributing Documentation
+- `DEVELOPMENT.md` - Comprehensive development guidelines and coding standards
+- `CONTRIBUTING.md` - Guidelines for contributing to the project
+
 ### Model Documentation
 The `models/` directory contains example usage for each model:
 - `account_examples.md` - Account model usage examples
@@ -24,4 +28,5 @@ The `conversations/` directory contains example conversations and usage scenario
 ## Documentation Philosophy
 1. Code docstrings contain essential information about purpose, fields, parameters, and return values
 2. Extended examples and usage patterns are in these documentation files
-3. This structure keeps the codebase clean while maintaining comprehensive documentation
+3. Development standards and patterns are consolidated in DEVELOPMENT.md
+4. This structure keeps the codebase clean while maintaining comprehensive documentation
