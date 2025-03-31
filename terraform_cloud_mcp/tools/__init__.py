@@ -5,5 +5,6 @@ from . import account
 from . import workspaces
 from . import runs
 from . import organizations
+from . import plans
 
-__all__ = ["account", "workspaces", "runs", "organizations"]
+__all__ = ["account", "workspaces", "runs", "organizations", "plans"]

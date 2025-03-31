@@ -2,7 +2,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.6-blue)
+![Version](https://img.shields.io/badge/version-0.8.7-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -14,6 +14,7 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - **Account Management**: Get account details for authenticated users or service accounts.
 - **Workspace Management**: Create, read, update, delete, lock/unlock workspaces.
 - **Run Management**: Create runs, list runs, get run details, apply/discard/cancel runs.
+- **Plan Management**: Retrieve plan details and JSON execution output.
 - **Organization Management**: List, create, update, delete organizations, and view organization entitlements.
 - **Future Features**: State management, variables management, and more.
 
@@ -131,6 +132,12 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `cancel_run(run_id, comment)`: Cancel a run currently planning or applying.
 - `force_cancel_run(run_id, comment)`: Forcefully cancel a run immediately.
 - `force_execute_run(run_id)`: Forcefully execute a pending run by canceling prior runs.
+
+### Plan Management Tools
+
+- `get_plan_details(plan_id)`: Get detailed information about a specific plan.
+- `get_plan_json_output(plan_id)`: Retrieve the JSON execution plan for a specific plan.
+- `get_run_plan_json_output(run_id)`: Retrieve the JSON execution plan from a run.
 
 ### Organization Management Tools
 
