@@ -73,7 +73,7 @@ async def api_request(
             "Content-Type": "application/vnd.api+json",
         }
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             url = f"{TERRAFORM_CLOUD_API_URL}/{path}"
 
             # Map HTTP methods to client functions for dynamic method selection
@@ -109,6 +109,53 @@ async def api_request(
                 else:
                     # Non-dict responses wrapped for consistent interface
                     return {"data": result}
+            elif response.status_code == 307:  # Handle 307 Temporary Redirect
+                location = response.headers.get("Location")
+                if location:
+                    # For JSON plan endpoints, attempt to follow the redirect manually with auth
+                    if "/json-output" in path:
+                        try:
+                            # Make a new request to the redirect URL with the same auth headers
+                            logger.info(f"Following redirect to: {location}")
+                            redirect_response = await client.get(location, headers=headers, follow_redirects=True)
+                            logger.info(f"Redirect response status: {redirect_response.status_code}")
+                            if 200 <= redirect_response.status_code < 300:
+                                # Successfully followed the redirect
+                                try:
+                                    content_type = redirect_response.headers.get("content-type", "")
+                                    logger.info(f"Redirect content type: {content_type}")
+                                    if "json" in content_type:
+                                        return redirect_response.json()
+                                    else:
+                                        # If not JSON, return content as data
+                                        return {"data": redirect_response.text}
+                                except ValueError:
+                                    logger.info("Failed to parse JSON from redirect response")
+                                    # If JSON parsing fails, return the raw content
+                                    return {"data": redirect_response.text}
+                            else:
+                                # Redirect request failed but we have the URL
+                                logger.info(f"Redirect request failed: {redirect_response.status_code}")
+                                return {
+                                    "redirect_url": location,
+                                    "message": f"Pre-signed URL request failed with status {redirect_response.status_code}. Use this URL directly with your TFC authentication."
+                                }
+                        except Exception as e:
+                            # If following redirect fails, at least return the URL
+                            return {
+                                "redirect_url": location,
+                                "message": f"Could not automatically follow redirect: {str(e)}. Use this URL directly with your TFC authentication."
+                            }
+                    else:
+                        # For other endpoints, the follow_redirects=True should have handled it
+                        # If we're here, something unusual happened
+                        return {
+                            "error": "API request failed: 307 Temporary Redirect",
+                            "redirect_url": location,
+                            "message": "Redirect could not be followed automatically."
+                        }
+                else:
+                    return {"error": "307 Redirect received, but no Location header provided."}
             else:
                 try:
                     # Include detailed error info from response body when available
