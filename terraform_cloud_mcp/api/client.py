@@ -1,7 +1,14 @@
 """Terraform Cloud API client
 
 This module provides functions for making requests to the Terraform Cloud API.
-It handles authentication, request formatting, and response processing.
+It handles authentication, request formatting, response processing, and
+specialized redirect handling for Terraform Cloud API's pre-signed URLs.
+
+The client implements custom redirect handling rather than using httpx's
+automatic redirect following because:
+1. We need to preserve authentication headers when following redirects
+2. We need content-type specific processing of redirect responses
+3. Terraform Cloud API uses pre-signed URLs that require the original auth headers
 """
 
 import os
@@ -51,77 +58,97 @@ async def api_request(
     Note:
         This function expects TFC_TOKEN to be set in the environment or .env file
     """
-    # Use environment token if not explicitly provided
-    if not token:
-        token = DEFAULT_TOKEN
-
-    # Fail early before network operations if token is missing
+    token = token or DEFAULT_TOKEN
     if not token:
         return {
             "error": "Token is required. Please set the TFC_TOKEN environment variable."
         }
 
-    # Convert Pydantic models to dict, excluding unset fields to respect server defaults
-    request_data = data
-    if isinstance(data, BaseModel):
-        request_data = data.model_dump(exclude_unset=True)
+    # Convert Pydantic models to dict
+    request_data = (
+        data.model_dump(exclude_unset=True) if isinstance(data, BaseModel) else data
+    )
 
-    try:
-        # Terraform Cloud API requires specific headers for authentication and content type
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/vnd.api+json",
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/vnd.api+json",
+    }
+
+    async with httpx.AsyncClient(follow_redirects=False) as client:
+        url = f"{TERRAFORM_CLOUD_API_URL}/{path}"
+        methods = {
+            "GET": client.get,
+            "POST": client.post,
+            "PATCH": client.patch,
+            "DELETE": client.delete,
         }
+        method_func = methods.get(method)
+        if not method_func:
+            return {"error": f"Unsupported method: {method}"}
 
-        async with httpx.AsyncClient() as client:
-            url = f"{TERRAFORM_CLOUD_API_URL}/{path}"
+        kwargs = {"headers": headers, "params": params}
+        if method in ["POST", "PATCH"]:
+            kwargs["json"] = request_data
 
-            # Map HTTP methods to client functions for dynamic method selection
-            methods: Dict[str, Any] = {
-                "GET": client.get,
-                "POST": client.post,
-                "PATCH": client.patch,
-                "DELETE": client.delete,
-            }
+        try:
+            # Cast to proper callable type to satisfy mypy
+            response = await method_func(url, **kwargs)  # type: ignore
 
-            # Get method function or return error for unsupported methods
-            method_func = methods.get(method)
-            if not method_func:
-                return {"error": f"Unsupported method: {method}"}
-
-            # Build common request parameters
-            kwargs = {"headers": headers, "params": params}
-
-            # Add JSON data for methods that send request bodies
-            if method in ["POST", "PATCH"]:
-                json_data = request_data if isinstance(request_data, dict) else {}
-                kwargs["json"] = json_data
-
-            response = await method_func(url, **kwargs)
-
-            if 200 <= response.status_code < 300:  # Success range
-                if response.status_code == 204:  # No content responses need standardized formatting
-                    return {"status": "success"}
-
-                result = response.json()
-                if isinstance(result, dict):
-                    return result
-                else:
-                    # Non-dict responses wrapped for consistent interface
-                    return {"data": result}
-            else:
-                try:
-                    # Include detailed error info from response body when available
+            # Handle redirects manually
+            if response.status_code in (301, 302, 307, 308):
+                location = response.headers.get("Location")
+                if not location:
                     return {
-                        "error": f"API request failed: {response.status_code}",
-                        "details": response.json(),
+                        "error": "Redirect received, but no Location header provided."
                     }
-                except ValueError:
-                    # Some error responses (e.g. 502) don't include JSON bodies
-                    return {"error": f"API request failed: {response.status_code}"}
+                return await handle_redirect(location, headers, client)
+
+            # Handle success responses
+            json_data = response.json()
+            # Ensure we return a dict as specified in the function signature
+            if isinstance(json_data, dict):
+                return json_data
+            return {"data": json_data}
+
+        except httpx.RequestError as e:
+            logger.error(f"Network error while making request to {url}: {e}")
+            return {"error": f"Network error: {str(e)}"}
+        except ValueError as e:
+            logger.error(f"Failed to parse JSON response from {url}: {e}")
+            return {"error": f"Failed to parse JSON response: {str(e)}"}
+        except Exception as e:
+            logger.error(f"Unexpected error while making request to {url}: {e}")
+            return {"error": f"Unexpected error: {str(e)}"}
+
+
+async def handle_redirect(
+    location: str, headers: Dict[str, str], client: httpx.AsyncClient
+) -> Dict[str, Any]:
+    """Handle redirects manually, ensuring headers are forwarded."""
+    try:
+        response = await client.get(location, headers=headers)
+        if 200 <= response.status_code < 300:
+            # Parse the response as JSON and ensure it is a dictionary
+            json_data = response.json()
+            if isinstance(json_data, dict):
+                return json_data
+            return {"data": json_data}
+        return {
+            "error": f"Redirect request failed: {response.status_code}",
+            "redirect_url": location,
+        }
+    except httpx.RequestError as e:
+        return {
+            "error": f"Failed to follow redirect due to network error: {str(e)}",
+            "redirect_url": location,
+        }
+    except ValueError as e:
+        return {
+            "error": f"Failed to parse JSON response: {str(e)}",
+            "redirect_url": location,
+        }
     except Exception as e:
-        # Security: Remove token from any error messages
-        error_message = str(e)
-        if token and token in error_message:
-            error_message = error_message.replace(token, "[REDACTED]")
-        return {"error": f"Request error: {error_message}"}
+        return {
+            "error": f"Unexpected error while following redirect: {str(e)}",
+            "redirect_url": location,
+        }

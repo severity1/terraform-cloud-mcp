@@ -73,7 +73,7 @@ async def create_run(
         model=request,
         exclude_fields={"workspace_id", "variables"},  # Fields handled separately
     )
-    
+
     # Add workspace relationship
     add_relationship(
         payload=payload,
@@ -81,7 +81,7 @@ async def create_run(
         resource_type="workspaces",
         resource_id=workspace_id,
     )
-    
+
     # Add optional configuration version relationship
     if request.configuration_version_id:
         add_relationship(
@@ -90,7 +90,7 @@ async def create_run(
             resource_type="configuration-versions",
             resource_id=request.configuration_version_id,
         )
-    
+
     # Transform variables to key-value format required by API
     if variables:
         payload["data"]["attributes"]["variables"] = [
@@ -161,21 +161,25 @@ async def list_runs_in_workspace(
 
     # Get base pagination parameters
     params = pagination_params(request, search_field=None)
-    
+
     # Add optional filter and search parameters
     # Filter parameters
     filter_fields = [
-        "filter_operation", "filter_status", "filter_source",
-        "filter_status_group", "filter_timeframe", "filter_agent_pool_names"
+        "filter_operation",
+        "filter_status",
+        "filter_source",
+        "filter_status_group",
+        "filter_timeframe",
+        "filter_agent_pool_names",
     ]
-    
+
     for field in filter_fields:
         value = getattr(request, field, None)
         if value:
             # Convert field name from filter_status to filter[status]
             api_param = f"filter[{field[7:]}]"  # Remove 'filter_' prefix
             params[api_param] = value
-    
+
     # Search parameters
     search_fields = ["search_user", "search_commit", "search_basic"]
     for field in search_fields:
@@ -255,22 +259,26 @@ async def list_runs_in_organization(
 
     # Get base pagination parameters
     params = pagination_params(request, search_field=None)
-    
+
     # Add optional filter and search parameters
     # Filter parameters
     filter_fields = [
-        "filter_operation", "filter_status", "filter_source",
-        "filter_status_group", "filter_timeframe", "filter_agent_pool_names",
-        "filter_workspace_names"
+        "filter_operation",
+        "filter_status",
+        "filter_source",
+        "filter_status_group",
+        "filter_timeframe",
+        "filter_agent_pool_names",
+        "filter_workspace_names",
     ]
-    
+
     for field in filter_fields:
         value = getattr(request, field, None)
         if value:
             # Convert field name from filter_status to filter[status]
             api_param = f"filter[{field[7:]}]"  # Remove 'filter_' prefix
             params[api_param] = value
-    
+
     # Search parameters
     search_fields = ["search_user", "search_commit", "search_basic"]
     for field in search_fields:

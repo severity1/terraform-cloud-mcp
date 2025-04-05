@@ -104,7 +104,7 @@ async def list_organizations(
 
     # Get base pagination parameters
     params = pagination_params(request)
-    
+
     # Add organization-specific query parameters
     if request.query:
         params["q"] = request.query
@@ -156,10 +156,7 @@ async def create_organization(
     request = OrganizationCreateRequest(name=name, email=email, **param_dict)
 
     # Create API payload using utility function
-    payload = create_api_payload(
-        resource_type="organizations", 
-        model=request
-    )
+    payload = create_api_payload(resource_type="organizations", model=request)
 
     # Make the API request
     return await api_request("organizations", method="POST", data=payload)
@@ -204,9 +201,7 @@ async def update_organization(
 
     # Create API payload using utility function
     payload = create_api_payload(
-        resource_type="organizations",
-        model=request,
-        exclude_fields={"organization"}
+        resource_type="organizations", model=request, exclude_fields={"organization"}
     )
 
     # Make the API request

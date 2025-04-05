@@ -2,7 +2,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.6-blue)
+![Version](https://img.shields.io/badge/version-0.8.7-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -14,8 +14,10 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - **Account Management**: Get account details for authenticated users or service accounts.
 - **Workspace Management**: Create, read, update, delete, lock/unlock workspaces.
 - **Run Management**: Create runs, list runs, get run details, apply/discard/cancel runs.
+- **Plan Management**: Retrieve plan details and JSON execution output with advanced HTTP redirect handling.
+- **Apply Management**: Get apply details and recover from failed state uploads.
 - **Organization Management**: List, create, update, delete organizations, and view organization entitlements.
-- **Future Features**: State management, variables management, and more.
+- **Future Features**: Variables management, state versions, and more.
 
 ---
 
@@ -115,10 +117,10 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `unlock_workspace(workspace_id)`: Unlock a workspace to allow runs.
 - `force_unlock_workspace(workspace_id)`: Force unlock a workspace locked by another user.
 
-#### Data Retention
+<!-- Future implementation: Data Retention
 - `set_data_retention_policy(workspace_id, days)`: Set a data retention policy.
 - `get_data_retention_policy(workspace_id)`: Get the current data retention policy.
-- `delete_data_retention_policy(workspace_id)`: Delete the data retention policy.
+- `delete_data_retention_policy(workspace_id)`: Delete the data retention policy. -->
 
 ### Run Management Tools
 
@@ -131,6 +133,17 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `cancel_run(run_id, comment)`: Cancel a run currently planning or applying.
 - `force_cancel_run(run_id, comment)`: Forcefully cancel a run immediately.
 - `force_execute_run(run_id)`: Forcefully execute a pending run by canceling prior runs.
+
+### Plan Management Tools
+
+- `get_plan_details(plan_id)`: Get detailed information about a specific plan.
+- `get_plan_json_output(plan_id)`: Retrieve the JSON execution plan for a specific plan with proper redirect handling.
+- `get_run_plan_json_output(run_id)`: Retrieve the JSON execution plan from a run with proper redirect handling.
+
+### Apply Management Tools
+
+- `get_apply_details(apply_id)`: Get detailed information about a specific apply.
+- `get_errored_state(apply_id)`: Retrieve the errored state from a failed apply for recovery.
 
 ### Organization Management Tools
 
