@@ -12,6 +12,7 @@ from terraform_cloud_mcp.tools import workspaces
 from terraform_cloud_mcp.tools import runs
 from terraform_cloud_mcp.tools import organizations
 from terraform_cloud_mcp.tools import plans
+from terraform_cloud_mcp.tools import applies
 
 # Load environment variables from .env file
 load_dotenv()
@@ -59,6 +60,10 @@ mcp.tool()(organizations.delete_organization)
 mcp.tool()(plans.get_plan_details)
 mcp.tool()(plans.get_plan_json_output)
 mcp.tool()(plans.get_run_plan_json_output)
+
+# Register apply management tools
+mcp.tool()(applies.get_apply_details)
+mcp.tool()(applies.get_errored_state)
 
 
 def main() -> None:

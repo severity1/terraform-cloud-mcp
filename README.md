@@ -15,8 +15,9 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - **Workspace Management**: Create, read, update, delete, lock/unlock workspaces.
 - **Run Management**: Create runs, list runs, get run details, apply/discard/cancel runs.
 - **Plan Management**: Retrieve plan details and JSON execution output with advanced HTTP redirect handling.
+- **Apply Management**: Get apply details and recover from failed state uploads.
 - **Organization Management**: List, create, update, delete organizations, and view organization entitlements.
-- **Future Features**: State management, variables management, and more.
+- **Future Features**: Variables management, state versions, and more.
 
 ---
 
@@ -138,6 +139,11 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `get_plan_details(plan_id)`: Get detailed information about a specific plan.
 - `get_plan_json_output(plan_id)`: Retrieve the JSON execution plan for a specific plan with proper redirect handling.
 - `get_run_plan_json_output(run_id)`: Retrieve the JSON execution plan from a run with proper redirect handling.
+
+### Apply Management Tools
+
+- `get_apply_details(apply_id)`: Get detailed information about a specific apply.
+- `get_errored_state(apply_id)`: Retrieve the errored state from a failed apply for recovery.
 
 ### Organization Management Tools
 

@@ -12,6 +12,13 @@ from .base import (  # noqa: F401
 
 # Import specific models
 from .account import AccountDetailsRequest  # noqa: F401
+from .applies import (  # noqa: F401
+    ApplyStatus,
+    ExecutionDetails as ApplyExecutionDetails,
+    StatusTimestamps as ApplyStatusTimestamps,
+    ApplyRequest,
+    ApplyErroredStateRequest,
+)
 from .organizations import (  # noqa: F401
     OrganizationDetailsRequest,
     OrganizationEntitlementsRequest,
@@ -61,6 +68,12 @@ __all__ = [
     "ExecutionMode",
     # Account models
     "AccountDetailsRequest",
+    # Apply models
+    "ApplyStatus",
+    "ApplyExecutionDetails",
+    "ApplyStatusTimestamps",
+    "ApplyRequest",
+    "ApplyErroredStateRequest",
     # Organization models
     "OrganizationDetailsRequest",
     "OrganizationEntitlementsRequest",
