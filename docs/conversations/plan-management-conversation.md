@@ -32,13 +32,19 @@ Claude: I'll retrieve the JSON execution plan for you.
 
 [Tool use: get_plan_json_output with plan_id="plan-aBcdEfGh12345678"]
 
-Claude: I've obtained a temporary authenticated URL to download the JSON execution plan:
+Claude: I've obtained the JSON execution plan. Here's an analysis of the planned changes:
 
-https://app.terraform.io/api/v2/plans/plan-aBcdEfGh12345678/json-output?token=eyJhbGciOiJ...
+The plan includes:
+- 2 resources to be created (aws_s3_bucket.data and aws_iam_role.lambda_role)
+- 1 resource to be modified (aws_security_group.allow_http)
+- 0 resources to be destroyed
 
-This URL is valid for a limited time and contains your authentication token. You can use it to download the complete plan in JSON format, which contains detailed information about all planned resource changes.
+Key modifications:
+- The security group is having a new ingress rule added for HTTPS (port 443)
+- The new S3 bucket will have versioning enabled
+- The IAM role has permissions for Lambda and S3 access
 
-The JSON plan includes detailed resource additions (3), modifications (1), and metadata about the execution environment.
+The plan was generated with Terraform 1.5.7 and includes all configuration details and state information. Would you like me to extract any specific part of the plan for more detailed analysis?
 ```
 
 ## Retrieving Run Plan JSON Output
@@ -50,13 +56,22 @@ Claude: I'll get the JSON plan output from that run for you.
 
 [Tool use: get_run_plan_json_output with run_id="run-xYzAbCdE12345678"]
 
-Claude: I've retrieved the JSON execution plan URL for run-xYzAbCdE12345678:
+Claude: I've retrieved the JSON execution plan for run-xYzAbCdE12345678. This is a destruction plan that will remove the following resources:
 
-https://app.terraform.io/api/v2/runs/run-xYzAbCdE12345678/plan/json-output?token=eyJhbGciOiJ...
+- aws_instance.web_server (EC2 instance)
+- aws_security_group.web_access
+- aws_s3_bucket.logs
+- aws_cloudwatch_metric_alarm.high_cpu
 
-This temporary URL allows you to download the complete plan details in JSON format. The JSON contains comprehensive information about all planned infrastructure changes, including resource configurations, computed attributes, and dependency relationships.
+The plan was generated with Terraform version 1.6.2. All four resources will be completely removed, and the state will be updated accordingly. 
 
-You can use tools like jq to parse and analyze this JSON output for any specific information you need about the planned changes.
+The plan shows that this will remove:
+- 1 EC2 t2.micro instance in us-west-2
+- 1 security group with 3 ingress rules
+- 1 S3 bucket containing approximately 250MB of log data
+- 1 CloudWatch alarm that was monitoring the EC2 instance
+
+Would you like me to extract any specific details from the plan?
 ```
 
 ## Working with Plan Status

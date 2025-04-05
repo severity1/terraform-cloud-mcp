@@ -60,6 +60,7 @@ mcp.tool()(plans.get_plan_details)
 mcp.tool()(plans.get_plan_json_output)
 mcp.tool()(plans.get_run_plan_json_output)
 
+
 def main() -> None:
     """Run the Terraform Cloud MCP server."""
 
@@ -67,4 +68,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main() 
+    main()

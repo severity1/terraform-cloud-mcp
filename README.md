@@ -14,7 +14,7 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - **Account Management**: Get account details for authenticated users or service accounts.
 - **Workspace Management**: Create, read, update, delete, lock/unlock workspaces.
 - **Run Management**: Create runs, list runs, get run details, apply/discard/cancel runs.
-- **Plan Management**: Retrieve plan details and JSON execution output.
+- **Plan Management**: Retrieve plan details and JSON execution output with advanced HTTP redirect handling.
 - **Organization Management**: List, create, update, delete organizations, and view organization entitlements.
 - **Future Features**: State management, variables management, and more.
 
@@ -116,10 +116,10 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `unlock_workspace(workspace_id)`: Unlock a workspace to allow runs.
 - `force_unlock_workspace(workspace_id)`: Force unlock a workspace locked by another user.
 
-#### Data Retention
+<!-- Future implementation: Data Retention
 - `set_data_retention_policy(workspace_id, days)`: Set a data retention policy.
 - `get_data_retention_policy(workspace_id)`: Get the current data retention policy.
-- `delete_data_retention_policy(workspace_id)`: Delete the data retention policy.
+- `delete_data_retention_policy(workspace_id)`: Delete the data retention policy. -->
 
 ### Run Management Tools
 
@@ -136,8 +136,8 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 ### Plan Management Tools
 
 - `get_plan_details(plan_id)`: Get detailed information about a specific plan.
-- `get_plan_json_output(plan_id)`: Retrieve the JSON execution plan for a specific plan.
-- `get_run_plan_json_output(run_id)`: Retrieve the JSON execution plan from a run.
+- `get_plan_json_output(plan_id)`: Retrieve the JSON execution plan for a specific plan with proper redirect handling.
+- `get_run_plan_json_output(run_id)`: Retrieve the JSON execution plan from a run with proper redirect handling.
 
 ### Organization Management Tools
 

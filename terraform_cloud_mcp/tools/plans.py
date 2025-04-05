@@ -47,10 +47,6 @@ async def get_plan_json_output(plan_id: str) -> APIResponse:
 
     Gets the JSON representation of a plan's execution details, providing a
     machine-readable format of the planned resource changes.
-    
-    Note: This endpoint returns a pre-signed URL that requires direct access with 
-    Terraform Cloud authentication. The URL is returned in the 'redirect_url' field
-    of the response.
 
     API endpoint: GET /plans/{plan_id}/json-output
 
@@ -58,8 +54,8 @@ async def get_plan_json_output(plan_id: str) -> APIResponse:
         plan_id: The ID of the plan to retrieve JSON output for (format: "plan-xxxxxxxx")
 
     Returns:
-        Dictionary with 'redirect_url' containing the temporary authenticated URL 
-        to the JSON formatted plan. Use this URL directly with your TFC authentication.
+        The complete JSON formatted plan with resource changes, metadata,
+        and planned actions. The redirect is automatically followed.
 
     See:
         docs/tools/plan_tools.md for usage examples
@@ -68,20 +64,7 @@ async def get_plan_json_output(plan_id: str) -> APIResponse:
     params = PlanJsonOutputRequest(plan_id=plan_id)
 
     # Make API request
-    response = await api_request(f"plans/{params.plan_id}/json-output")
-    
-    # Handle both direct response and redirect response formats
-    if "redirect_url" in response:
-        return response
-    elif "error" in response and "307" in response.get("error", ""):
-        # Fall back to explaining the issue if we're still getting a 307 error
-        return {
-            "error": "The plan JSON output requires following a redirect which needs direct authentication.",
-            "workaround": "Use the Terraform Cloud UI to view the plan details for this run.",
-            "run_url": f"https://app.terraform.io/app/organizations/workspaces/runs/{plan_id}"
-        }
-    else:
-        return response
+    return await api_request(f"plans/{params.plan_id}/json-output")
 
 
 @handle_api_errors
@@ -90,10 +73,6 @@ async def get_run_plan_json_output(run_id: str) -> APIResponse:
 
     Gets the JSON representation of a run's current plan execution details,
     providing a machine-readable format of the planned resource changes.
-    
-    Note: This endpoint returns a pre-signed URL that requires direct access with 
-    Terraform Cloud authentication. The URL is returned in the 'redirect_url' field
-    of the response.
 
     API endpoint: GET /runs/{run_id}/plan/json-output
 
@@ -101,8 +80,8 @@ async def get_run_plan_json_output(run_id: str) -> APIResponse:
         run_id: The ID of the run to retrieve plan JSON output for (format: "run-xxxxxxxx")
 
     Returns:
-        Dictionary with 'redirect_url' containing the temporary authenticated URL 
-        to the JSON formatted plan. Use this URL directly with your TFC authentication.
+        The complete JSON formatted plan with resource changes, metadata,
+        and planned actions. The redirect is automatically followed.
 
     See:
         docs/tools/plan_tools.md for usage examples
@@ -111,17 +90,4 @@ async def get_run_plan_json_output(run_id: str) -> APIResponse:
     params = RunPlanJsonOutputRequest(run_id=run_id)
 
     # Make API request
-    response = await api_request(f"runs/{params.run_id}/plan/json-output")
-    
-    # Handle both direct response and redirect response formats
-    if "redirect_url" in response:
-        return response
-    elif "error" in response and "307" in response.get("error", ""):
-        # Fall back to explaining the issue if we're still getting a 307 error
-        return {
-            "error": "The plan JSON output requires following a redirect which needs direct authentication.",
-            "workaround": "Use the Terraform Cloud UI to view the plan details for this run.",
-            "run_url": f"https://app.terraform.io/app/organizations/workspaces/runs/{run_id}"
-        }
-    else:
-        return response
+    return await api_request(f"runs/{params.run_id}/plan/json-output")

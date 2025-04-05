@@ -29,24 +29,26 @@ resource_destructions = plan_details["data"]["attributes"]["resource-destruction
 
 ```python
 # Get JSON formatted plan output
-plan_json_url = await get_plan_json_output(plan_id="plan-AbCdEfGhIjKlMnOp")
+plan_json = await get_plan_json_output(plan_id="plan-AbCdEfGhIjKlMnOp")
 
-# The response contains a temporary URL to download the JSON-formatted plan
-json_url = plan_json_url["data"]["attributes"]["url"]
+# The response contains the complete plan data
+resource_changes = plan_json["resource_changes"]
+terraform_version = plan_json["terraform_version"]
 
-# This URL is temporary and authenticated, and can be used to download the plan
+# This data can be parsed and analyzed programmatically
 ```
 
 ### Get Run Plan JSON Output
 
 ```python
 # Get JSON formatted plan output from a run
-run_plan_json_url = await get_run_plan_json_output(run_id="run-AbCdEfGhIjKlMnOp")
+run_plan_json = await get_run_plan_json_output(run_id="run-AbCdEfGhIjKlMnOp")
 
-# The response contains a temporary URL to download the JSON-formatted plan
-json_url = run_plan_json_url["data"]["attributes"]["url"]
+# The response contains the complete plan data
+resource_changes = run_plan_json["resource_changes"]
+terraform_version = run_plan_json["terraform_version"]
 
-# This URL is temporary and authenticated, and can be used to download the plan
+# This data can be parsed and analyzed programmatically
 ```
 
 ## API Reference
@@ -69,7 +71,7 @@ Retrieve the JSON execution plan.
 - `plan_id` (string, required): The ID of the plan to retrieve JSON output for (format: "plan-xxxxxxxx")
 
 **Returns:**
-- Temporary authenticated URL to JSON formatted plan
+- The complete JSON formatted plan with resource changes, metadata, and planned actions
 
 ### get_run_plan_json_output
 
@@ -79,4 +81,4 @@ Retrieve the JSON execution plan from a run.
 - `run_id` (string, required): The ID of the run to retrieve plan JSON output for (format: "run-xxxxxxxx")
 
 **Returns:**
-- Temporary authenticated URL to JSON formatted plan
+- The complete JSON formatted plan with resource changes, metadata, and planned actions

@@ -59,9 +59,7 @@ async def create_workspace(
     request = WorkspaceCreateRequest(organization=organization, name=name, **param_dict)
 
     payload = create_api_payload(
-        resource_type="workspaces",
-        model=request,
-        exclude_fields={"organization"}
+        resource_type="workspaces", model=request, exclude_fields={"organization"}
     )
 
     return await api_request(
@@ -118,7 +116,7 @@ async def update_workspace(
     payload = create_api_payload(
         resource_type="workspaces",
         model=request,
-        exclude_fields={"organization", "workspace_name"}
+        exclude_fields={"organization", "workspace_name"},
     )
 
     # Log payload for debugging
@@ -347,15 +345,12 @@ async def set_data_retention_policy(workspace_id: str, days: int) -> APIResponse
     """
     # Create API payload using create_api_payload with a dict instead of a model
     from pydantic import BaseModel
-    
+
     class RetentionPolicy(BaseModel):
         days: int
-        
+
     policy = RetentionPolicy(days=days)
-    payload = create_api_payload(
-        resource_type="data-retention-policy",
-        model=policy
-    )
+    payload = create_api_payload(resource_type="data-retention-policy", model=policy)
 
     # Make API request
     return await api_request(
