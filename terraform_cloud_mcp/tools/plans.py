@@ -91,3 +91,39 @@ async def get_run_plan_json_output(run_id: str) -> APIResponse:
 
     # Make API request
     return await api_request(f"runs/{params.run_id}/plan/json-output")
+
+
+@handle_api_errors
+async def get_plan_logs(plan_id: str) -> APIResponse:
+    """Retrieve logs from a plan.
+
+    Gets the raw log output from a Terraform Cloud plan operation,
+    providing detailed information about the execution plan.
+
+    API endpoint: Uses the log-read-url from GET /plans/{plan_id}
+
+    Args:
+        plan_id: The ID of the plan to retrieve logs for (format: "plan-xxxxxxxx")
+
+    Returns:
+        The raw logs from the plan operation. The redirect to the log file
+        is automatically followed.
+
+    See:
+        docs/tools/plan_tools.md for usage examples
+    """
+    # Validate parameters using existing model
+    params = PlanRequest(plan_id=plan_id)
+
+    # First get plan details to get the log URL
+    plan_details = await api_request(f"plans/{params.plan_id}")
+
+    # Extract log read URL
+    log_read_url = (
+        plan_details.get("data", {}).get("attributes", {}).get("log-read-url")
+    )
+    if not log_read_url:
+        return {"error": "No log URL available for this plan"}
+
+    # Use the enhanced api_request to fetch logs from the external URL
+    return await api_request(log_read_url, external_url=True, accept_text=True)

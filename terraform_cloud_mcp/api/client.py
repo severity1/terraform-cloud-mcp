@@ -35,6 +35,8 @@ async def api_request(
     token: Optional[str] = None,
     params: Dict[str, Any] = {},
     data: Union[Dict[str, Any], BaseModel] = {},
+    external_url: bool = False,
+    accept_text: bool = False,
 ) -> Dict[str, Any]:
     """Make a request to the Terraform Cloud API with proper error handling.
 
@@ -42,14 +44,16 @@ async def api_request(
     authentication, request formatting, and basic error checking.
 
     Args:
-        path: API path to request (without leading slash)
+        path: API path to request (without leading slash) or full URL if external_url=True
         method: HTTP method to use (GET, POST, PATCH, DELETE)
         token: API token (defaults to TFC_TOKEN from environment)
         params: Query parameters for the request
         data: JSON payload data (dict or Pydantic model)
+        external_url: Whether path is a complete external URL instead of a TFC API path
+        accept_text: Whether to accept and return text content instead of JSON
 
     Returns:
-        JSON response from the API as a dictionary
+        JSON response from the API as a dictionary or text content if accept_text=True
 
     Raises:
         HTTPStatusError: For HTTP errors (wrapped by handle_api_errors)
@@ -75,7 +79,7 @@ async def api_request(
     }
 
     async with httpx.AsyncClient(follow_redirects=False) as client:
-        url = f"{TERRAFORM_CLOUD_API_URL}/{path}"
+        url = path if external_url else f"{TERRAFORM_CLOUD_API_URL}/{path}"
         methods = {
             "GET": client.get,
             "POST": client.post,
@@ -101,7 +105,11 @@ async def api_request(
                     return {
                         "error": "Redirect received, but no Location header provided."
                     }
-                return await handle_redirect(location, headers, client)
+                return await handle_redirect(location, headers, client, accept_text)
+
+            # For text responses
+            if accept_text:
+                return {"content": response.text}
 
             # Handle success responses
             json_data = response.json()
@@ -114,6 +122,8 @@ async def api_request(
             logger.error(f"Network error while making request to {url}: {e}")
             return {"error": f"Network error: {str(e)}"}
         except ValueError as e:
+            if accept_text and "response" in locals():
+                return {"content": response.text}
             logger.error(f"Failed to parse JSON response from {url}: {e}")
             return {"error": f"Failed to parse JSON response: {str(e)}"}
         except Exception as e:
@@ -122,12 +132,19 @@ async def api_request(
 
 
 async def handle_redirect(
-    location: str, headers: Dict[str, str], client: httpx.AsyncClient
+    location: str,
+    headers: Dict[str, str],
+    client: httpx.AsyncClient,
+    accept_text: bool = False,
 ) -> Dict[str, Any]:
     """Handle redirects manually, ensuring headers are forwarded."""
     try:
         response = await client.get(location, headers=headers)
         if 200 <= response.status_code < 300:
+            # For text responses
+            if accept_text:
+                return {"content": response.text}
+
             # Parse the response as JSON and ensure it is a dictionary
             json_data = response.json()
             if isinstance(json_data, dict):
@@ -143,6 +160,9 @@ async def handle_redirect(
             "redirect_url": location,
         }
     except ValueError as e:
+        # Try returning text content if we're expecting text
+        if accept_text and "response" in locals():
+            return {"content": response.text}
         return {
             "error": f"Failed to parse JSON response: {str(e)}",
             "redirect_url": location,

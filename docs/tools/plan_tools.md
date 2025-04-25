@@ -9,6 +9,7 @@ A plan in Terraform Cloud contains information about the changes Terraform will 
 1. Retrieve detailed information about a plan
 2. Get plan JSON output for machine-readable analysis
 3. Get a plan's JSON output from a run
+4. Get raw plan logs for detailed troubleshooting
 
 ## Usage Examples
 
@@ -51,6 +52,17 @@ terraform_version = run_plan_json["terraform_version"]
 # This data can be parsed and analyzed programmatically
 ```
 
+### Get Plan Logs
+
+```python
+# Get logs from a specific plan
+plan_logs = await get_plan_logs(plan_id="plan-AbCdEfGhIjKlMnOp")
+
+# Access the log content
+log_content = plan_logs.get("content")
+print(log_content)
+```
+
 ## API Reference
 
 ### get_plan_details
@@ -82,3 +94,13 @@ Retrieve the JSON execution plan from a run.
 
 **Returns:**
 - The complete JSON formatted plan with resource changes, metadata, and planned actions
+
+### get_plan_logs
+
+Retrieve logs from a plan.
+
+**Parameters:**
+- `plan_id` (string, required): The ID of the plan to retrieve logs for (format: "plan-xxxxxxxx")
+
+**Returns:**
+- The raw logs from the plan operation as text
