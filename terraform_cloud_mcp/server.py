@@ -60,10 +60,12 @@ mcp.tool()(organizations.delete_organization)
 mcp.tool()(plans.get_plan_details)
 mcp.tool()(plans.get_plan_json_output)
 mcp.tool()(plans.get_run_plan_json_output)
+mcp.tool()(plans.get_plan_logs)
 
 # Register apply management tools
 mcp.tool()(applies.get_apply_details)
 mcp.tool()(applies.get_errored_state)
+mcp.tool()(applies.get_apply_logs)
 
 
 def main() -> None:

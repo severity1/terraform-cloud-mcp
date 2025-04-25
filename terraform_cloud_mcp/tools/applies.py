@@ -1,7 +1,7 @@
 """Terraform Cloud apply management tools.
 
 This module provides tools for working with applies in Terraform Cloud.
-It includes functions to retrieve apply details and errored state information.
+It includes functions to retrieve apply details, logs, and errored state information.
 
 Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/applies
 """
@@ -64,3 +64,39 @@ async def get_errored_state(apply_id: str) -> APIResponse:
 
     # Make API request - redirect handling happens automatically in the API client
     return await api_request(f"applies/{params.apply_id}/errored-state")
+
+
+@handle_api_errors
+async def get_apply_logs(apply_id: str) -> APIResponse:
+    """Retrieve logs from an apply.
+
+    Gets the raw log output from a Terraform Cloud apply operation,
+    providing detailed information about resource changes and any errors.
+
+    API endpoint: Uses the log-read-url from GET /applies/{apply_id}
+
+    Args:
+        apply_id: The ID of the apply to retrieve logs for (format: "apply-xxxxxxxx")
+
+    Returns:
+        The raw logs from the apply operation. The redirect to the log file
+        is automatically followed.
+
+    See:
+        docs/tools/apply_tools.md for usage examples
+    """
+    # Validate parameters using existing model
+    params = ApplyRequest(apply_id=apply_id)
+
+    # First get apply details to get the log URL
+    apply_details = await api_request(f"applies/{params.apply_id}")
+
+    # Extract log read URL
+    log_read_url = (
+        apply_details.get("data", {}).get("attributes", {}).get("log-read-url")
+    )
+    if not log_read_url:
+        return {"error": "No log URL available for this apply"}
+
+    # Use the enhanced api_request to fetch logs from the external URL
+    return await api_request(log_read_url, external_url=True, accept_text=True)

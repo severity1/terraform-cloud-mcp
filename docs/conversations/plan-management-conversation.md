@@ -23,6 +23,78 @@ The plan was queued at 2025-02-15T14:30:22Z, started at 2025-02-15T14:31:05Z, an
 It's associated with run-pQrStUvW12345678 in workspace "production-infrastructure".
 ```
 
+## Retrieving Plan Logs
+
+```
+User: Can you show me the actual Terraform plan output for plan-aBcdEfGh12345678?
+
+Claude: I'll retrieve the plan logs for you.
+
+[Tool use: get_plan_logs with plan_id="plan-aBcdEfGh12345678"]
+
+Claude: Here are the logs from the plan execution:
+
+Terraform v1.5.7
+on linux_amd64
+Initializing plugins and modules...
+
+aws_security_group.allow_http: Refreshing state... [id=sg-0a1b2c3d4e5f6g7h8]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+  ~ modify
+
+Terraform will perform the following actions:
+
+  # aws_s3_bucket.data will be created
+  + resource "aws_s3_bucket" "data" {
+      + acceleration_status         = (known after apply)
+      + acl                         = "private"
+      + arn                         = (known after apply)
+      + bucket                      = "example-data-bucket"
+      + versioning {
+          + enabled = true
+        }
+      + tags                        = {
+          + "Environment" = "Production"
+          + "Name"        = "Data Storage Bucket"
+        }
+    }
+
+  # aws_iam_role.lambda_role will be created
+  + resource "aws_iam_role" "lambda_role" {
+      + arn                = (known after apply)
+      + assume_role_policy = jsonencode({...})
+      + name               = "lambda-execution-role"
+    }
+
+  # aws_security_group.allow_http will be modified
+  ~ resource "aws_security_group" "allow_http" {
+      ~ ingress                = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = "HTTPS from anywhere"
+              + from_port        = 443
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "tcp"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 443
+            },
+            # (1 unchanged element hidden)
+        ]
+        # (8 unchanged attributes hidden)
+    }
+
+Plan: 2 to add, 1 to change, 0 to destroy.
+
+Would you like me to explain any part of this plan in more detail?
+```
+
 ## Retrieving Plan JSON Output
 
 ```
@@ -146,4 +218,28 @@ Plan 2 (plan-yZaBcDeF12345678):
 The second plan (from March 15) modifies one additional resource compared to the first plan (from March 10), but doesn't destroy any resources. Both plans add the same number of new resources.
 
 To see exactly what changed between these plans, I can retrieve and compare the JSON output for both.
+```
+
+## Examining Plan Logs for Errors
+
+```
+User: I'm concerned about potential issues in plan-kLmNoPqR12345678. Can you check the logs for any warnings or errors?
+
+Claude: I'll examine the plan logs for warnings or errors.
+
+[Tool use: get_plan_logs with plan_id="plan-kLmNoPqR12345678"]
+
+Claude: I've analyzed the plan logs and found the following issues:
+
+Warnings:
+1. Deprecated attribute: The plan contains a warning about using the deprecated "public_ip" attribute on aws_instance.web. The recommended replacement is "public_ip_address".
+
+2. Provider version constraint: There's a warning that the azurerm provider being used (3.0.1) is older than the recommended minimum version (3.2.0).
+
+Potential errors:
+1. Data source dependency: The plan shows that aws_vpc.main will be created before aws_subnet.primary, but there's a reference to the VPC ID in the subnet. This could cause issues if the VPC creation fails.
+
+2. Resource validation warning: An S3 bucket name "my-bucket" might not be globally unique, which could cause the apply to fail.
+
+The plan itself completed successfully but these issues might cause problems during apply. Would you like me to give recommendations on how to address these concerns?
 ```

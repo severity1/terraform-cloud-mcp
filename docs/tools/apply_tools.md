@@ -32,6 +32,25 @@ elif status == "errored":
     print("Apply encountered an error")
 ```
 
+### get_apply_logs
+
+Retrieves the log output from a specific apply operation.
+
+```python
+from terraform_cloud_mcp.tools.applies import get_apply_logs
+
+# Get logs from a specific apply
+apply_logs = await get_apply_logs(apply_id="apply-1234567890abcdef")
+
+# Access the log content
+log_content = apply_logs.get("content")
+print(log_content)
+
+# You can also analyze log for specific patterns
+if "Error:" in log_content:
+    print("Found errors in the apply logs")
+```
+
 ### get_errored_state
 
 Retrieves information about a state file that failed to upload during an apply, enabling state recovery.
@@ -52,6 +71,38 @@ else:
     # Error retrieving state or no errored state exists
     print("No errored state found or access denied")
 ```
+
+## API Reference
+
+### get_apply_details
+
+Get details for a specific apply.
+
+**Parameters:**
+- `apply_id` (string, required): The ID of the apply to retrieve details for (format: "apply-xxxxxxxx")
+
+**Returns:**
+- Apply details including status, timestamps, and resource change counts
+
+### get_apply_logs
+
+Retrieve logs from an apply.
+
+**Parameters:**
+- `apply_id` (string, required): The ID of the apply to retrieve logs for (format: "apply-xxxxxxxx")
+
+**Returns:**
+- The raw logs from the apply operation as text
+
+### get_errored_state
+
+Retrieve the errored state from a failed apply.
+
+**Parameters:**
+- `apply_id` (string, required): The ID of the apply with a failed state upload (format: "apply-xxxxxxxx")
+
+**Returns:**
+- Information about the errored state including access details
 
 ## Error Handling
 
@@ -95,6 +146,14 @@ All tools return API responses in the standard JSON:API format used by Terraform
       }
     }
   }
+}
+```
+
+For log content, the response will contain the text content:
+
+```json
+{
+  "content": "Terraform v1.4.6\nPreparing the environment...\nApplying changes...\n..."
 }
 ```
 
