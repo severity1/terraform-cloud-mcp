@@ -36,6 +36,16 @@ from .plans import (  # noqa: F401
     PlanJsonOutputRequest,
     RunPlanJsonOutputRequest,
 )
+from .projects import (  # noqa: F401
+    TagBinding,
+    ProjectListRequest,
+    BaseProjectRequest,
+    ProjectCreateRequest,
+    ProjectUpdateRequest,
+    ProjectParams,
+    ProjectTagBindingRequest,
+    WorkspaceMoveRequest,
+)
 from .runs import (  # noqa: F401
     RunOperation,
     RunStatus,
@@ -89,6 +99,15 @@ __all__ = [
     "PlanRequest",
     "PlanJsonOutputRequest",
     "RunPlanJsonOutputRequest",
+    # Project models
+    "TagBinding",
+    "ProjectListRequest",
+    "BaseProjectRequest",
+    "ProjectCreateRequest",
+    "ProjectUpdateRequest",
+    "ProjectParams",
+    "ProjectTagBindingRequest",
+    "WorkspaceMoveRequest",
     # Run models
     "RunOperation",
     "RunStatus",
