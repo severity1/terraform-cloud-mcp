@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 from ..api.client import api_request
 from ..utils.decorators import handle_api_errors
 from ..utils.payload import create_api_payload
-from ..utils.request import pagination_params
+from ..utils.request import query_params
 from ..models.base import APIResponse
 from ..models.projects import (
     ProjectCreateRequest,
@@ -62,17 +62,17 @@ async def create_project(
     if request.tag_bindings:
         tag_bindings_data = []
         for tag in request.tag_bindings:
-            tag_bindings_data.append({
-                "type": "tag-bindings",
-                "attributes": {"key": tag.key, "value": tag.value}
-            })
-        
+            tag_bindings_data.append(
+                {
+                    "type": "tag-bindings",
+                    "attributes": {"key": tag.key, "value": tag.value},
+                }
+            )
+
         if "relationships" not in payload["data"]:
             payload["data"]["relationships"] = {}
-        
-        payload["data"]["relationships"]["tag-bindings"] = {
-            "data": tag_bindings_data
-        }
+
+        payload["data"]["relationships"]["tag-bindings"] = {"data": tag_bindings_data}
 
     # Remove tag-bindings from attributes if present since we've moved them to relationships
     if "tag-bindings" in payload["data"]["attributes"]:
@@ -93,7 +93,7 @@ async def update_project(
     """Update an existing project.
 
     Modifies the settings of a Terraform Cloud project. This can be used to change
-    attributes like name, description, auto-destroy duration, or tags. Only specified 
+    attributes like name, description, auto-destroy duration, or tags. Only specified
     attributes will be updated; unspecified attributes remain unchanged.
 
     API endpoint: PATCH /projects/{project_id}
@@ -103,7 +103,7 @@ async def update_project(
         params: Project parameters to update (optional):
             - name: New name for the project
             - description: Human-readable description of the project
-            - auto_destroy_activity_duration: How long each workspace should wait before 
+            - auto_destroy_activity_duration: How long each workspace should wait before
               auto-destroying (e.g., '14d', '24h')
             - tag_bindings: List of tag key-value pairs to bind to the project
 
@@ -130,17 +130,17 @@ async def update_project(
     if request.tag_bindings:
         tag_bindings_data = []
         for tag in request.tag_bindings:
-            tag_bindings_data.append({
-                "type": "tag-bindings",
-                "attributes": {"key": tag.key, "value": tag.value}
-            })
-        
+            tag_bindings_data.append(
+                {
+                    "type": "tag-bindings",
+                    "attributes": {"key": tag.key, "value": tag.value},
+                }
+            )
+
         if "relationships" not in payload["data"]:
             payload["data"]["relationships"] = {}
-        
-        payload["data"]["relationships"]["tag-bindings"] = {
-            "data": tag_bindings_data
-        }
+
+        payload["data"]["relationships"]["tag-bindings"] = {"data": tag_bindings_data}
 
     # Remove tag-bindings from attributes if present since we've moved them to relationships
     if "tag-bindings" in payload["data"]["attributes"]:
@@ -151,9 +151,7 @@ async def update_project(
     logger.debug(f"Update project payload: {payload}")
 
     # Make API request
-    return await api_request(
-        f"projects/{project_id}", method="PATCH", data=payload
-    )
+    return await api_request(f"projects/{project_id}", method="PATCH", data=payload)
 
 
 @handle_api_errors
@@ -161,16 +159,16 @@ async def list_projects(
     organization: str,
     page_number: int = 1,
     page_size: int = 20,
-    query: str = "",
-    filter_names: str = "",
-    filter_permissions_update: bool = False,
-    filter_permissions_create_workspace: bool = False,
-    sort: str = "",
+    q: Optional[str] = None,
+    filter_names: Optional[str] = None,
+    filter_permissions_update: Optional[bool] = None,
+    filter_permissions_create_workspace: Optional[bool] = None,
+    sort: Optional[str] = None,
 ) -> APIResponse:
     """List projects in an organization.
 
     Retrieves a paginated list of all projects in a Terraform Cloud organization.
-    Results can be filtered using a search string or permissions filters to find 
+    Results can be filtered using a search string or permissions filters to find
     specific projects.
 
     API endpoint: GET /organizations/{organization}/projects
@@ -179,7 +177,7 @@ async def list_projects(
         organization: The name of the organization to list projects from
         page_number: The page number to return (default: 1)
         page_size: The number of items per page (default: 20, max: 100)
-        query: Optional search query to filter projects by name
+        q: Optional search query to filter projects by name
         filter_names: Filter projects by name (comma-separated list)
         filter_permissions_update: Filter projects that the user can update
         filter_permissions_create_workspace: Filter projects that the user can create workspaces in
@@ -196,42 +194,15 @@ async def list_projects(
         organization=organization,
         page_number=page_number,
         page_size=page_size,
-        query=query,
+        q=q,
         filter_names=filter_names,
         filter_permissions_update=filter_permissions_update,
         filter_permissions_create_workspace=filter_permissions_create_workspace,
         sort=sort,
     )
 
-    # Get base pagination parameters
-    params = pagination_params(request)
-
-    # Add query parameter if provided
-    if request.query:
-        params["q"] = request.query
-        
-    # Add sort parameter if provided
-    if request.sort:
-        params["sort"] = request.sort
-        
-    # Add filter parameters
-    filter_fields = [
-        "filter_names",
-        "filter_permissions_update",
-        "filter_permissions_create_workspace",
-    ]
-    
-    for field in filter_fields:
-        value = getattr(request, field, None)
-        if value is not None:
-            # Convert field name from filter_names to filter[names]
-            api_param = field.replace("_", "[", 1).replace("_", "][", 1) + "]"
-            
-            # Convert boolean values to string "true"
-            if isinstance(value, bool) and value:
-                params[api_param] = "true"
-            else:
-                params[api_param] = value
+    # Use the unified query params utility function
+    params = query_params(request)
 
     # Make API request
     return await api_request(
@@ -332,11 +303,10 @@ async def add_update_project_tag_bindings(
     # Create payload
     tag_bindings_data = []
     for tag in request.tag_bindings:
-        tag_bindings_data.append({
-            "type": "tag-bindings",
-            "attributes": {"key": tag.key, "value": tag.value}
-        })
-    
+        tag_bindings_data.append(
+            {"type": "tag-bindings", "attributes": {"key": tag.key, "value": tag.value}}
+        )
+
     payload = {"data": tag_bindings_data}
 
     # Make API request
@@ -346,7 +316,9 @@ async def add_update_project_tag_bindings(
 
 
 @handle_api_errors
-async def move_workspaces_to_project(project_id: str, workspace_ids: List[str]) -> APIResponse:
+async def move_workspaces_to_project(
+    project_id: str, workspace_ids: List[str]
+) -> APIResponse:
     """Move workspaces into a project.
 
     Moves one or more workspaces into a project. The user must have permission
@@ -370,10 +342,7 @@ async def move_workspaces_to_project(project_id: str, workspace_ids: List[str]) 
     # Create payload
     payload: Dict[str, List[Dict[str, str]]] = {"data": []}
     for workspace_id in request.workspace_ids:
-        payload["data"].append({
-            "type": "workspaces",
-            "id": workspace_id
-        })
+        payload["data"].append({"type": "workspaces", "id": workspace_id})
 
     # Make API request
     return await api_request(

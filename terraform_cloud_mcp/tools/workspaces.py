@@ -10,13 +10,14 @@ from typing import Optional
 from ..api.client import api_request
 from ..utils.decorators import handle_api_errors
 from ..utils.payload import create_api_payload
-from ..utils.request import pagination_params
+from ..utils.request import query_params
 from ..models.base import APIResponse
 from ..models.workspaces import (
     WorkspaceCreateRequest,
     WorkspaceUpdateRequest,
     WorkspaceListRequest,
     WorkspaceParams,
+    DataRetentionPolicyRequest,
 )
 
 
@@ -141,7 +142,7 @@ async def list_workspaces(
     organization: str,
     page_number: int = 1,
     page_size: int = 20,
-    search: str = "",
+    search: Optional[str] = None,
 ) -> APIResponse:
     """List workspaces in an organization.
 
@@ -172,10 +173,8 @@ async def list_workspaces(
         search=search,
     )
 
-    # Generate pagination parameters using utility function
-    params = pagination_params(request)
+    params = query_params(request)
 
-    # Make API request
     return await api_request(
         f"organizations/{organization}/workspaces", method="GET", params=params
     )
@@ -343,14 +342,15 @@ async def set_data_retention_policy(workspace_id: str, days: int) -> APIResponse
     See:
         docs/tools/workspace_tools.md for usage examples
     """
-    # Create API payload using create_api_payload with a dict instead of a model
-    from pydantic import BaseModel
+    # Create request using Pydantic model
+    request = DataRetentionPolicyRequest(workspace_id=workspace_id, days=days)
 
-    class RetentionPolicy(BaseModel):
-        days: int
-
-    policy = RetentionPolicy(days=days)
-    payload = create_api_payload(resource_type="data-retention-policy", model=policy)
+    # Create API payload using utility function
+    payload = create_api_payload(
+        resource_type="data-retention-policy",
+        model=request,
+        exclude_fields={"workspace_id"},
+    )
 
     # Make API request
     return await api_request(

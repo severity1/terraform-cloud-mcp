@@ -9,7 +9,7 @@ from typing import Optional
 from ..api.client import api_request
 from ..utils.decorators import handle_api_errors
 from ..utils.payload import create_api_payload
-from ..utils.request import pagination_params
+from ..utils.request import query_params
 from ..models.base import APIResponse
 from ..models.organizations import (
     OrganizationCreateRequest,
@@ -70,9 +70,9 @@ async def get_organization_entitlements(organization: str) -> APIResponse:
 async def list_organizations(
     page_number: int = 1,
     page_size: int = 20,
-    query: str = "",
-    query_email: str = "",
-    query_name: str = "",
+    q: Optional[str] = None,
+    query_email: Optional[str] = None,
+    query_name: Optional[str] = None,
 ) -> APIResponse:
     """List organizations with filtering options
 
@@ -84,7 +84,7 @@ async def list_organizations(
     Args:
         page_number: Page number to fetch (default: 1)
         page_size: Number of results per page (default: 20)
-        query: Search query to filter by name and email
+        q: Search query to filter by name and email
         query_email: Search query to filter by email only
         query_name: Search query to filter by name only
 
@@ -97,21 +97,13 @@ async def list_organizations(
     request = OrganizationListRequest(
         page_number=page_number,
         page_size=page_size,
-        query=query,
+        q=q,
         query_email=query_email,
         query_name=query_name,
     )
 
-    # Get base pagination parameters
-    params = pagination_params(request)
-
-    # Add organization-specific query parameters
-    if request.query:
-        params["q"] = request.query
-    if request.query_email:
-        params["q[email]"] = request.query_email
-    if request.query_name:
-        params["q[name]"] = request.query_name
+    # Get all query parameters - now automatically handles query_email and query_name
+    params = query_params(request)
 
     return await api_request("organizations", params=params)
 

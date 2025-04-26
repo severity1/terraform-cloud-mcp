@@ -25,12 +25,8 @@ class TagBinding(APIRequest):
 
     # Inherits model_config from APIRequest -> BaseModelConfig
 
-    key: str = Field(
-        ..., description="The key of the tag"
-    )
-    value: str = Field(
-        ..., description="The value of the tag"
-    )
+    key: str = Field(..., description="The key of the tag")
+    value: str = Field(..., description="The value of the tag")
 
 
 class ProjectListRequest(APIRequest):
@@ -55,18 +51,15 @@ class ProjectListRequest(APIRequest):
     page_size: Optional[int] = Field(
         20, ge=1, le=100, description="Number of results per page"
     )
-    query: Optional[str] = Field(None, description="Search query for name")
+    q: Optional[str] = Field(None, description="Search query for name")
     filter_names: Optional[str] = Field(
-        None, 
-        description="Filter projects by name (comma-separated)"
+        None, description="Filter projects by name (comma-separated)"
     )
     filter_permissions_update: Optional[bool] = Field(
-        None, 
-        description="Filter projects by update permission"
+        None, description="Filter projects by update permission"
     )
     filter_permissions_create_workspace: Optional[bool] = Field(
-        None, 
-        description="Filter projects by create workspace permission"
+        None, description="Filter projects by create workspace permission"
     )
     sort: Optional[str] = Field(
         None, description="Sort projects by name ('name' or '-name' for descending)"
@@ -132,7 +125,7 @@ class ProjectCreateRequest(BaseProjectRequest):
         ...,
         description="The name of the organization to create the project in",
     )
-    
+
     # Override name to make it required for creation
     name: str = Field(
         ...,
@@ -186,16 +179,16 @@ class ProjectParams(BaseProjectRequest):
 
 class ProjectTagBindingRequest(APIRequest):
     """Request model for adding or updating tag bindings on a project.
-    
+
     This model is used for the PATCH /projects/{project_id}/tag-bindings endpoint,
     which allows adding or updating tag bindings on an existing project.
-    
+
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/projects#add-or-update-tag-bindings-on-a-project
-    
+
     See:
         docs/models/project_examples.md for usage examples
     """
-    
+
     project_id: str = Field(
         ...,
         description="The ID of the project to update tag bindings for",
@@ -208,16 +201,16 @@ class ProjectTagBindingRequest(APIRequest):
 
 class WorkspaceMoveRequest(APIRequest):
     """Request model for moving workspaces into a project.
-    
+
     This model is used for the POST /projects/{project_id}/relationships/workspaces endpoint,
     which allows moving one or more workspaces into a project.
-    
+
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/projects#move-workspaces-into-a-project
-    
+
     See:
         docs/models/project_examples.md for usage examples
     """
-    
+
     project_id: str = Field(
         ...,
         description="The ID of the destination project",

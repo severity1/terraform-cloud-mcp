@@ -9,7 +9,7 @@ from typing import Optional
 from ..api.client import api_request
 from ..utils.decorators import handle_api_errors
 from ..utils.payload import create_api_payload, add_relationship
-from ..utils.request import pagination_params
+from ..utils.request import query_params
 from ..models.base import APIResponse
 from ..models.runs import (
     RunListInWorkspaceRequest,
@@ -105,15 +105,15 @@ async def list_runs_in_workspace(
     workspace_id: str,
     page_number: int = 1,
     page_size: int = 20,
-    filter_operation: str = "",
-    filter_status: str = "",
-    filter_source: str = "",
-    filter_status_group: str = "",
-    filter_timeframe: str = "",
-    filter_agent_pool_names: str = "",
-    search_user: str = "",
-    search_commit: str = "",
-    search_basic: str = "",
+    filter_operation: Optional[str] = None,
+    filter_status: Optional[str] = None,
+    filter_source: Optional[str] = None,
+    filter_status_group: Optional[str] = None,
+    filter_timeframe: Optional[str] = None,
+    filter_agent_pool_names: Optional[str] = None,
+    search_user: Optional[str] = None,
+    search_commit: Optional[str] = None,
+    search_basic: Optional[str] = None,
 ) -> APIResponse:
     """List runs in a workspace with filtering and pagination
 
@@ -159,35 +159,8 @@ async def list_runs_in_workspace(
         search_basic=search_basic,
     )
 
-    # Get base pagination parameters
-    params = pagination_params(request, search_field=None)
-
-    # Add optional filter and search parameters
-    # Filter parameters
-    filter_fields = [
-        "filter_operation",
-        "filter_status",
-        "filter_source",
-        "filter_status_group",
-        "filter_timeframe",
-        "filter_agent_pool_names",
-    ]
-
-    for field in filter_fields:
-        value = getattr(request, field, None)
-        if value:
-            # Convert field name from filter_status to filter[status]
-            api_param = f"filter[{field[7:]}]"  # Remove 'filter_' prefix
-            params[api_param] = value
-
-    # Search parameters
-    search_fields = ["search_user", "search_commit", "search_basic"]
-    for field in search_fields:
-        value = getattr(request, field, None)
-        if value:
-            # Convert field name from search_user to search[user]
-            api_param = f"search[{field[7:]}]"  # Remove 'search_' prefix
-            params[api_param] = value
+    # Use the unified query params utility function
+    params = query_params(request)
 
     # Make API request
     return await api_request(
@@ -200,16 +173,16 @@ async def list_runs_in_organization(
     organization: str,
     page_number: int = 1,
     page_size: int = 20,
-    filter_operation: str = "",
-    filter_status: str = "",
-    filter_source: str = "",
-    filter_status_group: str = "",
-    filter_timeframe: str = "",
-    filter_agent_pool_names: str = "",
-    filter_workspace_names: str = "",
-    search_user: str = "",
-    search_commit: str = "",
-    search_basic: str = "",
+    filter_operation: Optional[str] = None,
+    filter_status: Optional[str] = None,
+    filter_source: Optional[str] = None,
+    filter_status_group: Optional[str] = None,
+    filter_timeframe: Optional[str] = None,
+    filter_agent_pool_names: Optional[str] = None,
+    filter_workspace_names: Optional[str] = None,
+    search_user: Optional[str] = None,
+    search_commit: Optional[str] = None,
+    search_basic: Optional[str] = None,
 ) -> APIResponse:
     """List runs across all workspaces in an organization
 
@@ -257,36 +230,8 @@ async def list_runs_in_organization(
         search_basic=search_basic,
     )
 
-    # Get base pagination parameters
-    params = pagination_params(request, search_field=None)
-
-    # Add optional filter and search parameters
-    # Filter parameters
-    filter_fields = [
-        "filter_operation",
-        "filter_status",
-        "filter_source",
-        "filter_status_group",
-        "filter_timeframe",
-        "filter_agent_pool_names",
-        "filter_workspace_names",
-    ]
-
-    for field in filter_fields:
-        value = getattr(request, field, None)
-        if value:
-            # Convert field name from filter_status to filter[status]
-            api_param = f"filter[{field[7:]}]"  # Remove 'filter_' prefix
-            params[api_param] = value
-
-    # Search parameters
-    search_fields = ["search_user", "search_commit", "search_basic"]
-    for field in search_fields:
-        value = getattr(request, field, None)
-        if value:
-            # Convert field name from search_user to search[user]
-            api_param = f"search[{field[7:]}]"  # Remove 'search_' prefix
-            params[api_param] = value
+    # Use the unified query params utility function
+    params = query_params(request)
 
     # Make API request
     return await api_request(

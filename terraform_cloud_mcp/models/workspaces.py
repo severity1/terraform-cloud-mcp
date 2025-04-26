@@ -281,3 +281,21 @@ class WorkspaceParams(BaseWorkspaceRequest):
 
 
 # Response handling is implemented through raw dictionaries
+
+
+class DataRetentionPolicyRequest(APIRequest):
+    """Request model for setting a data retention policy.
+
+    Defines the parameters for the data retention policy API to specify
+    how long Terraform Cloud should keep run history and state files.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces#create-a-data-retention-policy
+
+    See:
+        docs/models/workspace_examples.md for usage examples
+    """
+
+    workspace_id: str = Field(
+        ..., description="The ID of the workspace to set the policy for"
+    )
+    days: int = Field(..., description="Number of days to retain data")

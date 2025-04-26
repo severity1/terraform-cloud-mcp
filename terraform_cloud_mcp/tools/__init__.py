@@ -9,4 +9,12 @@ from . import organizations
 from . import plans
 from . import projects
 
-__all__ = ["account", "applies", "workspaces", "runs", "organizations", "plans", "projects"]
+__all__ = [
+    "account",
+    "applies",
+    "workspaces",
+    "runs",
+    "organizations",
+    "plans",
+    "projects",
+]
