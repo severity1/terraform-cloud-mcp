@@ -13,6 +13,7 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 
 - **Account Management**: Get account details for authenticated users or service accounts.
 - **Workspace Management**: Create, read, update, delete, lock/unlock workspaces.
+- **Project Management**: Create, list, update, and delete projects; manage project tag bindings and move workspaces between projects.
 - **Run Management**: Create runs, list runs, get run details, apply/discard/cancel runs.
 - **Plan Management**: Retrieve plan details and JSON execution output with advanced HTTP redirect handling.
 - **Apply Management**: Get apply details and recover from failed state uploads.
@@ -144,6 +145,17 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 
 - `get_apply_details(apply_id)`: Get detailed information about a specific apply.
 - `get_errored_state(apply_id)`: Retrieve the errored state from a failed apply for recovery.
+
+### Project Management Tools
+
+- `create_project(organization, name, params)`: Create a new project with optional parameters.
+- `update_project(project_id, params)`: Update an existing project's configuration.
+- `list_projects(organization, ...)`: List and filter projects in an organization.
+- `get_project_details(project_id)`: Get detailed information about a specific project.
+- `delete_project(project_id)`: Delete a project (fails if it contains workspaces).
+- `list_project_tag_bindings(project_id)`: List tags bound to a project.
+- `add_update_project_tag_bindings(project_id, tag_bindings)`: Add or update tag bindings on a project.
+- `move_workspaces_to_project(project_id, workspace_ids)`: Move workspaces into a project.
 
 ### Organization Management Tools
 

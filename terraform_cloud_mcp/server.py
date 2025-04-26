@@ -13,6 +13,7 @@ from terraform_cloud_mcp.tools import runs
 from terraform_cloud_mcp.tools import organizations
 from terraform_cloud_mcp.tools import plans
 from terraform_cloud_mcp.tools import applies
+from terraform_cloud_mcp.tools import projects
 
 # Load environment variables from .env file
 load_dotenv()
@@ -66,6 +67,16 @@ mcp.tool()(plans.get_plan_logs)
 mcp.tool()(applies.get_apply_details)
 mcp.tool()(applies.get_errored_state)
 mcp.tool()(applies.get_apply_logs)
+
+# Register project management tools
+mcp.tool()(projects.create_project)
+mcp.tool()(projects.update_project)
+mcp.tool()(projects.list_projects)
+mcp.tool()(projects.get_project_details)
+mcp.tool()(projects.delete_project)
+mcp.tool()(projects.list_project_tag_bindings)
+mcp.tool()(projects.add_update_project_tag_bindings)
+mcp.tool()(projects.move_workspaces_to_project)
 
 
 def main() -> None:

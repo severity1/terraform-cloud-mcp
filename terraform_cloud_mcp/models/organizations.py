@@ -98,7 +98,7 @@ class OrganizationListRequest(APIRequest):
     page_size: Optional[int] = Field(
         20, ge=1, le=100, description="Number of results per page"
     )
-    query: Optional[str] = Field(
+    q: Optional[str] = Field(
         None, description="Search query for name and email", max_length=100
     )
     query_email: Optional[str] = Field(
