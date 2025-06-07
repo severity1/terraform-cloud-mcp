@@ -114,7 +114,7 @@ async def api_request(
             # Handle 204 No Content responses
             if response.status_code == 204:
                 return {"status": "success", "status_code": 204}
-                
+
             # Handle other success responses
             json_data = response.json()
             # Ensure we return a dict as specified in the function signature

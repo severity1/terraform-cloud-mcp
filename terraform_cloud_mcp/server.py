@@ -14,6 +14,7 @@ from terraform_cloud_mcp.tools import organizations
 from terraform_cloud_mcp.tools import plans
 from terraform_cloud_mcp.tools import applies
 from terraform_cloud_mcp.tools import projects
+from terraform_cloud_mcp.tools import cost_estimates
 
 # Load environment variables from .env file
 load_dotenv()
@@ -77,6 +78,9 @@ mcp.tool()(projects.delete_project)
 mcp.tool()(projects.list_project_tag_bindings)
 mcp.tool()(projects.add_update_project_tag_bindings)
 mcp.tool()(projects.move_workspaces_to_project)
+
+# Register cost estimates tools
+mcp.tool()(cost_estimates.get_cost_estimate_details)
 
 
 def main() -> None:

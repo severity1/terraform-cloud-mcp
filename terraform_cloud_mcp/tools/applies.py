@@ -31,7 +31,7 @@ async def get_apply_details(apply_id: str) -> APIResponse:
         Apply details including status, timestamps, and resource change counts
 
     See:
-        docs/tools/apply_tools.md for usage examples
+        docs/tools/apply.md for reference documentation
     """
     # Validate parameters
     params = ApplyRequest(apply_id=apply_id)
@@ -57,7 +57,7 @@ async def get_errored_state(apply_id: str) -> APIResponse:
         The redirect to the state file is automatically followed.
 
     See:
-        docs/tools/apply_tools.md for usage examples
+        docs/tools/apply.md for reference documentation
     """
     # Validate parameters
     params = ApplyErroredStateRequest(apply_id=apply_id)
@@ -83,7 +83,7 @@ async def get_apply_logs(apply_id: str) -> APIResponse:
         is automatically followed.
 
     See:
-        docs/tools/apply_tools.md for usage examples
+        docs/tools/apply.md for reference documentation
     """
     # Validate parameters using existing model
     params = ApplyRequest(apply_id=apply_id)

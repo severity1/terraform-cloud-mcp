@@ -20,7 +20,7 @@ class TagBinding(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/projects
 
     See:
-        docs/models/project_examples.md for usage examples
+        docs/models/project.md for reference
     """
 
     # Inherits model_config from APIRequest -> BaseModelConfig
@@ -38,7 +38,7 @@ class ProjectListRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/projects#list-projects
 
     See:
-        docs/models/project_examples.md for usage examples
+        docs/models/project.md for reference
     """
 
     organization: str = Field(
@@ -79,7 +79,7 @@ class BaseProjectRequest(APIRequest):
         default values for fields based on Terraform Cloud API defaults.
 
     See:
-        docs/models/project_examples.md for detailed field descriptions and usage examples
+        docs/models/project.md for detailed field descriptions and usage examples
     """
 
     # Fields common to both create and update requests
@@ -117,7 +117,7 @@ class ProjectCreateRequest(BaseProjectRequest):
         while making organization and name required.
 
     See:
-        docs/models/project_examples.md for usage examples
+        docs/models/project.md for reference
     """
 
     # Organization is needed for routing but not included in the payload
@@ -146,7 +146,7 @@ class ProjectUpdateRequest(BaseProjectRequest):
         and adds required routing field for the update operation.
 
     See:
-        docs/models/project_examples.md for usage examples
+        docs/models/project.md for reference
     """
 
     # Add project_id which is required for updates but not part of the project attributes payload
@@ -171,7 +171,7 @@ class ProjectParams(BaseProjectRequest):
         All fields are inherited from BaseProjectRequest.
 
     See:
-        docs/models/project_examples.md for usage examples
+        docs/models/project.md for reference
     """
 
     # Inherits model_config and all fields from BaseProjectRequest
@@ -186,7 +186,7 @@ class ProjectTagBindingRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/projects#add-or-update-tag-bindings-on-a-project
 
     See:
-        docs/models/project_examples.md for usage examples
+        docs/models/project.md for reference
     """
 
     project_id: str = Field(
@@ -208,7 +208,7 @@ class WorkspaceMoveRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/projects#move-workspaces-into-a-project
 
     See:
-        docs/models/project_examples.md for usage examples
+        docs/models/project.md for reference
     """
 
     project_id: str = Field(

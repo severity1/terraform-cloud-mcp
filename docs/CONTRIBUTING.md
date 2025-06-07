@@ -83,6 +83,10 @@ To add new functionality to the MCP server:
    - Define enums for constrained choices
    - Create request models inheriting from `APIRequest`
    - Create a `*Params` model for function parameters
+   - For examples, see:
+     - `account.py` for simple request models
+     - `workspaces.py` for comprehensive models with params 
+     - `cost_estimates.py` for models with enums and status tracking
 
 2. Add tool functions in the `terraform_cloud_mcp/tools` directory:
    - Accept typed `params` objects instead of `**kwargs`
@@ -90,18 +94,51 @@ To add new functionality to the MCP server:
    - Use utility functions from `utils/payload.py` for JSON:API payloads
    - Use utility functions from `utils/request.py` for parameters
    - Return `APIResponse` type
+   - For examples, see:
+     - `account.py` for simple GET operations
+     - `workspaces.py` for full CRUD operations
+     - `cost_estimates.py` for specialized retrieval operations
 
-3. Register new tools in `terraform_cloud_mcp/server.py`
+3. Register new tools in `terraform_cloud_mcp/server.py`:
+   - Add import statements at the top
+   - Use `mcp.tool()(module_name.function_name)` to register each function
+   - Group related tools together with comments
 
 4. Follow the Pydantic pattern for parameter validation and error handling
 
 5. Ensure all functions include proper type hints and docstrings
 
-6. Update documentation in the appropriate places:
-   - Add model examples to `docs/models/`
-   - Add tool examples to `docs/tools/`
+6. Update documentation in the appropriate places (following reference-based documentation approach):
+   - Add model documentation to `docs/models/` (e.g., `cost_estimate.md`) with model structure, validation rules, and references to actual implementations
+   - Add tool reference documentation to `docs/tools/` (e.g., `cost_estimate.md`) following the established format:
+     - Overview section explaining the tool's purpose
+     - API Reference section with links to Terraform Cloud API documentation
+     - Tools Reference section with function signatures, parameters, return values, and references to actual implementations
+     - Notes section for important usage information
+     - Common Error Scenarios section in table format
+   - Add conversation examples to `docs/conversations/` (e.g., `cost-estimate-conversation.md`) showing real-world usage patterns with the API
+   - Update `docs/README.md` to include new functionality
+   - Update `README.md` to include new functionality
+   - Update `docs/CONTRIBUTING.md` (this file) to reflect new patterns or processes
+   - Update `docs/DEVELOPMENT.md` to include new development standards or patterns
 
-7. Add tests for new functionality
+7. Update existing integration files:
+   - Add exports to `models/__init__.py`
+   - Add imports to `tools/__init__.py`
+
+8. Update `CLAUDE.md` files to document new functionality:
+   - Update main `CLAUDE.md` if adding major new components
+   - Update `docs/CLAUDE.md` with changes to documentation structure or standards
+   - Update component-specific CLAUDE.md files as needed:
+     - `terraform_cloud_mcp/api/CLAUDE.md` for API client changes
+     - `terraform_cloud_mcp/models/CLAUDE.md` for model patterns
+     - `terraform_cloud_mcp/tools/CLAUDE.md` for tool implementation patterns
+     - `terraform_cloud_mcp/utils/CLAUDE.md` for utility function patterns
+   - These files should include:
+     - New patterns introduced
+     - Additional examples for AI assistance
+     - Component-specific guidelines
+   - These files are critical for AI-assisted development and should document any non-obvious patterns
 
 ## Release Process
 

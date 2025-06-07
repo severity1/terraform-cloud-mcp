@@ -4,7 +4,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.7-blue)
+![Version](https://img.shields.io/badge/version-0.8.11-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -20,6 +20,7 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - **Plan Management**: Retrieve plan details and JSON execution output with advanced HTTP redirect handling.
 - **Apply Management**: Get apply details and recover from failed state uploads.
 - **Organization Management**: List, create, update, delete organizations, and view organization entitlements.
+- **Cost Estimation**: Retrieve detailed cost estimates for infrastructure changes including proposed monthly costs, prior costs, resource counts, and usage projections.
 - **Future Features**: Variables management, state versions, and more.
 
 ---
@@ -168,6 +169,10 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `update_organization(organization, params)`: Update an existing organization's settings.
 - `delete_organization(organization)`: Delete an organization and all its content.
 
+### Cost Estimation Tools
+
+- `get_cost_estimate_details(cost_estimate_id)`: Get detailed information about a specific cost estimate, including resource counts (matched and unmatched), prior monthly cost, proposed monthly cost, and delta monthly cost estimations. Use run relationships to find cost estimate IDs for specific runs.
+
 ---
 
 ## Development Guide
@@ -212,11 +217,12 @@ The codebase includes comprehensive documentation:
 
 - **Code Comments**: Focused on explaining the "why" behind implementation decisions
 - **Docstrings**: All public functions and classes include detailed docstrings
+- **Implementation References**: Development documentation now references actual code examples rather than using code snippets
 - **Example Files**: The `docs/` directory contains detailed examples for each domain:
-  - `docs/DEVELOPMENT.md`: Development standards and coding guidelines
+  - `docs/DEVELOPMENT.md`: Development standards and coding guidelines with references to actual code
   - `docs/CONTRIBUTING.md`: Guidelines for contributing to the project
-  - `docs/models/`: Usage examples for all model types
-  - `docs/tools/`: Detailed usage examples for each tool
+  - `docs/models/`: Reference documentation for all model types
+  - `docs/tools/`: Detailed reference documentation for each tool
   - `docs/conversations/`: Sample conversation flows with the API
 
 ## Troubleshooting

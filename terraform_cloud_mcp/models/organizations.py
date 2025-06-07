@@ -21,7 +21,7 @@ class OrganizationDetailsRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#show-an-organization
 
     See:
-        docs/models/organization_examples.md for usage examples
+        docs/models/organization.md for reference
     """
 
     organization: str = Field(
@@ -43,7 +43,7 @@ class OrganizationEntitlementsRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#show-the-entitlement-set
 
     See:
-        docs/models/organization_examples.md for usage examples
+        docs/models/organization.md for reference
     """
 
     organization: str = Field(
@@ -69,7 +69,7 @@ class OrganizationDeleteRequest(APIRequest):
         are globally unique and cannot be recreated with the same name later.
 
     See:
-        docs/models/organization_examples.md for usage examples
+        docs/models/organization.md for reference
     """
 
     organization: str = Field(
@@ -91,7 +91,7 @@ class OrganizationListRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/organizations#list-organizations
 
     See:
-        docs/models/organization_examples.md for usage examples
+        docs/models/organization.md for reference
     """
 
     page_number: Optional[int] = Field(1, ge=1, description="Page number to fetch")
@@ -120,7 +120,7 @@ class BaseOrganizationRequest(APIRequest):
         This class inherits model_config from APIRequest -> BaseModelConfig
 
     See:
-        docs/models/organization_examples.md for fields and usage examples
+        docs/models/organization.md for fields and usage examples
     """
 
     # Fields common to both create and update requests with API defaults from docs
@@ -216,7 +216,7 @@ class OrganizationCreateRequest(BaseOrganizationRequest):
         while making name and email required.
 
     See:
-        docs/models/organization_examples.md for usage examples
+        docs/models/organization.md for reference
     """
 
     # Override name and email to make them required for creation
@@ -237,7 +237,7 @@ class OrganizationUpdateRequest(BaseOrganizationRequest):
         and adds a required organization field for routing.
 
     See:
-        docs/models/organization_examples.md for usage examples
+        docs/models/organization.md for reference
     """
 
     # Add organization field which is required for updates but not part of the attributes
@@ -260,7 +260,7 @@ class OrganizationParams(BaseOrganizationRequest):
         All fields are inherited from BaseOrganizationRequest.
 
     See:
-        docs/models/organization_examples.md for usage examples
+        docs/models/organization.md for reference
     """
 
     # Inherits model_config and all fields from BaseOrganizationRequest

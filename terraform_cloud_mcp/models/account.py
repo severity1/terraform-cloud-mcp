@@ -20,7 +20,7 @@ class AccountDetailsRequest(APIRequest):
         a synthetic "service user" account associated with the token.
 
     See:
-        docs/models/account_examples.md for usage examples
+        docs/models/account.md for reference
     """
 
     pass  # No parameters needed for this endpoint

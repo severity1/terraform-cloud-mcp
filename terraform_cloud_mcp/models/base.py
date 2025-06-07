@@ -21,7 +21,7 @@ class BaseModelConfig(BaseModel):
     - extra: Ignore extra fields in input data
 
     See:
-        docs/models/base_examples.md for usage examples
+        docs/models/base.md for reference
     """
 
     model_config = ConfigDict(
@@ -43,7 +43,7 @@ class APIRequest(BaseModelConfig):
         model configuration from BaseModelConfig.
 
     See:
-        docs/models/base_examples.md for usage examples
+        docs/models/base.md for reference
     """
 
     pass
@@ -61,7 +61,7 @@ class ExecutionMode(str, Enum):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings#execution-mode
 
     See:
-        docs/models/workspace_examples.md for usage examples
+        docs/models/workspace.md for reference
     """
 
     REMOTE = "remote"
@@ -79,7 +79,7 @@ class CollaboratorAuthPolicy(str, Enum):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations#authentication
 
     See:
-        docs/models/organization_examples.md for usage examples
+        docs/models/organization.md for reference
     """
 
     PASSWORD = "password"

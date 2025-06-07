@@ -54,7 +54,7 @@ async def create_workspace(
         The created workspace data including configuration, settings and metadata
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     param_dict = params.model_dump(exclude_none=True) if params else {}
     request = WorkspaceCreateRequest(organization=organization, name=name, **param_dict)
@@ -103,7 +103,7 @@ async def update_workspace(
         The updated workspace with all current settings and configuration
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Extract parameters from the params object if provided
     param_dict = params.model_dump(exclude_none=True) if params else {}
@@ -163,7 +163,7 @@ async def list_workspaces(
         Paginated list of workspaces with their configuration settings and metadata
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Create request using Pydantic model for validation
     request = WorkspaceListRequest(
@@ -201,7 +201,7 @@ async def delete_workspace(organization: str, workspace_name: str) -> APIRespons
         Error response with explanation if the workspace cannot be deleted
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Make API request
     return await api_request(
@@ -236,7 +236,7 @@ async def safe_delete_workspace(organization: str, workspace_name: str) -> APIRe
         - List of resources that would be affected by deletion (if applicable)
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Make API request
     return await api_request(
@@ -263,7 +263,7 @@ async def lock_workspace(workspace_id: str, reason: str = "") -> APIResponse:
         The workspace with updated lock status and related metadata
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     payload = {}
     if reason:
@@ -289,7 +289,7 @@ async def unlock_workspace(workspace_id: str) -> APIResponse:
         The workspace with updated lock status and related metadata
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     return await api_request(f"workspaces/{workspace_id}/actions/unlock", method="POST")
 
@@ -314,7 +314,7 @@ async def force_unlock_workspace(workspace_id: str) -> APIResponse:
         The workspace with updated lock status and related metadata
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Make API request
     return await api_request(
@@ -340,7 +340,7 @@ async def set_data_retention_policy(workspace_id: str, days: int) -> APIResponse
         The created data retention policy with configuration details and timestamps
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Create request using Pydantic model
     request = DataRetentionPolicyRequest(workspace_id=workspace_id, days=days)
@@ -376,7 +376,7 @@ async def get_data_retention_policy(workspace_id: str) -> APIResponse:
         The data retention policy with configuration details and timestamps
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Make API request
     return await api_request(
@@ -401,7 +401,7 @@ async def delete_data_retention_policy(workspace_id: str) -> APIResponse:
         Empty response with HTTP 204 status code indicating successful deletion
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Make API request
     return await api_request(
@@ -436,7 +436,7 @@ async def get_workspace_details(
         Comprehensive workspace details including settings, configuration and status
 
     See:
-        docs/tools/workspace_tools.md for usage examples
+        docs/tools/workspace.md for reference documentation
     """
     # Ensure we have either workspace_id OR both organization and workspace_name
     if not workspace_id and not (organization and workspace_name):

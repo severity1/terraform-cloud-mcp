@@ -48,7 +48,7 @@ async def create_project(
         The created project data including configuration, settings and metadata
 
     See:
-        docs/tools/project_tools.md for usage examples
+        docs/tools/project.md for reference documentation
     """
     param_dict = params.model_dump(exclude_none=True) if params else {}
     request = ProjectCreateRequest(organization=organization, name=name, **param_dict)
@@ -111,7 +111,7 @@ async def update_project(
         The updated project with all current settings and configuration
 
     See:
-        docs/tools/project_tools.md for usage examples
+        docs/tools/project.md for reference documentation
     """
     # Extract parameters from the params object if provided
     param_dict = params.model_dump(exclude_none=True) if params else {}
@@ -187,7 +187,7 @@ async def list_projects(
         Paginated list of projects with their configuration settings and metadata
 
     See:
-        docs/tools/project_tools.md for usage examples
+        docs/tools/project.md for reference documentation
     """
     # Create request using Pydantic model for validation
     request = ProjectListRequest(
@@ -226,7 +226,7 @@ async def get_project_details(project_id: str) -> APIResponse:
         Project details including settings, configuration and status
 
     See:
-        docs/tools/project_tools.md for usage examples
+        docs/tools/project.md for reference documentation
     """
     # Make API request
     return await api_request(f"projects/{project_id}", method="GET")
@@ -248,7 +248,7 @@ async def delete_project(project_id: str) -> APIResponse:
         Empty response with HTTP 204 status code if successful
 
     See:
-        docs/tools/project_tools.md for usage examples
+        docs/tools/project.md for reference documentation
     """
     # Make API request
     return await api_request(f"projects/{project_id}", method="DELETE")
@@ -270,7 +270,7 @@ async def list_project_tag_bindings(project_id: str) -> APIResponse:
         List of tag bindings with their key-value pairs and creation timestamps
 
     See:
-        docs/tools/project_tools.md for usage examples
+        docs/tools/project.md for reference documentation
     """
     # Make API request
     return await api_request(f"projects/{project_id}/tag-bindings", method="GET")
@@ -295,7 +295,7 @@ async def add_update_project_tag_bindings(
         The complete list of updated tag bindings for the project
 
     See:
-        docs/tools/project_tools.md for usage examples
+        docs/tools/project.md for reference documentation
     """
     # Create request using Pydantic model
     request = ProjectTagBindingRequest(project_id=project_id, tag_bindings=tag_bindings)
@@ -334,7 +334,7 @@ async def move_workspaces_to_project(
         Empty response with HTTP 204 status code if successful
 
     See:
-        docs/tools/project_tools.md for usage examples
+        docs/tools/project.md for reference documentation
     """
     # Create request using Pydantic model
     request = WorkspaceMoveRequest(project_id=project_id, workspace_ids=workspace_ids)

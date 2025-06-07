@@ -27,7 +27,7 @@ class PlanStatus(str, Enum):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/plans
 
     See:
-        docs/models/plan_examples.md for usage examples
+        docs/models/plan.md for reference
     """
 
     PENDING = "pending"
@@ -49,7 +49,7 @@ class ExecutionDetails(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/plans
 
     See:
-        docs/models/plan_examples.md for usage examples
+        docs/models/plan.md for reference
     """
 
     agent_id: Optional[str] = Field(
@@ -83,7 +83,7 @@ class StatusTimestamps(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/plans
 
     See:
-        docs/models/plan_examples.md for usage examples
+        docs/models/plan.md for reference
     """
 
     queued_at: Optional[str] = Field(
@@ -116,7 +116,7 @@ class PlanRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/plans#show-a-plan
 
     See:
-        docs/models/plan_examples.md for usage examples
+        docs/models/plan.md for reference
     """
 
     plan_id: str = Field(
@@ -135,7 +135,7 @@ class PlanJsonOutputRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/plans#retrieve-the-json-execution-plan
 
     See:
-        docs/models/plan_examples.md for usage examples
+        docs/models/plan.md for reference
     """
 
     plan_id: str = Field(
@@ -154,7 +154,7 @@ class RunPlanJsonOutputRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/plans#retrieve-the-json-execution-plan-from-a-run
 
     See:
-        docs/models/plan_examples.md for usage examples
+        docs/models/plan.md for reference
     """
 
     run_id: str = Field(

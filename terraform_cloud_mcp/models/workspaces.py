@@ -20,7 +20,7 @@ class VcsRepoConfig(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces
 
     See:
-        docs/models/workspace_examples.md for usage examples
+        docs/models/workspace.md for reference
     """
 
     # Inherits model_config from APIRequest -> BaseModelConfig
@@ -62,7 +62,7 @@ class WorkspaceListRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces#list-workspaces
 
     See:
-        docs/models/workspace_examples.md for usage examples
+        docs/models/workspace.md for reference
     """
 
     organization: str = Field(
@@ -90,7 +90,7 @@ class BaseWorkspaceRequest(APIRequest):
         default values for most fields based on Terraform Cloud API defaults.
 
     See:
-        docs/models/workspace_examples.md for detailed field descriptions and usage examples
+        docs/models/workspace.md for detailed field descriptions and usage examples
     """
 
     # Fields common to both create and update requests with API defaults from docs
@@ -214,7 +214,7 @@ class WorkspaceCreateRequest(BaseWorkspaceRequest):
         while making organization and name required.
 
     See:
-        docs/models/workspace_examples.md for usage examples
+        docs/models/workspace.md for reference
     """
 
     # Override organization and name to make them required for creation
@@ -243,7 +243,7 @@ class WorkspaceUpdateRequest(BaseWorkspaceRequest):
         and adds required routing fields for the update operation.
 
     See:
-        docs/models/workspace_examples.md for usage examples
+        docs/models/workspace.md for reference
     """
 
     # Add fields which are required for updates but not part of the workspace attributes payload
@@ -274,7 +274,7 @@ class WorkspaceParams(BaseWorkspaceRequest):
         All fields are inherited from BaseWorkspaceRequest.
 
     See:
-        docs/models/workspace_examples.md for usage examples
+        docs/models/workspace.md for reference
     """
 
     # Inherits model_config and all fields from BaseWorkspaceRequest
@@ -292,7 +292,7 @@ class DataRetentionPolicyRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces#create-a-data-retention-policy
 
     See:
-        docs/models/workspace_examples.md for usage examples
+        docs/models/workspace.md for reference
     """
 
     workspace_id: str = Field(
