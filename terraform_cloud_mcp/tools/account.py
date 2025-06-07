@@ -26,7 +26,7 @@ async def get_account_details() -> APIResponse:
         including user ID, username, email address, and authentication status
 
     See:
-        docs/tools/account_tools.md for usage examples
+        docs/tools/account.md for reference documentation
     """
     AccountDetailsRequest()
     return await api_request("account/details")

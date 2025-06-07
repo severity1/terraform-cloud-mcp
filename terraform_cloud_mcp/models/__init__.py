@@ -19,6 +19,11 @@ from .applies import (  # noqa: F401
     ApplyRequest,
     ApplyErroredStateRequest,
 )
+from .cost_estimates import (  # noqa: F401
+    CostEstimateStatus,
+    StatusTimestamps as CostEstimateStatusTimestamps,
+    CostEstimateRequest,
+)
 from .organizations import (  # noqa: F401
     OrganizationDetailsRequest,
     OrganizationEntitlementsRequest,
@@ -84,6 +89,10 @@ __all__ = [
     "ApplyStatusTimestamps",
     "ApplyRequest",
     "ApplyErroredStateRequest",
+    # Cost estimate models
+    "CostEstimateStatus",
+    "CostEstimateStatusTimestamps",
+    "CostEstimateRequest",
     # Organization models
     "OrganizationDetailsRequest",
     "OrganizationEntitlementsRequest",

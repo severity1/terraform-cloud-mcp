@@ -56,7 +56,7 @@ async def create_run(
         workspace relationship, and links to associated resources
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     # Convert optional params to dictionary
     param_dict = params.model_dump(exclude_none=True) if params else {}
@@ -141,7 +141,7 @@ async def list_runs_in_workspace(
         List of runs with metadata, status info, and pagination details
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     # Create request using Pydantic model for validation
     request = RunListInWorkspaceRequest(
@@ -211,7 +211,7 @@ async def list_runs_in_organization(
         List of runs across workspaces with metadata and pagination details
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     # Create request using Pydantic model for validation
     request = RunListInOrganizationRequest(
@@ -255,7 +255,7 @@ async def get_run_details(run_id: str) -> APIResponse:
         Complete run details including status, plan, and relationships
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     # Make API request
     return await api_request(f"runs/{run_id}", method="GET")
@@ -280,7 +280,7 @@ async def apply_run(run_id: str, comment: str = "") -> APIResponse:
         including timestamp information and any comment provided
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     request = RunActionRequest(run_id=run_id, comment=comment)
 
@@ -314,7 +314,7 @@ async def discard_run(run_id: str, comment: str = "") -> APIResponse:
         discard action, and user information
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     request = RunActionRequest(run_id=run_id, comment=comment)
 
@@ -349,7 +349,7 @@ async def cancel_run(run_id: str, comment: str = "") -> APIResponse:
         and any provided comment in the response metadata
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     request = RunActionRequest(run_id=run_id, comment=comment)
 
@@ -384,7 +384,7 @@ async def force_cancel_run(run_id: str, comment: str = "") -> APIResponse:
         user information, and workspace unlock status
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     request = RunActionRequest(run_id=run_id, comment=comment)
 
@@ -418,7 +418,7 @@ async def force_execute_run(run_id: str) -> APIResponse:
         with information about which runs were canceled to allow execution
 
     See:
-        docs/tools/run_tools.md for usage examples
+        docs/tools/run.md for reference documentation
     """
     # Make API request
     return await api_request(f"runs/{run_id}/actions/force-execute", method="POST")

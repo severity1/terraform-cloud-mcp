@@ -38,7 +38,7 @@ async def get_organization_details(organization: str) -> APIResponse:
         Organization details including name, email, settings and configuration
 
     See:
-        docs/tools/organization_tools.md for usage examples
+        docs/tools/organization.md for reference documentation
     """
     request = OrganizationDetailsRequest(organization=organization)
     return await api_request(f"organizations/{request.organization}")
@@ -60,7 +60,7 @@ async def get_organization_entitlements(organization: str) -> APIResponse:
         Entitlement set details including feature limits and subscription information
 
     See:
-        docs/tools/organization_tools.md for usage examples
+        docs/tools/organization.md for reference documentation
     """
     request = OrganizationEntitlementsRequest(organization=organization)
     return await api_request(f"organizations/{request.organization}/entitlement-set")
@@ -92,7 +92,7 @@ async def list_organizations(
         List of organizations with metadata and pagination information
 
     See:
-        docs/tools/organization_tools.md for usage examples
+        docs/tools/organization.md for reference documentation
     """
     request = OrganizationListRequest(
         page_number=page_number,
@@ -139,7 +139,7 @@ async def create_organization(
         The created organization details including ID and created timestamp
 
     See:
-        docs/tools/organization_tools.md for usage examples
+        docs/tools/organization.md for reference documentation
     """
     # Extract parameters from the params object if provided
     param_dict = params.model_dump(exclude_none=True) if params else {}
@@ -183,7 +183,7 @@ async def update_organization(
         The updated organization with all current settings
 
     See:
-        docs/tools/organization_tools.md for usage examples
+        docs/tools/organization.md for reference documentation
     """
     # Extract parameters from the params object if provided
     param_dict = params.model_dump(exclude_none=True) if params else {}
@@ -219,7 +219,7 @@ async def delete_organization(organization: str) -> APIResponse:
         Success confirmation (HTTP 204 No Content) or error details
 
     See:
-        docs/tools/organization_tools.md for usage examples
+        docs/tools/organization.md for reference documentation
     """
     # Create request using Pydantic model
     request = OrganizationDeleteRequest(organization=organization)

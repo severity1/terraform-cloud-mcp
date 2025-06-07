@@ -32,7 +32,7 @@ async def get_plan_details(plan_id: str) -> APIResponse:
         Plan details including status, timestamps, and resource change counts
 
     See:
-        docs/tools/plan_tools.md for usage examples
+        docs/tools/plan.md for reference documentation
     """
     # Validate parameters
     params = PlanRequest(plan_id=plan_id)
@@ -58,7 +58,7 @@ async def get_plan_json_output(plan_id: str) -> APIResponse:
         and planned actions. The redirect is automatically followed.
 
     See:
-        docs/tools/plan_tools.md for usage examples
+        docs/tools/plan.md for reference documentation
     """
     # Validate parameters
     params = PlanJsonOutputRequest(plan_id=plan_id)
@@ -84,7 +84,7 @@ async def get_run_plan_json_output(run_id: str) -> APIResponse:
         and planned actions. The redirect is automatically followed.
 
     See:
-        docs/tools/plan_tools.md for usage examples
+        docs/tools/plan.md for reference documentation
     """
     # Validate parameters
     params = RunPlanJsonOutputRequest(run_id=run_id)
@@ -110,7 +110,7 @@ async def get_plan_logs(plan_id: str) -> APIResponse:
         is automatically followed.
 
     See:
-        docs/tools/plan_tools.md for usage examples
+        docs/tools/plan.md for reference documentation
     """
     # Validate parameters using existing model
     params = PlanRequest(plan_id=plan_id)

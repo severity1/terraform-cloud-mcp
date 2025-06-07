@@ -27,7 +27,7 @@ class ApplyStatus(str, Enum):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/applies
 
     See:
-        docs/models/apply_examples.md for usage examples
+        docs/models/apply.md for reference
     """
 
     PENDING = "pending"
@@ -49,7 +49,7 @@ class ExecutionDetails(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/applies
 
     See:
-        docs/models/apply_examples.md for usage examples
+        docs/models/apply.md for reference
     """
 
     agent_id: Optional[str] = Field(
@@ -83,7 +83,7 @@ class StatusTimestamps(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/applies
 
     See:
-        docs/models/apply_examples.md for usage examples
+        docs/models/apply.md for reference
     """
 
     queued_at: Optional[str] = Field(
@@ -116,7 +116,7 @@ class ApplyRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/applies#show-an-apply
 
     See:
-        docs/models/apply_examples.md for usage examples
+        docs/models/apply.md for reference
     """
 
     apply_id: str = Field(
@@ -135,7 +135,7 @@ class ApplyErroredStateRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/applies#recover-a-failed-state-upload-after-applying
 
     See:
-        docs/models/apply_examples.md for usage examples
+        docs/models/apply.md for reference
     """
 
     apply_id: str = Field(

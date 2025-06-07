@@ -26,7 +26,7 @@ class RunOperation(str, Enum):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     PLAN_ONLY = "plan_only"
@@ -47,7 +47,7 @@ class RunStatus(str, Enum):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     PENDING = "pending"
@@ -90,7 +90,7 @@ class RunSource(str, Enum):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     TFE_UI = "tfe-ui"
@@ -109,7 +109,7 @@ class RunStatusGroup(str, Enum):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     NON_FINAL = "non_final"
@@ -126,7 +126,7 @@ class RunVariable(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#create-a-run
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     key: str = Field(
@@ -153,7 +153,7 @@ class RunListInWorkspaceRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-a-workspace
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     workspace_id: str = Field(
@@ -210,7 +210,7 @@ class RunListInOrganizationRequest(APIRequest):
     Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/run#list-runs-in-an-organization
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     organization: str = Field(
@@ -275,7 +275,7 @@ class BaseRunRequest(APIRequest):
         Consolidates common parameters for consistency across endpoints
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     # Inherits model_config from APIRequest -> BaseModelConfig
@@ -353,7 +353,7 @@ class RunCreateRequest(BaseRunRequest):
         which accepts parameters directly and constructs the request object.
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     # Required fields
@@ -387,7 +387,7 @@ class RunActionRequest(APIRequest):
         same basic structure but perform different operations on the run.
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     run_id: str = Field(
@@ -415,7 +415,7 @@ class RunParams(BaseRunRequest):
         All fields are inherited from BaseRunRequest.
 
     See:
-        docs/models/run_examples.md for usage examples
+        docs/models/run.md for reference
     """
 
     # Inherits model_config and all fields from BaseRunRequest

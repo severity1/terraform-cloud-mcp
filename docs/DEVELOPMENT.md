@@ -24,17 +24,12 @@ uv pip install black mypy pydantic ruff
 
 ### Build & Run Commands
 
-- Setup: `uv pip install -e .`
+- Setup: `uv pip install -e .` (install with latest changes)
 - Install dev deps: `uv pip install black mypy pydantic ruff`
-- Run server: `uv run terraform_cloud_mcp/server.py` (use `TFC_TOKEN=token` or `.env`)
-- MCP tools: `mcp dev terraform_cloud_mcp/server.py` (includes debugging interface)
-- Debug: `TFC_TOKEN=token uv run -m pdb terraform_cloud_mcp/server.py`
-- Tests: `uv run -m unittest discover tests`
-- Single test: `uv run -m unittest tests.test_module.TestClass.test_method`
-- Format: `uv run -m black .` 
-- Type check: `uv run -m mypy .`
-- Lint: `uv run -m ruff check .`
-- Fix lint issues: `uv run -m ruff check --fix .`
+- Format: `uv pip install black && uv run -m black .` 
+- Type check: `uv pip install mypy && uv run -m mypy .`
+- Lint: `uv pip install ruff && uv run -m ruff check .`
+- Fix lint issues: `uv pip install ruff && uv run -m ruff check --fix .`
 
 ### Development With Claude Integrations
 
@@ -90,14 +85,22 @@ terraform_cloud_mcp/
 ├── models/             # Pydantic data models for validation
 │   ├── __init__.py
 │   ├── account.py      # Account-related models
+│   ├── applies.py      # Apply-related models
 │   ├── base.py         # Base model classes and shared types
+│   ├── cost_estimates.py # Cost estimation models
 │   ├── organizations.py # Organization models
+│   ├── plans.py        # Plan-related models
+│   ├── projects.py     # Project management models
 │   ├── runs.py         # Run management models
 │   └── workspaces.py   # Workspace management models
 ├── tools/              # Tool implementations exposed via MCP
 │   ├── __init__.py
 │   ├── account.py      # Account management tools
+│   ├── applies.py      # Apply management tools
+│   ├── cost_estimates.py # Cost estimation tools
 │   ├── organizations.py # Organization management tools
+│   ├── plans.py        # Plan management tools
+│   ├── projects.py     # Project management tools
 │   ├── runs.py         # Run management tools
 │   └── workspaces.py   # Workspace management tools
 ├── utils/              # Shared utilities
@@ -131,152 +134,65 @@ terraform_cloud_mcp/
 ### Model Structure
 
 1. **Base Classes**:
-   ```python
-   class BaseModelConfig(BaseModel):
-       """Base configuration for all models."""
-       model_config = ConfigDict(
-           populate_by_name=True,  # Allow both snake_case and kebab-case
-           use_enum_values=True,   # Serialize enums to their values
-           extra="ignore",         # Ignore extra fields in input
-       )
-
-   class APIRequest(BaseModelConfig):
-       """Base class for all API requests."""
-       pass
-
-   # Type alias for responses - we don't validate responses
-   APIResponse = Dict[str, Any]
-   ```
+   See the base classes defined in `terraform_cloud_mcp/models/base.py`:
+   - `BaseModelConfig` - Core configuration for all models
+   - `APIRequest` - Base class for all API requests
+   - `APIResponse` type alias
 
 2. **Request Models**:
-   ```python
-   class ExampleRequest(APIRequest):
-       """Example request model with field aliases."""
-       # Required field with alias for API compatibility
-       field_name: str = Field(..., alias="field-name")
-       
-       # Optional field with default value
-       optional_field: Optional[bool] = Field(False, alias="optional-field")
-       
-       # Field with validator
-       validated_field: int = Field(..., ge=1, le=100, alias="validated-field")
-   ```
+   For examples of request models with field aliases, see:
+   - `VcsRepoConfig` in `terraform_cloud_mcp/models/workspaces.py`
+   - `WorkspaceCreateRequest` in `terraform_cloud_mcp/models/workspaces.py`
+   - `WorkspaceListRequest` in `terraform_cloud_mcp/models/workspaces.py`
 
 3. **Enum Classes**:
-   ```python
-   class ExecutionMode(str, Enum):
-       """Execution mode options."""
-       REMOTE = "remote"
-       LOCAL = "local"
-       AGENT = "agent"
-   ```
+   For enum implementation examples, see:
+   - `ExecutionMode` in `terraform_cloud_mcp/models/base.py`
+   - Status enums in `terraform_cloud_mcp/models/runs.py`
 
 ### Implementation Pattern
 
 1. **Tool Implementation**:
-   ```python
-   @handle_api_errors
-   async def example_function(
-       param1: str, 
-       params: Optional[ExampleRequest] = None
-   ) -> APIResponse:
-       """Example tool function with Pydantic model."""
-       # Extract parameters from the params object if provided
-       param_dict = params.model_dump(exclude_none=True) if params else {}
-       
-       # Create request using Pydantic model
-       request = ExampleRequest(field_name=param1, **param_dict)
-       
-       # Create API payload using utility function
-       payload = create_api_payload(
-           resource_type="resource_type",
-           model=request,
-           exclude_fields={"field_to_exclude"}
-       )
-       
-       # Add relationship if needed
-       add_relationship(
-           payload=payload,
-           relation_name="related_resource",
-           resource_type="related_resources",
-           resource_id="resource-id"
-       )
-       
-       # Make API request
-       return await api_request("endpoint", method="POST", data=payload)
-   ```
+   See the implementation pattern in `terraform_cloud_mcp/tools/workspaces.py`:
+   - `create_workspace` function for a complete implementation example
+   - `update_workspace` function for updating existing resources
+   - `list_workspaces` function for listing resources with pagination
+   - Other CRUD operations in workspace management tools
 
 ### Pydantic Best Practices
 
 1. **Use Field Aliases** for API compatibility:
-   ```python
-   field_name: str = Field(..., alias="field-name")
-   ```
+   See the `execution_mode` field in `terraform_cloud_mcp/models/workspaces.py` (class `BaseWorkspaceRequest`)
 
 2. **Use Field Validators** for constraints:
-   ```python
-   count: int = Field(..., ge=1, le=100)  # Between 1 and 100
-   name: str = Field(..., min_length=3)   # At least 3 characters
-   ```
+   See the `page_size` field in `terraform_cloud_mcp/models/workspaces.py` (class `WorkspaceListRequest`) 
 
 3. **Use Description** for clarity:
-   ```python
-   name: str = Field(..., description="Name of the resource")
-   ```
+   See the `description` field in `terraform_cloud_mcp/models/workspaces.py` (class `BaseWorkspaceRequest`)
 
 4. **Use Enums** for constrained choices:
-   ```python
-   mode: ExecutionMode = Field(ExecutionMode.REMOTE)
-   ```
+   See `ExecutionMode` enum in `terraform_cloud_mcp/models/base.py`
 
 5. **Parameter Inheritance** for common parameters:
-   ```python
-   class BaseWorkspaceRequest(APIRequest):
-       """Base class with common workspace parameters."""
-       name: Optional[str] = None
-       
-   class WorkspaceCreateRequest(BaseWorkspaceRequest):
-       """Request to create a workspace, inherits common parameters."""
-       organization: str  # Required for creation
-   ```
+   See the class hierarchy in `terraform_cloud_mcp/models/workspaces.py`:
+   - `BaseWorkspaceRequest` defines common fields
+   - `WorkspaceCreateRequest` extends it with required fields
+   - `WorkspaceUpdateRequest` adds routing fields
+   - `WorkspaceParams` provides a parameter object without routing fields
 
 ## Utility Functions
 
 ### JSON:API Payload Utilities
-To ensure consistent handling of API payloads, use these utility functions from `terraform_cloud_mcp/utils/payload.py`:
+To ensure consistent handling of API payloads, use the utility functions from `terraform_cloud_mcp/utils/payload.py`:
 
 1. **create_api_payload**:
-   ```python
-   def create_api_payload(
-       resource_type: str, 
-       model: BaseModel,
-       exclude_fields: Optional[Set[str]] = None,
-   ) -> Dict[str, Any]:
-       """Creates a JSON:API compliant payload from a Pydantic model."""
-   ```
+   See implementation in `terraform_cloud_mcp/utils/payload.py` and example usage in `create_workspace` function in `terraform_cloud_mcp/tools/workspaces.py`
 
 2. **add_relationship**:
-   ```python
-   def add_relationship(
-       payload: Dict[str, Any], 
-       relation_name: str,
-       resource_type: str,
-       resource_id: str
-   ) -> Dict[str, Any]:
-       """Adds a relationship to a JSON:API payload."""
-   ```
+   See implementation in `terraform_cloud_mcp/utils/payload.py` and usage examples in `terraform_cloud_mcp/tools/runs.py`
 
 ### Request Parameter Utilities
-For handling pagination and request parameters, use utilities from `terraform_cloud_mcp/utils/request.py`:
-
-1. **pagination_params**:
-   ```python
-   def pagination_params(
-       model: PaginationModel,
-       search_field: Optional[str] = "search"
-   ) -> Dict[str, Any]:
-       """Creates pagination parameters from a Pydantic request model."""
-   ```
+For handling pagination and request parameters, see `terraform_cloud_mcp/utils/request.py` and its usage in list operations like `list_workspaces` in `terraform_cloud_mcp/tools/workspaces.py`
 
 ## Documentation Standards
 
@@ -288,100 +204,93 @@ For handling pagination and request parameters, use utilities from `terraform_cl
 
 ### Model Classes
 
-```python
-class ExampleModel(BaseModel):
-    """Brief description of the model's purpose.
-    
-    Longer description explaining its role and context.
-    
-    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/section
-    
-    Fields:
-        field_name: Description of the field (only in base classes)
-        
-    Note: 
-        Any important usage notes or inheritance details.
-        
-    See: 
-        docs/models/model_name_examples.md for usage examples
-    """
-```
+See `VcsRepoConfig` class in `terraform_cloud_mcp/models/workspaces.py` for proper model documentation
 
-For derived classes, only document new or overridden fields and indicate inheritance:
-
-```python
-class DerivedModel(BaseModel):
-    """Brief description of the derived model.
-    
-    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/section
-    
-    Note:
-        This inherits all fields from BaseModel.
-        Only new/overridden fields documented here.
-        
-    See: 
-        docs/models/model_name_examples.md for usage examples
-    """
-```
+For derived classes that inherit from a base class, see `WorkspaceCreateRequest` in `terraform_cloud_mcp/models/workspaces.py` as an example of how to document inheritance
 
 ### Tool Functions
 
-```python
-async def example_function(param1: str, param2: int = 0) -> APIResponse:
-    """Brief description of what the function does.
-    
-    Context about WHEN to use this tool and its purpose.
-    
-    API endpoint: METHOD /path/to/endpoint
-    
-    Args:
-        param1: Brief description of parameter
-        param2: Brief description including default value
-        params: Optional configuration settings:
-            - option1: Description of what this option does
-            - option2: Description with possible values
-            
-    Returns:
-        Description of return structure and important fields
-        
-    See:
-        docs/tools/tool_name.md for usage examples
-    """
-```
+See `create_workspace` function in `terraform_cloud_mcp/tools/workspaces.py` for proper tool function documentation including:
+- Purpose description
+- API endpoint reference
+- Parameter documentation
+- Return value description
+- External documentation references
 
 ### Utility Functions
 
-```python
-def helper_function(param: Any) -> ResultType:
-    """Brief description of what this helper does.
-    
-    Args:
-        param: Description of parameter
-        
-    Returns:
-        Description of return value
-        
-    Raises:
-        ExceptionType: When error conditions are met
-    """
-```
+See utility functions in `terraform_cloud_mcp/utils/payload.py` and `terraform_cloud_mcp/utils/request.py` for examples of properly documented helper functions
 
 ### Documentation Structure
 
-Examples should be moved to dedicated markdown files:
+Documentation is organized in dedicated markdown files:
 
 ```
 docs/
-  models/
-    account_examples.md
-    organization_examples.md
-    workspace_examples.md
-    run_examples.md
-  tools/
-    account_tools.md
-    organization_tools.md
-    workspace_tools.md
-    run_tools.md
+  models/             # Documentation for Pydantic models
+    account.md
+    apply.md
+    cost_estimate.md
+    organization.md
+    plan.md
+    project.md
+    run.md
+    workspace.md
+  tools/              # Reference documentation for MCP tools
+    account.md
+    apply.md
+    cost_estimate.md
+    organization.md
+    plan.md
+    project.md
+    run.md
+    workspace.md
+```
+
+#### Tool Documentation Format
+
+Each tool documentation file should follow this structure:
+
+```markdown
+# Module Name Tools
+
+Brief introduction about the module's purpose.
+
+## Overview
+
+Detailed explanation of the functionality and concepts.
+
+## API Reference
+
+Links to relevant Terraform Cloud API documentation:
+- [API Section 1](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/section)
+- [API Section 2](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/section)
+
+## Tools Reference
+
+### function_name
+
+**Function:** `function_name(param1: type, param2: type) -> ReturnType`
+
+**Description:** Explanation of what the function does.
+
+**Parameters:**
+- `param1` (type): Parameter description
+- `param2` (type): Parameter description
+
+**Returns:** Description of return value structure
+
+**Notes:**
+- Important usage information
+- Related functionality
+- Permissions required
+
+**Common Error Scenarios:**
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| 404   | Resource not found | Verify ID and permissions |
+| 422   | Invalid parameters | Ensure values match required format |
 ```
 
 ## Code Commenting Standards
