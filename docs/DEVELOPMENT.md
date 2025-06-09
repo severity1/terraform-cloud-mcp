@@ -86,6 +86,7 @@ terraform_cloud_mcp/
 │   ├── __init__.py
 │   ├── account.py      # Account-related models
 │   ├── applies.py      # Apply-related models
+│   ├── assessment_results.py # Assessment results models
 │   ├── base.py         # Base model classes and shared types
 │   ├── cost_estimates.py # Cost estimation models
 │   ├── organizations.py # Organization models
@@ -97,6 +98,7 @@ terraform_cloud_mcp/
 │   ├── __init__.py
 │   ├── account.py      # Account management tools
 │   ├── applies.py      # Apply management tools
+│   ├── assessment_results.py # Assessment results tools
 │   ├── cost_estimates.py # Cost estimation tools
 │   ├── organizations.py # Organization management tools
 │   ├── plans.py        # Plan management tools
@@ -230,6 +232,7 @@ docs/
   models/             # Documentation for Pydantic models
     account.md
     apply.md
+    assessment_result.md
     cost_estimate.md
     organization.md
     plan.md
@@ -239,12 +242,24 @@ docs/
   tools/              # Reference documentation for MCP tools
     account.md
     apply.md
+    assessment_results.md
     cost_estimate.md
     organization.md
     plan.md
     project.md
     run.md
     workspace.md
+  conversations/      # Example conversations using the tools
+    account.md
+    apply-management-conversation.md
+    assessment-results-conversation.md
+    cost-estimate-conversation.md
+    organization-entitlements-conversation.md
+    organizations-management-conversation.md
+    plan-management-conversation.md
+    project-management-conversation.md
+    runs-management-conversation.md
+    workspace-management-conversation.md
 ```
 
 #### Tool Documentation Format

@@ -4,7 +4,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.11-blue)
+![Version](https://img.shields.io/badge/version-0.8.12-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -242,3 +242,9 @@ The codebase includes comprehensive documentation:
 Contributions are welcome! Please open an issue or pull request if you'd like to contribute to this project.
 
 See our [Contributing Guide](docs/CONTRIBUTING.md) for detailed instructions on how to get started, code quality standards, and the pull request process.
+
+## Disclaimer
+
+This project is not affiliated with, associated with, or endorsed by HashiCorp or Terraform.  
+"Terraform" and "Terraform Cloud" are trademarks of HashiCorp.  
+This project merely interacts with the Terraform Cloud public API under fair use.

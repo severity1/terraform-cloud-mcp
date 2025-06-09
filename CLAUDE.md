@@ -58,3 +58,13 @@ For detailed guidance on specific components, refer to the relevant CLAUDE.md fi
   - Add comments for complex logic, edge cases, security measures, or API-specific requirements
   - Avoid redundant, unnecessary, or self-explanatory comments
   - Keep comments concise and directly relevant
+
+## Workflow Guidelines
+- When adding/implementing new tools:
+  - Create model documentation in `docs/models/`
+  - Create documentation in `docs/tools/`
+  - Create conversation example in `docs/conversations/`
+  - Always update `docs/README.md`, `docs/DEVELOPMENT.md`
+  - Update any relevant `CLAUDE.md` files to include tool information
+
+- Update `TASKS.md` to mark task as completed if it exists and is used for the task.

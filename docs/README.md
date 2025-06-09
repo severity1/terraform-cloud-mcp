@@ -12,6 +12,7 @@ This directory contains supplementary documentation for the Terraform Cloud MCP 
 The `models/` directory contains documentation for each model type:
 - `account.md` - Account model documentation
 - `apply.md` - Apply model documentation
+- `assessment_result.md` - Assessment result model documentation
 - `cost_estimate.md` - Cost estimate model documentation
 - `organization.md` - Organization model documentation  
 - `plan.md` - Plan model documentation
@@ -23,6 +24,7 @@ The `models/` directory contains documentation for each model type:
 The `tools/` directory contains reference documentation for each tool:
 - `account.md` - Account tool reference documentation
 - `apply.md` - Apply management tool reference documentation
+- `assessment_results.md` - Assessment results tool reference documentation
 - `cost_estimate.md` - Cost estimate tools reference documentation
 - `organization.md` - Organization tools reference documentation
 - `plan.md` - Plan management tool reference documentation
@@ -31,7 +33,17 @@ The `tools/` directory contains reference documentation for each tool:
 - `workspace.md` - Workspace tools reference documentation
 
 ### Conversation Examples
-The `conversations/` directory contains example conversations and usage scenarios.
+The `conversations/` directory contains example conversations and usage scenarios:
+- `account.md` - Account management conversation examples
+- `apply-management-conversation.md` - Apply management conversation examples
+- `assessment-results-conversation.md` - Assessment results conversation examples
+- `cost-estimate-conversation.md` - Cost estimation conversation examples
+- `organization-entitlements-conversation.md` - Organization entitlements conversation examples
+- `organizations-management-conversation.md` - Organization management conversation examples
+- `plan-management-conversation.md` - Plan management conversation examples
+- `project-management-conversation.md` - Project management conversation examples
+- `runs-management-conversation.md` - Run management conversation examples
+- `workspace-management-conversation.md` - Workspace management conversation examples
 
 ## Documentation Philosophy
 1. Code docstrings contain essential information about purpose, fields, parameters, and return values

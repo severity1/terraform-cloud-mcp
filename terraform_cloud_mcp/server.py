@@ -15,6 +15,7 @@ from terraform_cloud_mcp.tools import plans
 from terraform_cloud_mcp.tools import applies
 from terraform_cloud_mcp.tools import projects
 from terraform_cloud_mcp.tools import cost_estimates
+from terraform_cloud_mcp.tools import assessment_results
 
 # Load environment variables from .env file
 load_dotenv()
@@ -81,6 +82,12 @@ mcp.tool()(projects.move_workspaces_to_project)
 
 # Register cost estimates tools
 mcp.tool()(cost_estimates.get_cost_estimate_details)
+
+# Register assessment results tools
+mcp.tool()(assessment_results.get_assessment_result_details)
+mcp.tool()(assessment_results.get_assessment_json_output)
+mcp.tool()(assessment_results.get_assessment_json_schema)
+mcp.tool()(assessment_results.get_assessment_log_output)
 
 
 def main() -> None:
