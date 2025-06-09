@@ -18,6 +18,7 @@ The tools directory contains all Model Context Protocol (MCP) tools that are exp
   - **organizations.py**: Organization management tools
   - **projects.py**: Project management tools
   - **cost_estimates.py**: Cost estimate tools
+  - **assessment_results.py**: Health assessment results tools
 
 ## Tool Implementation Pattern
 

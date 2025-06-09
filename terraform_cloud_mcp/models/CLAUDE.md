@@ -30,6 +30,7 @@ We validate requests using Pydantic models but do not validate responses (respon
   - **organizations.py**: Organization management models
   - **projects.py**: Project management models
   - **cost_estimates.py**: Cost estimation models
+  - **assessment_results.py**: Health assessment results models
 
 ## Pydantic Model Pattern
 
