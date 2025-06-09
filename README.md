@@ -242,3 +242,9 @@ The codebase includes comprehensive documentation:
 Contributions are welcome! Please open an issue or pull request if you'd like to contribute to this project.
 
 See our [Contributing Guide](docs/CONTRIBUTING.md) for detailed instructions on how to get started, code quality standards, and the pull request process.
+
+## Disclaimer
+
+This project is not affiliated with, associated with, or endorsed by HashiCorp or Terraform.  
+"Terraform" and "Terraform Cloud" are trademarks of HashiCorp.  
+This project merely interacts with the Terraform Cloud public API under fair use.
