@@ -16,6 +16,8 @@ from terraform_cloud_mcp.tools import applies
 from terraform_cloud_mcp.tools import projects
 from terraform_cloud_mcp.tools import cost_estimates
 from terraform_cloud_mcp.tools import assessment_results
+from terraform_cloud_mcp.tools import state_versions
+from terraform_cloud_mcp.tools import state_version_outputs
 
 # Load environment variables from .env file
 load_dotenv()
@@ -88,6 +90,17 @@ mcp.tool()(assessment_results.get_assessment_result_details)
 mcp.tool()(assessment_results.get_assessment_json_output)
 mcp.tool()(assessment_results.get_assessment_json_schema)
 mcp.tool()(assessment_results.get_assessment_log_output)
+
+# Register state version tools
+mcp.tool()(state_versions.list_state_versions)
+mcp.tool()(state_versions.get_current_state_version)
+mcp.tool()(state_versions.get_state_version)
+mcp.tool()(state_versions.create_state_version)
+mcp.tool()(state_versions.download_state_file)
+
+# Register state version outputs tools
+mcp.tool()(state_version_outputs.list_state_version_outputs)
+mcp.tool()(state_version_outputs.get_state_version_output)
 
 
 def main() -> None:

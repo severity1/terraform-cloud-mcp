@@ -3,20 +3,26 @@
 # Import tools for easier access
 from . import account
 from . import applies
+from . import assessment_results
 from . import cost_estimates
-from . import workspaces
-from . import runs
 from . import organizations
 from . import plans
 from . import projects
+from . import runs
+from . import state_versions
+from . import state_version_outputs
+from . import workspaces
 
 __all__ = [
     "account",
     "applies",
+    "assessment_results",
     "cost_estimates",
-    "workspaces",
-    "runs",
     "organizations",
     "plans",
     "projects",
+    "runs",
+    "state_versions",
+    "state_version_outputs",
+    "workspaces",
 ]

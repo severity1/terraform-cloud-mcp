@@ -18,6 +18,8 @@ The `models/` directory contains documentation for each model type:
 - `plan.md` - Plan model documentation
 - `project.md` - Project model documentation
 - `run.md` - Run model documentation
+- `state_versions.md` - State version model documentation
+- `state_version_outputs.md` - State version outputs model documentation
 - `workspace.md` - Workspace model documentation
 
 ### Tool Documentation
@@ -30,6 +32,8 @@ The `tools/` directory contains reference documentation for each tool:
 - `plan.md` - Plan management tool reference documentation
 - `project.md` - Project management tool reference documentation
 - `run.md` - Run tools reference documentation
+- `state_versions.md` - State version management tool reference documentation
+- `state_version_outputs.md` - State version outputs tool reference documentation
 - `workspace.md` - Workspace tools reference documentation
 
 ### Conversation Examples
@@ -43,6 +47,7 @@ The `conversations/` directory contains example conversations and usage scenario
 - `plan-management-conversation.md` - Plan management conversation examples
 - `project-management-conversation.md` - Project management conversation examples
 - `runs-management-conversation.md` - Run management conversation examples
+- `state_management.md` - State management conversation examples
 - `workspace-management-conversation.md` - Workspace management conversation examples
 
 ## Documentation Philosophy

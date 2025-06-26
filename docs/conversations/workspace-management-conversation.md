@@ -4,13 +4,12 @@ This document shows example conversations with Claude using the Terraform Cloud 
 
 ## Listing and Finding Workspaces
 
-**User**: List all my workspaces in "example-org"
-
-**Claude**: I'll list all workspaces in the "example-org" organization.
-
-```python
-workspaces = await list_workspaces(organization="example-org")
 ```
+User: List all my workspaces in "example-org"
+
+Claude: I'll list all workspaces in the "example-org" organization.
+
+[Claude uses list_workspaces tool]
 
 Here are all the workspaces in "example-org":
 
@@ -39,13 +38,11 @@ Here are all the workspaces in "example-org":
    - Last run: Discarded 3 days ago
    - VCS: Connected to GitHub (main branch)
 
-**User**: Find all workspaces in "example-org" with names containing "prod"
+User: Find all workspaces in "example-org" with names containing "prod"
 
-**Claude**: I'll search for workspaces in the "example-org" organization that have "prod" in their names.
+Claude: I'll search for workspaces in the "example-org" organization that have "prod" in their names.
 
-```python
-workspaces = await list_workspaces(organization="example-org", search_name="prod")
-```
+[Claude uses list_workspaces tool]
 
 I found the following workspaces in "example-org" with "prod" in their names:
 
@@ -64,16 +61,11 @@ I found the following workspaces in "example-org" with "prod" in their names:
    - Last run: Errored 12 hours ago
    - VCS: Connected to GitHub (main branch)
 
-**User**: List workspaces in "example-org" with the "environment:production" tag
+User: List workspaces in "example-org" with the "environment:production" tag
 
-**Claude**: I'll find workspaces in "example-org" that have the "environment:production" tag.
+Claude: I'll find workspaces in "example-org" that have the "environment:production" tag.
 
-```python
-workspaces = await list_workspaces(
-    organization="example-org",
-    search_tags="environment:production"
-)
-```
+[Claude uses list_workspaces tool]
 
 Here are the workspaces in "example-org" tagged with "environment:production":
 
@@ -97,18 +89,16 @@ Here are the workspaces in "example-org" tagged with "environment:production":
    - Status: Active, Unlocked
    - Last run: Applied 3 days ago
 
+```
+
 ## Workspace Details and Management
 
-**User**: Get details for the "production" workspace in "example-org"
-
-**Claude**: I'll retrieve detailed information about the "production" workspace in "example-org".
-
-```python
-workspace = await get_workspace_details(
-    organization="example-org",
-    workspace_name="production"
-)
 ```
+User: Get details for the "production" workspace in "example-org"
+
+Claude: I'll retrieve detailed information about the "production" workspace in "example-org".
+
+[Claude uses get_workspace_details tool]
 
 Here are the details for the "production" workspace in "example-org":
 
@@ -144,21 +134,11 @@ Here are the details for the "production" workspace in "example-org":
 - region:us-west-2
 - team:infrastructure
 
-**User**: Create a new workspace in "example-org" called "staging" with auto-apply enabled
+User: Create a new workspace in "example-org" called "staging" with auto-apply enabled
 
-**Claude**: I'll create a new workspace called "staging" in the "example-org" organization with auto-apply enabled.
+Claude: I'll create a new workspace called "staging" in the "example-org" organization with auto-apply enabled.
 
-```python
-new_workspace = await create_workspace(
-    organization="example-org",
-    name="staging",
-    auto_apply=True,
-    description="Staging environment for testing",
-    terraform_version="1.5.2",
-    working_directory="/terraform/staging",
-    execution_mode="remote"
-)
-```
+[Claude uses create_workspace tool]
 
 I've successfully created the "staging" workspace in "example-org" with auto-apply enabled. Here are the details:
 
@@ -174,17 +154,11 @@ I've successfully created the "staging" workspace in "example-org" with auto-app
 
 The workspace is now ready to use. Since auto-apply is enabled, any successful plans will automatically be applied without requiring manual approval.
 
-**User**: Update my "staging" workspace to use Terraform version 1.5.0
+User: Update my "staging" workspace to use Terraform version 1.5.0
 
-**Claude**: I'll update the "staging" workspace in "example-org" to use Terraform version 1.5.0.
+Claude: I'll update the "staging" workspace in "example-org" to use Terraform version 1.5.0.
 
-```python
-updated_workspace = await update_workspace(
-    organization="example-org",
-    workspace_name="staging",
-    terraform_version="1.5.0"
-)
-```
+[Claude uses update_workspace tool]
 
 I've successfully updated the "staging" workspace to use Terraform version 1.5.0. Here's the confirmation:
 
@@ -198,19 +172,16 @@ I've successfully updated the "staging" workspace to use Terraform version 1.5.0
 
 The change has been applied immediately. Any new runs in this workspace will now use Terraform 1.5.0 instead of 1.5.2.
 
+```
+
 ## Workspace Deletion
 
-**User**: Delete my "dev-test" workspace in "example-org"
-
-**Claude**: I'll help you delete the "dev-test" workspace in "example-org". This is a significant action that requires confirmation.
-
-```python
-delete_response = await delete_workspace(
-    organization="example-org", 
-    workspace_name="dev-test", 
-    confirm=False
-)
 ```
+User: Delete my "dev-test" workspace in "example-org"
+
+Claude: I'll help you delete the "dev-test" workspace in "example-org". This is a significant action that requires confirmation.
+
+[Claude uses delete_workspace tool]
 
 **WARNING: Confirmation Required**
 
@@ -222,33 +193,21 @@ You've requested to delete the "dev-test" workspace in "example-org". This actio
 
 To confirm deletion, please explicitly confirm that you want to proceed.
 
-**User**: Yes, please delete the workspace
+User: Yes, please delete the workspace
 
-**Claude**: I'll proceed with deleting the "dev-test" workspace as confirmed.
+Claude: I'll proceed with deleting the "dev-test" workspace as confirmed.
 
-```python
-delete_response = await delete_workspace(
-    organization="example-org", 
-    workspace_name="dev-test", 
-    confirm=True
-)
-```
+[Claude uses delete_workspace tool]
 
 **Deletion Successful**
 
 The "dev-test" workspace in "example-org" has been permanently deleted. All associated resources, variables, and state files have been removed.
 
-**User**: Delete my "staging" workspace but only if it's not managing any resources
+User: Delete my "staging" workspace but only if it's not managing any resources
 
-**Claude**: I'll help you safely delete the "staging" workspace, but only if it's not currently managing any resources.
+Claude: I'll help you safely delete the "staging" workspace, but only if it's not currently managing any resources.
 
-```python
-delete_response = await safe_delete_workspace(
-    organization="example-org", 
-    workspace_name="staging", 
-    confirm=False
-)
-```
+[Claude uses safe_delete_workspace tool]
 
 **WARNING: Confirmation Required**
 
@@ -260,17 +219,11 @@ You've requested to safely delete the "staging" workspace in "example-org". This
 
 To proceed with the safe deletion, please confirm.
 
-**User**: Yes, proceed with the safe delete
+User: Yes, proceed with the safe delete
 
-**Claude**: I'll proceed with the safe deletion of the "staging" workspace.
+Claude: I'll proceed with the safe deletion of the "staging" workspace.
 
-```python
-delete_response = await safe_delete_workspace(
-    organization="example-org", 
-    workspace_name="staging", 
-    confirm=True
-)
-```
+[Claude uses safe_delete_workspace tool]
 
 **Safe Deletion Successful**
 
@@ -278,19 +231,16 @@ The "staging" workspace in "example-org" has been safely deleted. The workspace 
 
 All workspace configurations, variables, and settings have been removed. The operation completed successfully.
 
+```
+
 ## Workspace Locking and Unlocking
 
-**User**: Lock my "production" workspace while we do maintenance
-
-**Claude**: I'll lock the "production" workspace to prevent any changes during your maintenance period.
-
-```python
-lock_response = await lock_workspace(
-    organization="example-org",
-    workspace_name="production",
-    reason="Scheduled maintenance in progress"
-)
 ```
+User: Lock my "production" workspace while we do maintenance
+
+Claude: I'll lock the "production" workspace to prevent any changes during your maintenance period.
+
+[Claude uses lock_workspace tool]
 
 **Workspace Locked**
 
@@ -307,16 +257,11 @@ I've successfully locked the "production" workspace in "example-org". While lock
 
 The workspace will remain locked until you request it to be unlocked.
 
-**User**: The maintenance is complete, unlock "production" now
+User: The maintenance is complete, unlock "production" now
 
-**Claude**: I'll unlock the "production" workspace now that maintenance is complete.
+Claude: I'll unlock the "production" workspace now that maintenance is complete.
 
-```python
-unlock_response = await unlock_workspace(
-    organization="example-org",
-    workspace_name="production"
-)
-```
+[Claude uses unlock_workspace tool]
 
 **Workspace Unlocked**
 
@@ -327,16 +272,11 @@ The "production" workspace in "example-org" has been successfully unlocked. Norm
 
 The workspace is now available for use.
 
-**User**: Someone left "staging" locked and they're out today. Can you force unlock it?
+User: Someone left "staging" locked and they're out today. Can you force unlock it?
 
-**Claude**: I'll force unlock the "staging" workspace since the person who locked it is unavailable today.
+Claude: I'll force unlock the "staging" workspace since the person who locked it is unavailable today.
 
-```python
-force_unlock_response = await force_unlock_workspace(
-    organization="example-org",
-    workspace_name="staging"
-)
-```
+[Claude uses force_unlock_workspace tool]
 
 **Workspace Force Unlocked**
 
@@ -348,3 +288,4 @@ The force unlock has:
 - Allowed new runs to be queued
 
 The workspace is now unlocked and available for normal operations. Note that force unlocking should only be done in situations like this where the original locker is unavailable.
+```

@@ -5,13 +5,13 @@ This document provides example conversations demonstrating how to use the plan m
 ## Getting Plan Details
 
 ```
-User: I'd like to see details for my plan with ID plan-aBcdEfGh12345678
+**User:** I'd like to see details for my plan with ID plan-aBcdEfGh12345678
 
-Claude: I'll retrieve the details for that plan for you.
+**Claude:** I'll retrieve the details for that plan for you.
 
-[Tool use: get_plan_details with plan_id="plan-aBcdEfGh12345678"]
+[Claude uses get_plan_details tool]
 
-Claude: Here are the details for plan-aBcdEfGh12345678:
+Here are the details for plan-aBcdEfGh12345678:
 
 Status: finished
 Resources to add: 3
@@ -26,71 +26,15 @@ It's associated with run-pQrStUvW12345678 in workspace "production-infrastructur
 ## Retrieving Plan Logs
 
 ```
-User: Can you show me the actual Terraform plan output for plan-aBcdEfGh12345678?
+**User:** Can you show me the actual Terraform plan output for plan-aBcdEfGh12345678?
 
-Claude: I'll retrieve the plan logs for you.
+**Claude:** I'll retrieve the plan logs for you.
 
-[Tool use: get_plan_logs with plan_id="plan-aBcdEfGh12345678"]
+[Claude uses get_plan_logs tool]
 
-Claude: Here are the logs from the plan execution:
+I've retrieved the complete plan execution logs. The plan shows that Terraform will create an S3 bucket called "example-data-bucket" with versioning enabled and production tags, create a new IAM role for Lambda execution, and modify an existing security group to add an HTTPS ingress rule allowing traffic from anywhere.
 
-Terraform v1.5.7
-on linux_amd64
-Initializing plugins and modules...
-
-aws_security_group.allow_http: Refreshing state... [id=sg-0a1b2c3d4e5f6g7h8]
-
-Terraform used the selected providers to generate the following execution
-plan. Resource actions are indicated with the following symbols:
-  + create
-  ~ modify
-
-Terraform will perform the following actions:
-
-  # aws_s3_bucket.data will be created
-  + resource "aws_s3_bucket" "data" {
-      + acceleration_status         = (known after apply)
-      + acl                         = "private"
-      + arn                         = (known after apply)
-      + bucket                      = "example-data-bucket"
-      + versioning {
-          + enabled = true
-        }
-      + tags                        = {
-          + "Environment" = "Production"
-          + "Name"        = "Data Storage Bucket"
-        }
-    }
-
-  # aws_iam_role.lambda_role will be created
-  + resource "aws_iam_role" "lambda_role" {
-      + arn                = (known after apply)
-      + assume_role_policy = jsonencode({...})
-      + name               = "lambda-execution-role"
-    }
-
-  # aws_security_group.allow_http will be modified
-  ~ resource "aws_security_group" "allow_http" {
-      ~ ingress                = [
-          + {
-              + cidr_blocks      = [
-                  + "0.0.0.0/0",
-                ]
-              + description      = "HTTPS from anywhere"
-              + from_port        = 443
-              + ipv6_cidr_blocks = []
-              + prefix_list_ids  = []
-              + protocol         = "tcp"
-              + security_groups  = []
-              + self             = false
-              + to_port          = 443
-            },
-            # (1 unchanged element hidden)
-        ]
-        # (8 unchanged attributes hidden)
-    }
-
-Plan: 2 to add, 1 to change, 0 to destroy.
+The plan execution used Terraform v1.5.7 and successfully determined that 2 resources will be added and 1 will be changed, with no resources being destroyed.
 
 Would you like me to explain any part of this plan in more detail?
 ```
@@ -98,13 +42,13 @@ Would you like me to explain any part of this plan in more detail?
 ## Retrieving Plan JSON Output
 
 ```
-User: Can you get me the JSON execution output for plan-aBcdEfGh12345678? I need to analyze the changes.
+**User:** Can you get me the JSON execution output for plan-aBcdEfGh12345678? I need to analyze the changes.
 
-Claude: I'll retrieve the JSON execution plan for you.
+**Claude:** I'll retrieve the JSON execution plan for you.
 
-[Tool use: get_plan_json_output with plan_id="plan-aBcdEfGh12345678"]
+[Claude uses get_plan_json_output tool]
 
-Claude: I've obtained the JSON execution plan. Here's an analysis of the planned changes:
+I've obtained the JSON execution plan. Here's an analysis of the planned changes:
 
 The plan includes:
 - 2 resources to be created (aws_s3_bucket.data and aws_iam_role.lambda_role)
@@ -122,13 +66,13 @@ The plan was generated with Terraform 1.5.7 and includes all configuration detai
 ## Retrieving Run Plan JSON Output
 
 ```
-User: I'm working with a run ID run-xYzAbCdE12345678 and need the JSON execution plan from that run.
+**User:** I'm working with a run ID run-xYzAbCdE12345678 and need the JSON execution plan from that run.
 
-Claude: I'll get the JSON plan output from that run for you.
+**Claude:** I'll get the JSON plan output from that run for you.
 
-[Tool use: get_run_plan_json_output with run_id="run-xYzAbCdE12345678"]
+[Claude uses get_run_plan_json_output tool]
 
-Claude: I've retrieved the JSON execution plan for run-xYzAbCdE12345678. This is a destruction plan that will remove the following resources:
+I've retrieved the JSON execution plan for run-xYzAbCdE12345678. This is a destruction plan that will remove the following resources:
 
 - aws_instance.web_server (EC2 instance)
 - aws_security_group.web_access
@@ -149,13 +93,13 @@ Would you like me to extract any specific details from the plan?
 ## Working with Plan Status
 
 ```
-User: My plan seems to be taking a long time. The ID is plan-mNoPqRsT12345678. What's its status?
+**User:** My plan seems to be taking a long time. The ID is plan-mNoPqRsT12345678. What's its status?
 
-Claude: Let me check the status of that plan for you.
+**Claude:** Let me check the status of that plan for you.
 
-[Tool use: get_plan_details with plan_id="plan-mNoPqRsT12345678"]
+[Claude uses get_plan_details tool]
 
-Claude: Your plan with ID plan-mNoPqRsT12345678 is currently in the "running" status. 
+Your plan with ID plan-mNoPqRsT12345678 is currently in the "running" status. 
 
 It was queued at 2025-03-01T09:15:33Z and started execution at 2025-03-01T09:16:10Z (about 25 minutes ago).
 
@@ -167,13 +111,13 @@ Would you like me to check if there are any logs available that might provide mo
 ## Analyzing Plan Resources
 
 ```
-User: I need to understand what resources will be created in plan-gHiJkLmN12345678
+**User:** I need to understand what resources will be created in plan-gHiJkLmN12345678
 
-Claude: I'll retrieve and analyze the plan details for you.
+**Claude:** I'll retrieve and analyze the plan details for you.
 
-[Tool use: get_plan_details with plan_id="plan-gHiJkLmN12345678"]
+[Claude uses get_plan_details tool]
 
-Claude: The plan plan-gHiJkLmN12345678 will create 5 new resources:
+The plan plan-gHiJkLmN12345678 will create 5 new resources:
 
 - 2 aws_security_group resources
 - 1 aws_instance (EC2) resource
@@ -190,14 +134,13 @@ For more detailed analysis of the exact resource configurations, I can retrieve 
 ## Comparing Multiple Plans
 
 ```
-User: I have two plans I want to compare: plan-qRsTuVwX12345678 and plan-yZaBcDeF12345678
+**User:** I have two plans I want to compare: plan-qRsTuVwX12345678 and plan-yZaBcDeF12345678
 
-Claude: I'll retrieve both plans and compare them for you.
+**Claude:** I'll retrieve both plans and compare them for you.
 
-[Tool use: get_plan_details with plan_id="plan-qRsTuVwX12345678"]
-[Tool use: get_plan_details with plan_id="plan-yZaBcDeF12345678"]
+[Claude uses get_plan_details tool]
 
-Claude: Here's a comparison of the two plans:
+Here's a comparison of the two plans:
 
 Plan 1 (plan-qRsTuVwX12345678):
 - Status: finished
@@ -223,13 +166,13 @@ To see exactly what changed between these plans, I can retrieve and compare the 
 ## Examining Plan Logs for Errors
 
 ```
-User: I'm concerned about potential issues in plan-kLmNoPqR12345678. Can you check the logs for any warnings or errors?
+**User:** I'm concerned about potential issues in plan-kLmNoPqR12345678. Can you check the logs for any warnings or errors?
 
-Claude: I'll examine the plan logs for warnings or errors.
+**Claude:** I'll examine the plan logs for warnings or errors.
 
-[Tool use: get_plan_logs with plan_id="plan-kLmNoPqR12345678"]
+[Claude uses get_plan_logs tool]
 
-Claude: I've analyzed the plan logs and found the following issues:
+I've analyzed the plan logs and found the following issues:
 
 Warnings:
 1. Deprecated attribute: The plan contains a warning about using the deprecated "public_ip" attribute on aws_instance.web. The recommended replacement is "public_ip_address".

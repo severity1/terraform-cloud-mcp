@@ -4,13 +4,12 @@ This document shows example conversations with Claude using the Terraform Cloud 
 
 ## Viewing Basic Organization Entitlements
 
+```
 **User**: Can you show me the entitlements for my organization "hashicorp"?
 
 **Claude**: I'll retrieve the entitlements for your "hashicorp" organization.
 
-```python
-result = await get_organization_entitlements("hashicorp")
-```
+[Claude uses get_organization_entitlements tool]
 
 Here are the entitlements for your "hashicorp" organization:
 
@@ -34,9 +33,11 @@ Here are the entitlements for your "hashicorp" organization:
 - Run Task Workspace Limit: 10
 
 These entitlements indicate you're on a basic tier plan with access to core features like state storage, operations, and private module registry, but without premium features like SSO, teams, or Sentinel policies.
+```
 
 ## Understanding Plan Features and Upgrades
 
+```
 **User**: What features would I get if I upgraded my plan?
 
 **Claude**: Based on your current entitlements, if you upgraded your plan (likely to a Team or Enterprise tier), you would gain access to several premium features:
@@ -58,23 +59,18 @@ You might also gain access to:
 - Module Tests Generation - Automated test creation for modules
 
 The exact features would depend on the specific tier you upgrade to. Would you like me to help you determine which plan would be best for your needs?
+```
 
 ## Analyzing Usage Against Entitlements
 
+```
 **User**: Can you tell me which features we're actually using in our current organization?
 
 **Claude**: To determine which features you're actually using in your organization, I'll need to check various aspects of your Terraform Cloud setup.
 
-```python
-# First, let's get overall organization details
-org_details = await get_organization_details("hashicorp")
-
-# Let's check workspace count to understand usage scale
-workspaces = await list_workspaces(organization="hashicorp")
-
-# Check if there are any runs to understand activity level
-runs = await list_runs_in_organization(organization="hashicorp", page_size=5)
-```
+[Claude uses get_organization_details tool]
+[Claude uses list_workspaces tool]
+[Claude uses list_runs_in_organization tool]
 
 Based on my analysis of your "hashicorp" organization:
 
@@ -100,24 +96,16 @@ Based on your usage patterns, you might benefit most from upgrading if you need:
 3. Cost visibility for your infrastructure
 
 Would you like more specific recommendations based on your organization's needs?
+```
 
 ## Checking User Capacity Against Limits
 
+```
 **User**: Are we close to hitting our user limit?
 
 **Claude**: Let me check your current user count against your limit.
 
-```python
-# Get organization entitlements
-entitlements = await get_organization_entitlements("hashicorp")
-user_limit = entitlements["data"]["attributes"]["user-limit"]
-
-# We'd need to use a different API call to get the actual user count
-# Since this is not yet implemented, we'll simulate this information
-# In a real implementation, you'd use something like:
-# users = await list_organization_users("hashicorp")
-# user_count = len(users["data"])
-```
+[Claude uses get_organization_entitlements tool]
 
 Based on your organization entitlements:
 
@@ -134,22 +122,16 @@ If you're planning to add more team members soon, you might want to consider upg
 3. More granular access control options
 
 Would you like me to help you explore upgrade options to accommodate your growing team?
+```
 
 ## Comparing Against Different Organizations
 
+```
 **User**: How do our entitlements compare to our "hashicorp-staging" organization?
 
 **Claude**: I'll compare the entitlements between your "hashicorp" and "hashicorp-staging" organizations.
 
-```python
-# Get entitlements for both organizations
-main_org_entitlements = await get_organization_entitlements("hashicorp")
-staging_org_entitlements = await get_organization_entitlements("hashicorp-staging")
-
-# Extract the attributes for easier comparison
-main_attributes = main_org_entitlements["data"]["attributes"]
-staging_attributes = staging_org_entitlements["data"]["attributes"]
-```
+[Claude uses get_organization_entitlements tool for both organizations]
 
 Here's a comparison of entitlements between your organizations:
 
@@ -177,3 +159,4 @@ Interesting findings:
 3. Both organizations lack SSO, which is typically only available on Enterprise plans
 
 This suggests your staging environment might be used for testing advanced features before adopting them in production. Would you like me to recommend how to align these environments, or explain why certain features might be important to have in production?
+```

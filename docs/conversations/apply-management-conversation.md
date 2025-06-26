@@ -5,13 +5,13 @@ This document provides example conversations demonstrating how to use the apply 
 ## Getting Apply Details
 
 ```
-User: I'd like to check on the status of an apply in my Terraform Cloud workspace. The apply ID is apply-gH2Ns7VBP9a2QMcr
+**User:** I'd like to check on the status of an apply in my Terraform Cloud workspace. The apply ID is apply-gH2Ns7VBP9a2QMcr
 
-Claude: I'll retrieve the details for that apply for you.
+**Claude:** I'll retrieve the details for that apply for you.
 
-[Tool use: get_apply_details with apply_id="apply-gH2Ns7VBP9a2QMcr"]
+[Claude uses get_apply_details tool]
 
-Claude: Here are the details for apply-gH2Ns7VBP9a2QMcr:
+Here are the details for apply-gH2Ns7VBP9a2QMcr:
 
 Status: finished
 Resources added: 3
@@ -26,31 +26,22 @@ The operation took about 3 minutes and 24 seconds to complete.
 ## Retrieving Apply Logs
 
 ```
-User: Can you show me the logs for apply-gH2Ns7VBP9a2QMcr? I want to see what changes were made.
+**User:** Can you show me the logs for apply-gH2Ns7VBP9a2QMcr? I want to see what changes were made.
 
-Claude: I'll retrieve the logs for that apply.
+**Claude:** I'll retrieve the logs for that apply.
 
-[Tool use: get_apply_logs with apply_id="apply-gH2Ns7VBP9a2QMcr"]
+[Claude uses get_apply_logs tool]
 
-Claude: Here are the logs from the apply:
+Here are the logs from the apply:
 
-Terraform v1.4.6
-on linux_amd64
+The apply used Terraform v1.4.6 on linux and successfully completed the following actions:
 
-Initializing plugins and modules...
+- Created an AWS security group (sg-0a1b2c3d4e5f6g7h8) in 3 seconds
+- Created an AWS instance for the web server (i-0a1b2c3d4e5f6g7h8) which took 30 seconds
+- Created an S3 bucket for logs (my-example-logs-bucket) in 5 seconds
+- Modified a security group rule to allow HTTPS traffic in 2 seconds
 
-aws_security_group.example: Creating...
-aws_security_group.example: Creation complete after 3s [id=sg-0a1b2c3d4e5f6g7h8]
-aws_instance.web_server: Creating...
-aws_instance.web_server: Still creating... [10s elapsed]
-aws_instance.web_server: Still creating... [20s elapsed]
-aws_instance.web_server: Creation complete after 30s [id=i-0a1b2c3d4e5f6g7h8]
-aws_s3_bucket.logs: Creating...
-aws_s3_bucket.logs: Creation complete after 5s [id=my-example-logs-bucket]
-aws_security_group_rule.allow_https: Modifying...
-aws_security_group_rule.allow_https: Modifications complete after 2s [id=sgrule-0a1b2c3d4e5f6g7h8]
-
-Apply complete! Resources: 3 added, 1 changed, 0 destroyed.
+The apply completed successfully with 3 resources added and 1 resource changed, taking about 40 seconds total.
 
 Would you like me to explain any specific part of the apply process?
 ```
@@ -58,13 +49,13 @@ Would you like me to explain any specific part of the apply process?
 ## Working with Errored States
 
 ```
-User: I found an apply with an error: apply-rT5Kp2VsMx3zNPqf. Can you check if there's a failed state to recover?
+**User:** I found an apply with an error: apply-rT5Kp2VsMx3zNPqf. Can you check if there's a failed state to recover?
 
-Claude: I'll check if there's an errored state for that apply that we can recover.
+**Claude:** I'll check if there's an errored state for that apply that we can recover.
 
-[Tool use: get_errored_state with apply_id="apply-rT5Kp2VsMx3zNPqf"]
+[Claude uses get_errored_state tool]
 
-Claude: I found the failed state upload for apply-rT5Kp2VsMx3zNPqf. It contains state data for 12 resources.
+I found the failed state upload for apply-rT5Kp2VsMx3zNPqf. It contains state data for 12 resources.
 
 The state version is 4, and it includes resources like:
 - aws_vpc.main (vpc-0a1b2c3d)
@@ -83,14 +74,14 @@ This state can be recovered to prevent drift between what Terraform Cloud knows 
 ## Understanding Apply Failures
 
 ```
-User: Can you check the details of apply-xYz123AbCd and tell me why it failed?
+**User:** Can you check the details of apply-xYz123AbCd and tell me why it failed?
 
-Claude: I'll examine what went wrong with that apply.
+**Claude:** I'll examine what went wrong with that apply.
 
-[Tool use: get_apply_details with apply_id="apply-xYz123AbCd"]
-[Tool use: get_apply_logs with apply_id="apply-xYz123AbCd"]
+[Claude uses get_apply_details tool]
+[Claude uses get_apply_logs tool]
 
-Claude: I've analyzed the failed apply. Here's what happened:
+I've analyzed the failed apply. Here's what happened:
 
 The apply failed during resource creation with error code 403 (Forbidden).
 
@@ -109,14 +100,14 @@ To resolve this, you'll need to either:
 ## Comparing Multiple Applies
 
 ```
-User: Can you compare the details of two different applies for me? apply-8HqpY2tKnGbR5xVz and apply-cJm3L7sWvZ4dNfQk
+**User:** Can you compare the details of two different applies for me? apply-8HqpY2tKnGbR5xVz and apply-cJm3L7sWvZ4dNfQk
 
-Claude: I'll retrieve and compare the details of both applies.
+**Claude:** I'll retrieve and compare the details of both applies.
 
-[Tool use: get_apply_details with apply_id="apply-8HqpY2tKnGbR5xVz"]
-[Tool use: get_apply_details with apply_id="apply-cJm3L7sWvZ4dNfQk"]
+[Claude uses get_apply_details tool]
+[Claude uses get_apply_details tool]
 
-Claude: Here's a comparison of the two applies:
+Here's a comparison of the two applies:
 
 Apply 1 (apply-8HqpY2tKnGbR5xVz):
 - Status: finished
@@ -141,6 +132,6 @@ Key differences:
 - Apply 1 created more resources (8 vs 2)
 - Apply 2 destroyed resources (4) while Apply 1 had none
 - Both applies had the same total number of resource actions (11)
-```
 
 Would you like me to analyze any specific aspect of these applies in more detail?
+```
