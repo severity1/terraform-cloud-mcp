@@ -4,13 +4,12 @@ This document shows example conversations with Claude using the Terraform Cloud 
 
 ## Listing and Finding Organizations
 
+```
 **User**: List all my Terraform Cloud organizations
 
 **Claude**: I'll list all the Terraform Cloud organizations you have access to.
 
-```python
-organizations = await list_organizations()
-```
+[Claude uses list_organizations tool]
 
 Here are all the Terraform Cloud organizations you have access to:
 
@@ -38,14 +37,14 @@ Here are all the Terraform Cloud organizations you have access to:
    - Email: test@example.com
    - Created: December 1, 2023
    - Plan: Free
+```
 
+```
 **User**: Show me details for my "example-org" organization
 
 **Claude**: I'll retrieve detailed information about the "example-org" organization.
 
-```python
-org_details = await get_organization_details(organization="example-org")
-```
+[Claude uses get_organization_details tool]
 
 Here are the details for the "example-org" organization:
 
@@ -78,14 +77,14 @@ Here are the details for the "example-org" organization:
 - You can manage subscription settings
 
 This organization is on the Team & Governance tier with active cost estimation features and standard remote execution setup.
+```
 
+```
 **User**: Get information about "example-org" organization
 
 **Claude**: I'll retrieve the details for the "example-org" organization.
 
-```python
-org_details = await get_organization_details(organization="example-org")
-```
+[Claude uses get_organization_details tool]
 
 Here are the details for the "example-org" organization:
 
@@ -98,14 +97,14 @@ Here are the details for the "example-org" organization:
 - Plan Type: Team & Governance
 
 The organization is on the Team & Governance tier. If you'd like to see the organization's entitlements and feature limits, I can retrieve that information separately.
+```
 
+```
 **User**: What are the entitlements for my "example-org" organization?
 
 **Claude**: I'll specifically check the entitlements for your "example-org" organization.
 
-```python
-entitlements = await get_organization_entitlements(organization="example-org")
-```
+[Claude uses get_organization_entitlements tool]
 
 Here are the detailed entitlements for your "example-org" organization:
 
@@ -137,14 +136,14 @@ Here are the detailed entitlements for your "example-org" organization:
 - Policy Mandatory Enforcement Limit: 5
 
 Your organization has the Team & Governance tier features, including policy as code (Sentinel), cost estimation, and team management. You don't currently have access to enterprise features like SSO or audit logging. Your organization can have up to 25 users and has reasonable limits for policies and run tasks.
+```
 
+```
 **User**: Find organizations with "prod" in their name
 
 **Claude**: I'll search for organizations with "prod" in their name.
 
-```python
-prod_orgs = await list_organizations(query_name="prod")
-```
+[Claude uses list_organizations tool with name filter]
 
 I found the following organizations with "prod" in their name:
 
@@ -164,19 +163,16 @@ I found the following organizations with "prod" in their name:
    - Plan: Free
 
 These three organizations match your search query for "prod" in their names. Each has different plan levels and was created at different times.
+```
 
 ## Creating and Managing Organizations
 
+```
 **User**: Create a new organization named "terraform-demo" with my email "admin@example.com"
 
 **Claude**: I'll create a new organization named "terraform-demo" with your email.
 
-```python
-new_org = await create_organization(
-    name="terraform-demo",
-    email="admin@example.com"
-)
-```
+[Claude uses create_organization tool]
 
 I've successfully created a new organization in Terraform Cloud. Here are the details:
 
@@ -201,17 +197,14 @@ I've successfully created a new organization in Terraform Cloud. Here are the de
 - User Limit: 5 (Free tier)
 
 The organization has been created with default settings. You're currently the owner of this organization. You can invite additional members and create workspaces within this organization.
+```
 
+```
 **User**: Update my "terraform-demo" organization to enable cost estimation
 
 **Claude**: I'll update the "terraform-demo" organization to enable cost estimation.
 
-```python
-updated_org = await update_organization(
-    organization="terraform-demo",
-    cost_estimation_enabled=True
-)
-```
+[Claude uses update_organization tool]
 
 I've updated the "terraform-demo" organization to enable cost estimation. Here's the confirmation:
 
@@ -231,17 +224,14 @@ Cost estimation is now enabled for this organization. This feature will:
 - Show cost trend analysis
 
 The cost estimation feature uses cloud provider pricing data to estimate the cost of resources in your Terraform configurations. This can help teams understand the financial impact of their infrastructure changes before applying them.
+```
 
+```
 **User**: Change the email address for "terraform-demo" to "terraform@example.com"
 
 **Claude**: I'll update the email address for the "terraform-demo" organization.
 
-```python
-updated_org = await update_organization(
-    organization="terraform-demo",
-    email="terraform@example.com"
-)
-```
+[Claude uses update_organization tool]
 
 I've successfully updated the email address for the "terraform-demo" organization. Here's the confirmation:
 
@@ -251,14 +241,14 @@ I've successfully updated the email address for the "terraform-demo" organizatio
 - ID: org-Bzyc2JuegvVLAibn
 
 The organization's notification email has been changed to terraform@example.com. All system notifications and alerts will now be sent to this address.
+```
 
+```
 **User**: Delete the "test-org" organization
 
 **Claude**: I'll help you delete the "test-org" organization. This is a significant action that will permanently delete all resources.
 
-```python
-delete_response = await delete_organization(organization="test-org")
-```
+[Claude uses delete_organization tool]
 
 **Organization Deletion Successful**
 
@@ -271,3 +261,4 @@ The "test-org" organization has been permanently deleted. All associated resourc
 The organization name "test-org" is now available for use again if you wish to recreate it in the future.
 
 **Note**: This operation is irreversible. All data associated with the organization has been permanently deleted.
+```

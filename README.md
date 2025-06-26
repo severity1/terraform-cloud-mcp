@@ -4,7 +4,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.12-blue)
+![Version](https://img.shields.io/badge/version-0.8.13-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -21,7 +21,9 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - **Apply Management**: Get apply details and recover from failed state uploads.
 - **Organization Management**: List, create, update, delete organizations, and view organization entitlements.
 - **Cost Estimation**: Retrieve detailed cost estimates for infrastructure changes including proposed monthly costs, prior costs, resource counts, and usage projections.
-- **Future Features**: Variables management, state versions, and more.
+- **Assessment Results**: Retrieve health assessment details, JSON output, schema files, and logs from Terraform Cloud health assessments.
+- **State Version Management**: List, retrieve, create, and download state versions; get current state for workspaces.
+- **State Version Outputs**: List and retrieve specific outputs from state versions including values and sensitivity information.
 
 ---
 
@@ -143,11 +145,13 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `get_plan_details(plan_id)`: Get detailed information about a specific plan.
 - `get_plan_json_output(plan_id)`: Retrieve the JSON execution plan for a specific plan with proper redirect handling.
 - `get_run_plan_json_output(run_id)`: Retrieve the JSON execution plan from a run with proper redirect handling.
+- `get_plan_logs(plan_id)`: Retrieve logs from a plan operation.
 
 ### Apply Management Tools
 
 - `get_apply_details(apply_id)`: Get detailed information about a specific apply.
 - `get_errored_state(apply_id)`: Retrieve the errored state from a failed apply for recovery.
+- `get_apply_logs(apply_id)`: Retrieve logs from an apply operation.
 
 ### Project Management Tools
 
@@ -172,6 +176,26 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 ### Cost Estimation Tools
 
 - `get_cost_estimate_details(cost_estimate_id)`: Get detailed information about a specific cost estimate, including resource counts (matched and unmatched), prior monthly cost, proposed monthly cost, and delta monthly cost estimations. Use run relationships to find cost estimate IDs for specific runs.
+
+### Assessment Results Tools
+
+- `get_assessment_result_details(assessment_result_id)`: Get detailed information about a specific health assessment result.
+- `get_assessment_json_output(assessment_result_id)`: Retrieve the JSON execution plan from an assessment result.
+- `get_assessment_json_schema(assessment_result_id)`: Retrieve the JSON schema file from an assessment result.
+- `get_assessment_log_output(assessment_result_id)`: Retrieve logs from an assessment result operation.
+
+### State Version Management Tools
+
+- `list_state_versions(organization, workspace_name, page_number, page_size, filter_status)`: List and filter state versions in a workspace.
+- `get_current_state_version(workspace_id)`: Get the current state version for a workspace.
+- `get_state_version(state_version_id)`: Get details for a specific state version.
+- `create_state_version(workspace_id, serial, md5, params)`: Create a new state version in a workspace.
+- `download_state_file(state_version_id, json_format)`: Download the raw or JSON formatted state file.
+
+### State Version Outputs Tools
+
+- `list_state_version_outputs(state_version_id, page_number, page_size)`: List outputs for a specific state version.
+- `get_state_version_output(state_version_output_id)`: Get details for a specific state version output.
 
 ---
 

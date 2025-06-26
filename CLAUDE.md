@@ -4,6 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Terraform Cloud MCP Development Guide
 
+## Subagent Usage Guidelines
+
+Subagents MUST be used for complex tasks following these rules:
+
+- Use a minimum of 2 and maximum of 6 subagents for complex tasks
+- Assign different roles/"hats" to each subagent for more effective task division:
+  - Researcher: For finding patterns, documentation, and existing implementations
+  - Architect: For designing complex features and ensuring adherence to project patterns
+  - Implementer: For writing the actual code following project conventions
+  - Tester/Reviewer: For verifying implementations and checking for edge cases
+- Use subagents particularly for:
+  - Complex multi-step search operations or investigations
+  - Independent verification of implementations
+  - Early planning stages of complex features
+  - Test-driven development to avoid overfitting
+
 ## Component-Specific Guidelines
 
 For detailed guidance on specific components, refer to the relevant CLAUDE.md files:
