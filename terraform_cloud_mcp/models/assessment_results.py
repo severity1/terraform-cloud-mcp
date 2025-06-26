@@ -5,7 +5,6 @@ Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/assessm
 """
 
 from enum import Enum
-from typing import Optional
 
 from pydantic import Field
 

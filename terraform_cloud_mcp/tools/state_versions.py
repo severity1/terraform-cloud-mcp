@@ -19,8 +19,7 @@ from ..models.state_versions import (
     StateVersionStatus,
 )
 from ..utils.decorators import handle_api_errors
-from ..utils.payload import create_api_payload
-from ..utils.request import query_params
+from ..utils.payload import create_api_payload, add_relationship
 
 
 @handle_api_errors
@@ -146,9 +145,9 @@ async def create_state_version(
 ) -> APIResponse:
     """Create a state version in a workspace.
 
-    Creates a new state version and sets it as the current state version for the 
+    Creates a new state version and sets it as the current state version for the
     given workspace. The workspace must be locked by the user creating a state version.
-    This is most useful for migrating existing state from Terraform Community edition 
+    This is most useful for migrating existing state from Terraform Community edition
     into a new HCP Terraform workspace.
 
     API endpoint: POST /workspaces/:workspace_id/state-versions
@@ -170,13 +169,6 @@ async def create_state_version(
     See:
         docs/tools/state_versions.md for reference documentation
     """
-    # Validate parameters
-    request_params = StateVersionCreateRequest(
-        workspace_id=workspace_id,
-        serial=serial,
-        md5=md5,
-    )
-
     # Extract parameters from params object
     param_dict = params.model_dump(exclude_none=True, by_alias=True) if params else {}
 
@@ -184,14 +176,34 @@ async def create_state_version(
     param_dict["serial"] = serial
     param_dict["md5"] = md5
 
-    # Create API payload
+    # Create request using Pydantic model with explicit optional parameters
+    request_params = StateVersionCreateRequest(
+        workspace_id=workspace_id,
+        serial=serial,
+        md5=md5,
+        state=param_dict.get("state"),
+        lineage=param_dict.get("lineage"),
+        json_state=param_dict.get("json-state"),
+        json_state_outputs=param_dict.get("json-state-outputs"),
+        run_id=param_dict.get("run_id"),
+    )  # type: ignore[call-arg]
+
+    # Create API payload using utility function
     payload = create_api_payload(
         resource_type="state-versions",
-        attributes=param_dict,
-        relationships={} if "run_id" not in param_dict else {
-            "run": {"data": {"type": "runs", "id": param_dict.pop("run_id")}}
-        },
+        model=request_params,
+        exclude_fields={"workspace_id"},
     )
+
+    # Add relationship if run_id is provided
+    if param_dict.get("run_id"):
+
+        payload = add_relationship(
+            payload=payload,
+            relation_name="run",
+            resource_type="runs",
+            resource_id=param_dict["run_id"],
+        )
 
     # Make API request
     return await api_request(
@@ -202,7 +214,9 @@ async def create_state_version(
 
 
 @handle_api_errors
-async def download_state_file(state_version_id: str, json_format: bool = False) -> APIResponse:
+async def download_state_file(
+    state_version_id: str, json_format: bool = False
+) -> APIResponse:
     """Download the state file content.
 
     Retrieves the raw state file or JSON formatted state file for a specific state version.
@@ -229,9 +243,7 @@ async def download_state_file(state_version_id: str, json_format: bool = False) 
     url_attr = (
         "hosted-json-state-download-url" if json_format else "hosted-state-download-url"
     )
-    download_url = (
-        state_version.get("data", {}).get("attributes", {}).get(url_attr)
-    )
+    download_url = state_version.get("data", {}).get("attributes", {}).get(url_attr)
 
     # Check if URL is available
     if not download_url:

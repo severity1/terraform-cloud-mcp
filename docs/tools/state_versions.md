@@ -1,202 +1,118 @@
-# State Version Tools Documentation
+# State Version Tools
 
-This document describes tools for working with state versions in Terraform Cloud.
+The state version tools module provides functions for working with state versions in Terraform Cloud.
 
-## Available Tools
+## Overview
+
+State versions represent point-in-time snapshots of Terraform state files. These tools allow you to manage the complete lifecycle of state versions, including listing, retrieving, creating, and downloading state data. This is particularly useful for state migration and workspace management.
+
+## API Reference
+
+These tools interact with the Terraform Cloud State Versions API:
+- [State Versions API Documentation](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/state-versions)
+- [State Versions Concepts](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/state)
+
+## Tools Reference
 
 ### list_state_versions
 
-List state versions in a workspace with filtering and pagination options.
+**Function:** `list_state_versions(organization: str, workspace_name: str, page_number: int = 1, page_size: int = 20, filter_status: Optional[str] = None) -> Dict[str, Any]`
 
-```python
-async def list_state_versions(
-    organization: str,
-    workspace_name: str,
-    page_number: int = 1,
-    page_size: int = 20,
-    filter_status: Optional[str] = None,
-) -> APIResponse
-```
+**Description:** Retrieves a paginated list of state versions for a workspace with optional status filtering.
 
 **Parameters:**
+- `organization` (str): The organization name
+- `workspace_name` (str): The workspace name
+- `page_number` (int): Page number to fetch (default: 1)
+- `page_size` (int): Number of results per page (default: 20, max: 100)
+- `filter_status` (str): Filter by status: 'pending', 'finalized', or 'discarded'
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| organization | str | Yes | The organization name |
-| workspace_name | str | Yes | The workspace name |
-| page_number | int | No | Page number to fetch (default: 1) |
-| page_size | int | No | Number of results per page (default: 20, max: 100) |
-| filter_status | str | No | Filter state versions by status: 'pending', 'finalized', or 'discarded' |
+**Returns:** JSON response containing paginated state versions with metadata including serial numbers, creation timestamps, and download URLs.
 
-**Returns:**
-
-A paginated list of state versions for the specified workspace.
-
-**Example:**
-
-```python
-# List all finalized state versions for a workspace
-state_versions = await list_state_versions(
-    organization="hashicorp", 
-    workspace_name="my-workspace",
-    filter_status="finalized"
-)
-```
+**Notes:**
+- State versions are ordered by creation date (newest first)
+- The `resources-processed` attribute indicates if asynchronous processing is complete
+- Requires "read" permission for the workspace
 
 ### get_current_state_version
 
-Get the current state version for a workspace.
+**Function:** `get_current_state_version(workspace_id: str) -> Dict[str, Any]`
 
-```python
-async def get_current_state_version(workspace_id: str) -> APIResponse
-```
+**Description:** Retrieves the current active state version for a workspace.
 
 **Parameters:**
+- `workspace_id` (str): The ID of the workspace (format: "ws-xxxxxxxx")
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| workspace_id | str | Yes | The ID of the workspace (format: "ws-xxxxxxxx") |
+**Returns:** JSON response containing the current state version details including download URLs and metadata.
 
-**Returns:**
-
-The current state version details for the specified workspace.
-
-**Example:**
-
-```python
-# Get the current state version for a workspace
-current_state = await get_current_state_version(workspace_id="ws-1234567890abcdef")
-```
+**Notes:**
+- Returns the state version that serves as input for new runs
+- May return empty if no state versions exist for the workspace
+- Requires "read" permission for the workspace
 
 ### get_state_version
 
-Get details for a specific state version.
+**Function:** `get_state_version(state_version_id: str) -> Dict[str, Any]`
 
-```python
-async def get_state_version(state_version_id: str) -> APIResponse
-```
+**Description:** Retrieves detailed information about a specific state version by ID.
 
 **Parameters:**
+- `state_version_id` (str): The ID of the state version (format: "sv-xxxxxxxx")
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| state_version_id | str | Yes | The ID of the state version (format: "sv-xxxxxxxx") |
+**Returns:** JSON response containing comprehensive state version details including resources, modules, providers, and download URLs.
 
-**Returns:**
-
-Comprehensive details about the specified state version including download URLs.
-
-**Example:**
-
-```python
-# Get details for a specific state version
-state_version = await get_state_version(state_version_id="sv-1234567890abcdef")
-```
+**Notes:**
+- Includes detailed resource and module information if processing is complete
+- Contains both raw state and JSON state download URLs (when available)
+- Requires "read" permission for the associated workspace
 
 ### create_state_version
 
-Create a new state version in a workspace.
+**Function:** `create_state_version(workspace_id: str, serial: int, md5: str, params: Optional[StateVersionParams] = None) -> Dict[str, Any]`
 
-```python
-async def create_state_version(
-    workspace_id: str,
-    serial: int,
-    md5: str,
-    params: Optional[StateVersionParams] = None,
-) -> APIResponse
-```
+**Description:** Creates a new state version in a workspace, useful for migrating state from Terraform Community Edition.
 
 **Parameters:**
+- `workspace_id` (str): The ID of the workspace (format: "ws-xxxxxxxx")
+- `serial` (int): The serial number of this state instance
+- `md5` (str): An MD5 hash of the raw state version
+- `params` (StateVersionParams): Additional configuration including state data and lineage
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| workspace_id | str | Yes | The ID of the workspace (format: "ws-xxxxxxxx") |
-| serial | int | Yes | The serial number of this state instance |
-| md5 | str | Yes | An MD5 hash of the raw state version |
-| params | StateVersionParams | No | Additional parameters for state version creation |
+**Returns:** JSON response containing the created state version with upload URLs if state data wasn't provided.
 
-**State Version Params:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| state | str | No | Base64 encoded raw state file |
-| lineage | str | No | Lineage of the state version |
-| json_state | str | No | Base64 encoded JSON state |
-| json_state_outputs | str | No | Base64 encoded JSON state outputs |
-| run_id | str | No | The ID of the run to associate with the state version |
-
-**Returns:**
-
-The created state version details including URLs for state upload (if applicable).
-
-**Example:**
-
-```python
-from terraform_cloud_mcp.models.state_versions import StateVersionParams
-
-# Create optional parameters
-params = StateVersionParams(
-    state="H4sIAAAA...",  # Base64 encoded state
-    lineage="871d1b4a-e579-fb7c-ffdb-f0c858a647a7"
-)
-
-# Create a new state version
-new_state_version = await create_state_version(
-    workspace_id="ws-1234567890abcdef",
-    serial=1,
-    md5="d41d8cd98f00b204e9800998ecf8427e",
-    params=params
-)
-```
+**Notes:**
+- Workspace must be locked by the user creating the state version
+- Can provide state data directly or use returned upload URLs
+- Requires "write" permission for the workspace
 
 ### download_state_file
 
-Download the state file content.
+**Function:** `download_state_file(state_version_id: str, json_format: bool = False) -> Dict[str, Any]`
 
-```python
-async def download_state_file(state_version_id: str, json_format: bool = False) -> APIResponse
-```
+**Description:** Downloads the raw state file content or JSON formatted state for a specific state version.
 
 **Parameters:**
+- `state_version_id` (str): The ID of the state version (format: "sv-xxxxxxxx")
+- `json_format` (bool): Whether to download JSON formatted state (default: False)
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| state_version_id | str | Yes | The ID of the state version (format: "sv-xxxxxxxx") |
-| json_format | bool | No | Whether to download the JSON formatted state (default: False) |
+**Returns:** Raw state file content or JSON formatted state content.
 
-**Returns:**
+**Notes:**
+- JSON format requires Terraform 1.3+ to be available
+- Raw format returns the actual Terraform state file
+- Requires "read" permission for the associated workspace
 
-The raw state file content or JSON formatted state content.
+**Common Error Scenarios:**
 
-**Example:**
-
-```python
-# Download the raw state file
-state_content = await download_state_file(state_version_id="sv-1234567890abcdef")
-
-# Download the JSON formatted state (requires Terraform 1.3+)
-json_state_content = await download_state_file(
-    state_version_id="sv-1234567890abcdef",
-    json_format=True
-)
-```
-
-## Usage Notes
-
-1. **Workspace Locking:** When creating a state version, the workspace must be locked by the user creating the state version. The workspace may be locked with the API or with the UI.
-
-2. **Asynchronous Processing:** Some information returned in a state version API object might be populated asynchronously by HCP Terraform. This includes resources, modules, providers, and the outputs. The `resources-processed` property on the state version object indicates whether or not processing is complete.
-
-3. **State Download URLs:** The state version object includes URLs from which the state can be downloaded:
-   - `hosted-state-download-url`: For downloading raw state data
-   - `hosted-json-state-download-url`: For downloading JSON formatted state (Terraform 1.3+)
-
-4. **State Upload URLs:** When creating a state version without providing state data, you'll receive URLs to upload the state content separately:
-   - `hosted-state-upload-url`: For uploading raw state data
-   - `hosted-json-state-upload-url`: For uploading JSON formatted state
+| Error | Cause | Solution |
+|-------|-------|----------|
+| 404 | State version not found | Verify the ID exists and you have proper permissions |
+| 422 | Invalid state version ID format | Ensure the ID matches pattern "sv-xxxxxxxx" |
+| 403 | Insufficient permissions | Verify your API token has proper workspace access |
+| 409 | Workspace not locked (create only) | Lock the workspace before creating state versions |
 
 ## Related Resources
 
-- [State Version Models Documentation](../models/state_versions.md)
-- [State Version Outputs Documentation](./state_version_outputs.md)
-- [Terraform Cloud API Documentation - State Versions](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/state-versions)
+- [State Version Models](../models/state_versions.md)
+- [State Version Outputs Tools](./state_version_outputs.md)
+- [Terraform Cloud API - State Versions](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/state-versions)

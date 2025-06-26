@@ -1,164 +1,138 @@
-# State Version Models Documentation
+# State Version Models
 
-This document describes the Pydantic models used for state version operations in the Terraform Cloud MCP.
+This document describes the data models used for state version operations in Terraform Cloud.
 
 ## Overview
 
-State versions represent point-in-time snapshots of Terraform state files. State version models are used to:
+State version models provide structure and validation for interacting with the Terraform Cloud State Versions API. These models define the format of state version data, status values, and request validation for managing point-in-time snapshots of Terraform state files.
 
-1. List state versions for a workspace
-2. Get details about a specific state version
-3. Get the current state version for a workspace
-4. Create new state versions
-5. Download state file contents
-
-## Model Structure
+## Models Reference
 
 ### StateVersionStatus
 
-Enum representing the possible statuses of a state version:
+**Type:** Enum (string)
 
-```python
-class StateVersionStatus(str, Enum):
-    PENDING = "pending"
-    FINALIZED = "finalized"
-    DISCARDED = "discarded"
-    BACKING_DATA_SOFT_DELETED = "backing_data_soft_deleted"
-    BACKING_DATA_PERMANENTLY_DELETED = "backing_data_permanently_deleted"
-```
+**Description:** Represents the possible states a state version can be in during its lifecycle.
 
-| Status | Description |
-|--------|-------------|
-| `pending` | State version has been created but the state data is not encoded within the request |
-| `finalized` | State version has been successfully uploaded or created with valid state attribute |
-| `discarded` | State version was discarded because it was superseded by a newer state version |
-| `backing_data_soft_deleted` | *Enterprise only* - backing files are marked for garbage collection |
-| `backing_data_permanently_deleted` | *Enterprise only* - backing files have been permanently deleted |
+**Values:**
+- `pending`: State version has been created but the state data is not encoded within the request
+- `finalized`: State version has been successfully uploaded or created with valid state attribute
+- `discarded`: State version was discarded because it was superseded by a newer state version
+- `backing_data_soft_deleted`: *Enterprise only* - backing files are marked for garbage collection
+- `backing_data_permanently_deleted`: *Enterprise only* - backing files have been permanently deleted
+
+**Usage Context:**
+Used to filter state versions by their current status and determine if processing is complete.
 
 ### StateVersionListRequest
 
-Request model for listing state versions:
+**Type:** Request Validation Model
 
-```python
-class StateVersionListRequest(APIRequest):
-    workspace_name: str
-    organization: str
-    filter_status: Optional[StateVersionStatus] = None
-    page_number: Optional[int] = 1
-    page_size: Optional[int] = 20
-```
+**Description:** Used to validate parameters for listing state versions in a workspace.
+
+**Fields:**
+- `workspace_name` (string, required): The name of the workspace to list state versions for
+- `organization` (string, required): The name of the organization that owns the workspace
+- `filter_status` (StateVersionStatus, optional): Filter state versions by status
+- `page_number` (integer, optional): Page number to fetch (default: 1, minimum: 1)
+- `page_size` (integer, optional): Number of results per page (default: 20, max: 100)
 
 ### StateVersionRequest
 
-Request model for retrieving a specific state version:
+**Type:** Request Validation Model
 
-```python
-class StateVersionRequest(APIRequest):
-    state_version_id: str  # Format: "sv-xxxxxxxxxxxxxxxx"
-```
+**Description:** Used to validate state version ID parameters in API requests.
+
+**Fields:**
+- `state_version_id` (string, required): The ID of the state version to retrieve
+  - Format: Must match pattern "sv-[a-zA-Z0-9]{16}"
+  - Example: "sv-BPvFFrYCqRV6qVBK"
 
 ### CurrentStateVersionRequest
 
-Request model for retrieving a workspace's current state version:
+**Type:** Request Validation Model
 
-```python
-class CurrentStateVersionRequest(APIRequest):
-    workspace_id: str  # Format: "ws-xxxxxxxxxxxxxxxx"
-```
+**Description:** Used to validate workspace ID parameters for current state version requests.
+
+**Fields:**
+- `workspace_id` (string, required): The ID of the workspace
+  - Format: Must match pattern "ws-[a-zA-Z0-9]{16}"
+  - Example: "ws-BPvFFrYCqRV6qVBK"
 
 ### StateVersionCreateRequest
 
-Request model for creating a state version:
+**Type:** Request Validation Model
 
-```python
-class StateVersionCreateRequest(APIRequest):
-    workspace_id: str
-    serial: int
-    md5: str
-    state: Optional[str] = None
-    lineage: Optional[str] = None
-    json_state: Optional[str] = None
-    json_state_outputs: Optional[str] = None
-    run_id: Optional[str] = None
-```
+**Description:** Used to validate parameters for creating new state versions.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| workspace_id | str | Yes | The ID of the workspace to create the state version in |
-| serial | int | Yes | The serial number of this state instance |
-| md5 | str | Yes | An MD5 hash of the raw state version |
-| state | str | No | Base64 encoded raw state file |
-| lineage | str | No | Lineage of the state version |
-| json_state | str | No | Base64 encoded JSON state |
-| json_state_outputs | str | No | Base64 encoded JSON state outputs |
-| run_id | str | No | The ID of the run to associate with the state version |
+**Fields:**
+- `workspace_id` (string, required): The ID of the workspace to create the state version in
+- `serial` (integer, required): The serial number of this state instance (minimum: 0)
+- `md5` (string, required): An MD5 hash of the raw state version (32 character hex string)
+- `state` (string, optional): Base64 encoded raw state file
+- `lineage` (string, optional): Lineage of the state version
+- `json_state` (string, optional): Base64 encoded JSON state from "terraform show -json"
+- `json_state_outputs` (string, optional): Base64 encoded JSON state outputs
+- `run_id` (string, optional): The ID of the run to associate with the state version
 
 ### StateVersionParams
 
-Parameters model for state version operations:
+**Type:** Parameter Object
 
-```python
-class StateVersionParams(APIRequest):
-    serial: Optional[int] = None
-    md5: Optional[str] = None
-    state: Optional[str] = None
-    lineage: Optional[str] = None
-    json_state: Optional[str] = None
-    json_state_outputs: Optional[str] = None
-    run_id: Optional[str] = None
+**Description:** Flexible parameter model for state version operations without routing fields.
+
+**Fields:**
+All fields from StateVersionCreateRequest excluding workspace_id, with all fields optional.
+
+**JSON representation:**
+```json
+{
+  "serial": 1,
+  "md5": "d41d8cd98f00b204e9800998ecf8427e",
+  "lineage": "871d1b4a-e579-fb7c-ffdb-f0c858a647a7",
+  "json-state": "H4sIAAAA...",
+  "json-state-outputs": "H4sIAAAA..."
+}
 ```
 
-## Usage Examples
+**Notes:**
+- Field names in JSON responses use kebab-case format (e.g., "json-state")
+- Field names in the model use snake_case format (e.g., json_state)
+- All encoded fields expect Base64 format
 
-### Creating a request to list state versions
+## API Response Structure
 
-```python
-from terraform_cloud_mcp.models.state_versions import StateVersionListRequest
+While models validate requests, responses are returned as raw JSON. A typical state version response has this structure:
 
-# Create a request to list state versions for a workspace
-request = StateVersionListRequest(
-    organization="my-organization",
-    workspace_name="my-workspace",
-    page_number=1,
-    page_size=20,
-    filter_status=StateVersionStatus.FINALIZED
-)
-```
-
-### Creating a request to get a specific state version
-
-```python
-from terraform_cloud_mcp.models.state_versions import StateVersionRequest
-
-# Create a request to get a specific state version
-request = StateVersionRequest(
-    state_version_id="sv-1234567890abcdef"
-)
-```
-
-### Creating a request to create a state version
-
-```python
-from terraform_cloud_mcp.models.state_versions import StateVersionCreateRequest, StateVersionParams
-
-# Create parameters for state version creation
-params = StateVersionParams(
-    serial=1,
-    md5="d41d8cd98f00b204e9800998ecf8427e",
-    lineage="871d1b4a-e579-fb7c-ffdb-f0c858a647a7",
-    state="H4sIAAAA...", # Base64 encoded state content
-)
-
-# Create a request to create a state version
-request = StateVersionCreateRequest(
-    workspace_id="ws-1234567890abcdef",
-    serial=1,
-    md5="d41d8cd98f00b204e9800998ecf8427e"
-)
+```json
+{
+  "data": {
+    "id": "sv-BPvFFrYCqRV6qVBK",
+    "type": "state-versions",
+    "attributes": {
+      "created-at": "2023-05-01T12:34:56Z",
+      "size": 1024,
+      "hosted-state-download-url": "https://...",
+      "hosted-json-state-download-url": "https://...",
+      "modules": {...},
+      "providers": {...},
+      "resources": [...],
+      "serial": 1,
+      "state-version": 4,
+      "terraform-version": "1.5.0",
+      "vcs-commit-sha": "abc123",
+      "vcs-commit-url": "https://..."
+    },
+    "relationships": {
+      "run": {...},
+      "created-by": {...}
+    }
+  }
+}
 ```
 
 ## Related Resources
 
-- [State Version Tools Documentation](../tools/state_versions.md)
-- [State Version Outputs Models Documentation](./state_version_outputs.md)
-- [Terraform Cloud API Documentation - State Versions](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/state-versions)
+- [State Version Tools](../tools/state_versions.md)
+- [State Version Outputs Models](./state_version_outputs.md)
+- [Terraform Cloud API - State Versions](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/state-versions)

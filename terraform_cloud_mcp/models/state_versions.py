@@ -5,7 +5,7 @@ Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/state-v
 """
 
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
 from pydantic import Field
 
