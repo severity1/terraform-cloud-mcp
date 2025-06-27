@@ -3,8 +3,10 @@
 Terraform Cloud MCP Server
 """
 import logging
-from dotenv import load_dotenv
 from fastmcp import FastMCP
+
+# Import environment configuration
+from terraform_cloud_mcp.utils.env import should_enable_delete_tools
 
 # Import tools and models
 from terraform_cloud_mcp.tools import account
@@ -19,14 +21,14 @@ from terraform_cloud_mcp.tools import assessment_results
 from terraform_cloud_mcp.tools import state_versions
 from terraform_cloud_mcp.tools import state_version_outputs
 
-# Load environment variables from .env file
-load_dotenv()
-
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
 # Create server instance
 mcp: FastMCP = FastMCP("Terraform Cloud MCP Server")
+
+# Check if delete tools should be enabled
+enable_delete_tools = should_enable_delete_tools()
 
 # Register account management tools
 mcp.tool()(account.get_account_details)
@@ -36,8 +38,14 @@ mcp.tool()(workspaces.list_workspaces)
 mcp.tool()(workspaces.get_workspace_details)
 mcp.tool()(workspaces.create_workspace)
 mcp.tool()(workspaces.update_workspace)
-mcp.tool(enabled=False)(workspaces.delete_workspace)  # Disabled for safety
-mcp.tool(enabled=False)(workspaces.safe_delete_workspace)  # Disabled for safety
+mcp.tool(
+    enabled=enable_delete_tools,
+    annotations={"destructiveHint": True, "readOnlyHint": False},
+)(workspaces.delete_workspace)
+mcp.tool(
+    enabled=enable_delete_tools,
+    annotations={"destructiveHint": True, "readOnlyHint": False},
+)(workspaces.safe_delete_workspace)
 mcp.tool()(workspaces.lock_workspace)
 mcp.tool()(workspaces.unlock_workspace)
 mcp.tool()(workspaces.force_unlock_workspace)
@@ -59,7 +67,10 @@ mcp.tool()(organizations.get_organization_entitlements)
 mcp.tool()(organizations.list_organizations)
 mcp.tool()(organizations.create_organization)
 mcp.tool()(organizations.update_organization)
-mcp.tool(enabled=False)(organizations.delete_organization)  # Disabled for safety
+mcp.tool(
+    enabled=enable_delete_tools,
+    annotations={"destructiveHint": True, "readOnlyHint": False},
+)(organizations.delete_organization)
 
 # Register plan management tools
 mcp.tool()(plans.get_plan_details)
@@ -77,7 +88,10 @@ mcp.tool()(projects.create_project)
 mcp.tool()(projects.update_project)
 mcp.tool()(projects.list_projects)
 mcp.tool()(projects.get_project_details)
-mcp.tool(enabled=False)(projects.delete_project)  # Disabled for safety
+mcp.tool(
+    enabled=enable_delete_tools,
+    annotations={"destructiveHint": True, "readOnlyHint": False},
+)(projects.delete_project)
 mcp.tool()(projects.list_project_tag_bindings)
 mcp.tool()(projects.add_update_project_tag_bindings)
 mcp.tool()(projects.move_workspaces_to_project)
