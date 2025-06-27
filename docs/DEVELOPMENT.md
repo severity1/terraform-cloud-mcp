@@ -124,6 +124,9 @@ terraform_cloud_mcp/
 - **Error handling**: Use `handle_api_errors` decorator from `terraform_cloud_mcp/utils/decorators.py`
 - **Async pattern**: All API functions should be async, using httpx
 - **Security**: Never log tokens, validate all inputs, redact sensitive data
+- **MCP Tool Registration**: Follow minimal pattern in `server.py`:
+  - Use simple `mcp.tool()(function_name)` for standard operations
+  - Use `mcp.tool(enabled=False)(function_name)` for dangerous delete operations
 
 ## Pydantic Model Standards
 

@@ -4,7 +4,7 @@ Terraform Cloud MCP Server
 """
 import logging
 from dotenv import load_dotenv
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 # Import tools and models
 from terraform_cloud_mcp.tools import account
@@ -26,7 +26,7 @@ load_dotenv()
 logging.basicConfig(level=logging.DEBUG)
 
 # Create server instance
-mcp = FastMCP("Terraform Cloud MCP Server")
+mcp: FastMCP = FastMCP("Terraform Cloud MCP Server")
 
 # Register account management tools
 mcp.tool()(account.get_account_details)
@@ -36,8 +36,8 @@ mcp.tool()(workspaces.list_workspaces)
 mcp.tool()(workspaces.get_workspace_details)
 mcp.tool()(workspaces.create_workspace)
 mcp.tool()(workspaces.update_workspace)
-mcp.tool()(workspaces.delete_workspace)  # Uses confirm=False pattern
-mcp.tool()(workspaces.safe_delete_workspace)  # Uses confirm=False pattern
+mcp.tool(enabled=False)(workspaces.delete_workspace)  # Disabled for safety
+mcp.tool(enabled=False)(workspaces.safe_delete_workspace)  # Disabled for safety
 mcp.tool()(workspaces.lock_workspace)
 mcp.tool()(workspaces.unlock_workspace)
 mcp.tool()(workspaces.force_unlock_workspace)
@@ -59,7 +59,7 @@ mcp.tool()(organizations.get_organization_entitlements)
 mcp.tool()(organizations.list_organizations)
 mcp.tool()(organizations.create_organization)
 mcp.tool()(organizations.update_organization)
-mcp.tool()(organizations.delete_organization)
+mcp.tool(enabled=False)(organizations.delete_organization)  # Disabled for safety
 
 # Register plan management tools
 mcp.tool()(plans.get_plan_details)
@@ -77,7 +77,7 @@ mcp.tool()(projects.create_project)
 mcp.tool()(projects.update_project)
 mcp.tool()(projects.list_projects)
 mcp.tool()(projects.get_project_details)
-mcp.tool()(projects.delete_project)
+mcp.tool(enabled=False)(projects.delete_project)  # Disabled for safety
 mcp.tool()(projects.list_project_tag_bindings)
 mcp.tool()(projects.add_update_project_tag_bindings)
 mcp.tool()(projects.move_workspaces_to_project)
