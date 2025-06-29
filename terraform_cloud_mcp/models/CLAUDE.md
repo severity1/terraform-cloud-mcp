@@ -1,99 +1,69 @@
 # CLAUDE.md for models/
 
-This file provides guidance about the data models used in this repository.
+This file provides guidance about the Pydantic data models for Terraform Cloud API request validation.
 
-## Models Overview
+## Model Architecture
 
-The models directory contains Pydantic data models for validating Terraform Cloud API requests. These models provide:
+The models directory provides request validation through Pydantic models with:
+- **Input validation**: API request parameter validation and type safety
+- **Field mapping**: Aliases for kebab-case to snake_case API compatibility
+- **Response typing**: All responses typed as `APIResponse = Dict[str, Any]` (not validated)
 
-1. Input validation for API requests
-2. Type safety through static typing
-3. Consistent serialization/deserialization
-4. Field aliases for API compatibility
+### Core Components
+- **base.py**: `APIRequest` base class, `BaseModelConfig`, and `APIResponse` type alias
+- **Domain modules**: Account, workspaces, runs, plans, applies, organizations, projects, cost estimates, assessment results
 
-We validate requests using Pydantic models but do not validate responses (responses are typed as `APIResponse = Dict[str, Any]`).
+### Model Categories
+- **Request models**: Validate API request parameters with field aliases
+- **Parameter models**: Flexible configuration objects for operations with >3 optional parameters  
+- **Enums**: Constrained choices based on API documentation
 
-## Key Components
+## Implementation Standards
 
-- **base.py**: Base model classes and common types
-  - `BaseModelConfig`: Core configuration for all models
-  - `APIRequest`: Base class for all API requests
-  - Common enums used across modules
-  - `APIResponse` type alias
+### Model Patterns
+- **Request models**: Extend `APIRequest`, use field aliases for kebab-case mapping
+- **Parameter models**: Create `*Params` objects for operations with >3 optional parameters
+- **Base models**: Create `Base*Request` when ≥3 operations share >50% of fields
+- **Enums**: Use for fields with API-documented constrained choices
 
-- Domain-specific models:
-  - **account.py**: Account-related models
-  - **workspaces.py**: Workspace management models
-  - **runs.py**: Run management models
-  - **plans.py**: Plan management models
-  - **applies.py**: Apply management models
-  - **organizations.py**: Organization management models
-  - **projects.py**: Project management models
-  - **cost_estimates.py**: Cost estimation models
-  - **assessment_results.py**: Health assessment results models
+### Field Standards
+- **Required**: `Field(...)` with no default (follows API documentation)
+- **Optional**: `Optional[Type]` with appropriate default values
+- **Aliases**: Always use `alias="kebab-case-name"` for API compatibility
+- **Validation**: Apply Field constraints when API docs specify limits
 
-## Pydantic Model Pattern
+## Decision Criteria
 
-Each domain follows a consistent pattern:
+### Model Creation Rules
+- **BaseRequest**: When ≥3 operations share >50% of fields
+- **Params objects**: When function has >3 optional configuration parameters  
+- **Separate Create/Update**: When models differ by >2 fields or validation rules
+- **Enums**: When API docs specify constrained values (not examples)
 
-```python
-# Request model for specific operations
-class ExampleRequest(APIRequest):
-    """Request model for example operation."""
-    field_name: str = Field(..., alias="field-name")
-    optional_field: Optional[bool] = Field(False, alias="optional-field")
+### Field Validation Rules
+- **Validation constraints**: Apply when API docs specify limits (length, range, format)
+- **Default values**: Use API defaults; None only when field truly optional in API
+- **Required vs Optional**: Follow API documentation exactly
+- **Field organization**: Group by domain, clear inheritance with APIRequest
 
-# Parameters model for flexible configurations
-class ExampleParams(APIRequest):
-    """Parameters for example operations without routing fields."""
-    name: Optional[str] = None
-    description: Optional[str] = None
-    
-# Enum for constrained choices
-class ExampleStatus(str, Enum):
-    """Status options for examples."""
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-```
+## Development Integration
 
-## Field Handling
+### Standards Reference
+Complete development guidance is in [docs/DEVELOPMENT.md](../../docs/DEVELOPMENT.md):
+- **Pydantic Patterns**: `APIRequest` base class, field aliases, parameter objects
+- **Quality Standards**: Type hints, Field constraints, validation rules
+- **Development Cycle**: Pattern implementation → API validation → Quality checks → Alias mapping
 
-- **Required fields**: Use `Field(...)` with no default
-- **Optional fields**: Use `Optional[Type]` with a default value
-- **Field aliases**: Use `alias="kebab-case-name"` for API compatibility
-- **Validation**: Use Field constraints (e.g., `min_length`, `ge`, `le`)
-- **Description**: Include field descriptions in docstrings
+### Model-Specific Requirements
+- All fields must have proper type hints and API-based validation
+- Use `BaseModelConfig` and `APIRequest` for consistency
+- Document all field aliases and constraint reasoning
+- Apply 5-step quality check sequence after model changes
 
-## Common Patterns
+## Component Cross-References
 
-1. **Base Request Models**:
-   ```python
-   class BaseWorkspaceRequest(APIRequest):
-       """Base class with common workspace parameters."""
-       name: Optional[str] = None
-   ```
-
-2. **Parameter Models**:
-   ```python
-   class WorkspaceParams(APIRequest):
-       """Parameters for workspace operations."""
-       description: Optional[str] = None
-   ```
-
-3. **Enum Classes**:
-   ```python
-   class ExecutionMode(str, Enum):
-       """Execution mode options."""
-       REMOTE = "remote"
-       LOCAL = "local"
-   ```
-
-## Usage Guidelines
-
-1. Always extend from `APIRequest` for all request models
-2. Use field aliases for API compatibility with kebab-case to snake_case mapping
-3. Add validation for all fields that have constraints
-4. Include proper docstrings with references to Terraform Cloud API docs
-5. For new features, follow the pattern in existing models
-6. For complex parameter objects, create a separate `*Params` model
-7. Use enums for all fields with constrained choices
+### Related Component Guidance
+- **Tool Implementation**: [../tools/CLAUDE.md](../tools/CLAUDE.md) for using models in tool functions
+- **Utility Functions**: [../utils/CLAUDE.md](../utils/CLAUDE.md) for payload creation and parameter handling
+- **API Client**: [../api/CLAUDE.md](../api/CLAUDE.md) for API request integration
+- **Documentation**: [../../docs/CLAUDE.md](../../docs/CLAUDE.md) for model documentation standards

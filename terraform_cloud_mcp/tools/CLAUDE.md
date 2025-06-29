@@ -1,112 +1,72 @@
 # CLAUDE.md for tools/
 
-This file provides guidance about the MCP tool implementations in this repository.
+This file provides guidance for MCP tool implementations that expose Terraform Cloud API functionality to AI assistants.
 
-## Tools Overview
+## Tool Architecture
 
-The tools directory contains all Model Context Protocol (MCP) tools that are exposed to AI assistants for interacting with the Terraform Cloud API. Each module implements domain-specific tools following a consistent pattern.
-
-## Key Components
-
+### Directory Structure
 - **__init__.py**: Tool registration and imports
-- Domain-specific tool modules:
-  - **account.py**: Account management tools
-  - **workspaces.py**: Workspace management tools
-  - **runs.py**: Run management tools
-  - **plans.py**: Plan management tools
-  - **applies.py**: Apply management tools
-  - **organizations.py**: Organization management tools
-  - **projects.py**: Project management tools
-  - **cost_estimates.py**: Cost estimate tools
-  - **assessment_results.py**: Health assessment results tools
+- **Domain modules**: Account, workspaces, runs, plans, applies, organizations, projects, cost estimates, assessment results
 
-## Tool Implementation Pattern
+### Implementation Standards
+- **Consistent patterns**: All tools follow standardized implementation patterns
+- **Error handling**: Use @handle_api_errors decorator for consistent error management
+- **Async patterns**: All API functions are async using httpx
+- **Parameter validation**: Use Pydantic models for input validation
 
-Each tool follows a consistent implementation pattern:
+## Tool Organization
 
-```python
-@handle_api_errors
-async def example_tool(
-    required_param: str,
-    optional_param: int = 0,
-    params: Optional[ExampleParams] = None
-) -> APIResponse:
-    """Tool description with clear context on when and how to use it.
-    
-    API endpoint: METHOD /path/to/endpoint
-    
-    Args:
-        required_param: Description of parameter
-        optional_param: Description including default value
-        params: Optional configuration settings:
-            - option1: Description of what this option does
-            - option2: Description with possible values
-            
-    Returns:
-        Description of return structure and important fields
-        
-    See:
-        docs/tools/example_tools.md for usage examples
-    """
-    # Validate parameters
-    request_params = ExampleRequest(
-        required_param=required_param,
-        optional_param=optional_param
-    )
-    
-    # Extract parameters from params object
-    param_dict = params.model_dump(exclude_none=True) if params else {}
-    
-    # Create API payload
-    payload = create_api_payload(
-        resource_type="resource_type",
-        model=request_params,
-        exclude_fields={"field_to_exclude"}
-    )
-    
-    # Make API request
-    return await api_request("endpoint", method="POST", data=payload)
-```
+### Operation Categories
+- **CRUD**: create_*, get_*, update_*, delete_* operations
+- **List**: list_* operations with filtering and pagination
+- **Actions**: lock_*, unlock_*, apply_*, cancel_* state changes
+- **Specialized**: Domain-specific operations
 
-## Tool Categories
+### File Organization Rules
+- **Add to existing**: Tool fits domain and file has < 15 functions
+- **Create new file**: New domain OR existing file ≥ 15 functions  
+- **Split file**: When file exceeds 20 functions, split by logical sub-domains
+- **Domain boundaries**: Create new domain for ≥ 5 conceptually distinct tools
+- **Naming**: Use singular form matching API domain (e.g., workspace.py)
 
-1. **CRUD Operations**:
-   - `create_*` - Create new resources
-   - `get_*` - Retrieve resource details
-   - `update_*` - Modify existing resources
-   - `delete_*` - Remove resources
+### Registration Classification
+- **Non-destructive**: get_*, list_*, create_*, update_* (basic registration)
+- **Destructive**: delete_*, force_*, *_unlock affecting running processes (conditional)
+- **Potentially destructive**: cancel_*, discard_* operations (case-by-case)
 
-2. **List Operations**:
-   - `list_*` - List and filter resources
-   
-3. **Action Operations**:
-   - `lock_*`, `unlock_*` - Change resource state
-   - `apply_*`, `cancel_*` - Control resource processes
+## Implementation Requirements
 
-4. **Specialized Operations**:
-   - Operations specific to certain resource types
+### Essential Patterns
+1. Use @handle_api_errors decorator for consistent error handling
+2. Create corresponding Pydantic models for validation
+3. Follow function signature pattern: (routing_params, optional_params, params_object)
+4. Use utility functions for payload creation and parameter handling
+5. Document thoroughly with API endpoint references
+6. Register appropriately in server.py based on destructiveness
 
-## Error Handling
+### Documentation Integration
+- Reference [docs/API_REFERENCES.md](../../docs/API_REFERENCES.md) for official API groupings
+- Create usage examples in docs/tools/
+- Link to model definitions and conversation examples
 
-All tools use the `handle_api_errors` decorator from utils/decorators.py to provide consistent error handling, ensuring:
+## Development Integration
 
-1. Validation errors are properly reported
-2. API errors are formatted consistently
-3. Unexpected exceptions are caught and formatted
+### Standards Reference
+Complete development guidance is in [docs/DEVELOPMENT.md](../../docs/DEVELOPMENT.md):
+- **Build Commands**: Quality check sequences and environment setup
+- **Quality Protocols**: 5-step mandatory validation process  
+- **Code Style**: Function patterns, async implementation, and validation requirements
 
-## Guidelines for Adding New Tools
+### Tool-Specific Requirements
+- Use @handle_api_errors decorator for all API functions
+- Follow (routing_params, optional_params, params_object) signature pattern
+- Apply comprehensive testing: Happy path → Edge cases → Error cases → Integration
+- Use Pydantic models for validation (see [../models/CLAUDE.md](../models/CLAUDE.md))
 
-1. Follow the established naming convention for the tool
-2. Use the `handle_api_errors` decorator
-3. Create corresponding Pydantic models in models/
-4. Document the tool thoroughly with docstrings
-5. Create usage examples in docs/tools/
-6. Register the tool in server.py
-7. Use utility functions from utils/ for payload creation and parameter handling
+## Component Cross-References
 
-## Related Documentation
-
-For each tool category, refer to the corresponding documentation:
-- Model definitions in `models/*.py`
-- Usage examples in `docs/tools/*.md`
-- Conversation examples in `docs/conversations/*.md`
+### Related Component Guidance
+- **Model Development**: [../models/CLAUDE.md](../models/CLAUDE.md) for Pydantic model patterns and validation
+- **Utility Functions**: [../utils/CLAUDE.md](../utils/CLAUDE.md) for error handling and payload utilities  
+- **API Client**: [../api/CLAUDE.md](../api/CLAUDE.md) for API request patterns
+- **Documentation**: [../../docs/CLAUDE.md](../../docs/CLAUDE.md) for documentation framework

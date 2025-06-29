@@ -14,16 +14,22 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 ## Features
 
 - **Account Management**: Get account details for authenticated users or service accounts.
-- **Workspace Management**: Create, read, update, delete, lock/unlock workspaces.
-- **Project Management**: Create, list, update, and delete projects; manage project tag bindings and move workspaces between projects.
+- **Workspace Management**: Create, read, update, lock/unlock workspaces, and optionally delete workspaces (with safety controls).
+- **Project Management**: Create, list, update projects, and optionally delete projects; manage project tag bindings and move workspaces between projects.
 - **Run Management**: Create runs, list runs, get run details, apply/discard/cancel runs.
 - **Plan Management**: Retrieve plan details and JSON execution output with advanced HTTP redirect handling.
 - **Apply Management**: Get apply details and recover from failed state uploads.
-- **Organization Management**: List, create, update, delete organizations, and view organization entitlements.
+- **Organization Management**: List, create, update organizations, view organization entitlements, and optionally delete organizations (with safety controls).
 - **Cost Estimation**: Retrieve detailed cost estimates for infrastructure changes including proposed monthly costs, prior costs, resource counts, and usage projections.
 - **Assessment Results**: Retrieve health assessment details, JSON output, schema files, and logs from Terraform Cloud health assessments.
 - **State Version Management**: List, retrieve, create, and download state versions; get current state for workspaces.
 - **State Version Outputs**: List and retrieve specific outputs from state versions including values and sensitivity information.
+
+### Safety Features
+
+- **Destructive Operation Controls**: Delete operations are disabled by default and require explicit enablement via environment variable
+- **Destructive Hints**: MCP clients receive proper destructive operation warnings for potentially dangerous tools
+- **Environment-Based Safety**: Production and development environments can have different safety configurations
 
 ---
 
@@ -59,7 +65,10 @@ uv pip install .
 
 ```bash
 # Add to Claude Code with your Terraform Cloud token
-claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -s user terraform-cloud-mcp -- "terraform-cloud-mcp"
+claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -e ENABLE_DELETE_TOOLS=false -s user terraform-cloud-mcp -- "terraform-cloud-mcp"
+
+# To enable delete operations (use with caution):
+# claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -e ENABLE_DELETE_TOOLS=true -s user terraform-cloud-mcp -- "terraform-cloud-mcp"
 ```
 
 #### Adding to Claude Desktop
@@ -80,7 +89,8 @@ Create a `claude_desktop_config.json` configuration file:
         "terraform-cloud-mcp"
       ],
       "env": {
-        "TFC_TOKEN": "my token..." # replace with actual token
+        "TFC_TOKEN": "my token...", # replace with actual token
+        "ENABLE_DELETE_TOOLS": "false" # set to "true" to enable destructive operations
       }
     }
   }
@@ -93,8 +103,9 @@ Replace `your_terraform_cloud_token` with your actual Terraform Cloud API token.
 
 For other platforms (like Cursor, Copilot Studio, or Glama), follow their platform-specific instructions for adding an MCP server. Most platforms require:
 1. The server path or command to start the server.
-2. Environment variables for the Terraform Cloud API token.
-3. Configuration to auto-start the server when needed.
+2. Environment variables for the Terraform Cloud API token (`TFC_TOKEN`).
+3. Optional environment variable to enable delete operations (`ENABLE_DELETE_TOOLS=true` for destructive operations).
+4. Configuration to auto-start the server when needed.
 
 ---
 
@@ -114,9 +125,11 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `create_workspace(organization, name, params)`: Create a new workspace with optional parameters.
 - `update_workspace(organization, workspace_name, params)`: Update an existing workspace's configuration.
 
-#### Delete
+#### Delete (Requires ENABLE_DELETE_TOOLS=true)
 - `delete_workspace(organization, workspace_name)`: Delete a workspace and all its content.
 - `safe_delete_workspace(organization, workspace_name)`: Delete only if the workspace isn't managing any resources.
+
+**Note**: Delete operations are disabled by default for safety. Set `ENABLE_DELETE_TOOLS=true` to enable these destructive operations.
 
 #### Lock & Unlock
 - `lock_workspace(workspace_id, reason)`: Lock a workspace to prevent runs.
@@ -159,7 +172,7 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `update_project(project_id, params)`: Update an existing project's configuration.
 - `list_projects(organization, ...)`: List and filter projects in an organization.
 - `get_project_details(project_id)`: Get detailed information about a specific project.
-- `delete_project(project_id)`: Delete a project (fails if it contains workspaces).
+- `delete_project(project_id)`: Delete a project (fails if it contains workspaces). **Requires ENABLE_DELETE_TOOLS=true**
 - `list_project_tag_bindings(project_id)`: List tags bound to a project.
 - `add_update_project_tag_bindings(project_id, tag_bindings)`: Add or update tag bindings on a project.
 - `move_workspaces_to_project(project_id, workspace_ids)`: Move workspaces into a project.
@@ -171,7 +184,7 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 - `list_organizations(page_number, page_size, query, query_email, query_name)`: List and filter organizations.
 - `create_organization(name, email, params)`: Create a new organization with optional parameters.
 - `update_organization(organization, params)`: Update an existing organization's settings.
-- `delete_organization(organization)`: Delete an organization and all its content.
+- `delete_organization(organization)`: Delete an organization and all its content. **Requires ENABLE_DELETE_TOOLS=true**
 
 ### Cost Estimation Tools
 
