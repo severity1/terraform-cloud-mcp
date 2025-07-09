@@ -63,6 +63,20 @@ from .state_version_outputs import (  # noqa: F401
     StateVersionOutputListRequest,
     StateVersionOutputRequest,
 )
+from .variables import (  # noqa: F401
+    VariableCategory,
+    WorkspaceVariable,
+    WorkspaceVariableParams,
+    WorkspaceVariableCreateRequest,
+    WorkspaceVariableUpdateRequest,
+    VariableSet,
+    VariableSetParams,
+    VariableSetCreateRequest,
+    VariableSetUpdateRequest,
+    VariableSetVariable,
+    VariableSetAssignmentRequest,
+    VariableSetVariableParams,
+)
 from .runs import (  # noqa: F401
     RunOperation,
     RunStatus,
@@ -150,6 +164,19 @@ __all__ = [
     # State Version Output models
     "StateVersionOutputListRequest",
     "StateVersionOutputRequest",
+    # Variable models
+    "VariableCategory",
+    "WorkspaceVariable",
+    "WorkspaceVariableParams",
+    "WorkspaceVariableCreateRequest",
+    "WorkspaceVariableUpdateRequest",
+    "VariableSet",
+    "VariableSetParams",
+    "VariableSetCreateRequest",
+    "VariableSetUpdateRequest",
+    "VariableSetVariable",
+    "VariableSetAssignmentRequest",
+    "VariableSetVariableParams",
     # Workspace models
     "VcsRepoConfig",
     "WorkspaceListRequest",

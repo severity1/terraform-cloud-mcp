@@ -4,7 +4,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.14-blue)
+![Version](https://img.shields.io/badge/version-0.8.15-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -24,6 +24,7 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - **Assessment Results**: Retrieve health assessment details, JSON output, schema files, and logs from Terraform Cloud health assessments.
 - **State Version Management**: List, retrieve, create, and download state versions; get current state for workspaces.
 - **State Version Outputs**: List and retrieve specific outputs from state versions including values and sensitivity information.
+- **Variables Management**: Complete workspace variable and variable set management including creation, updates, assignments, and optionally deletion (with safety controls).
 
 ### Safety Features
 
@@ -209,6 +210,33 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 
 - `list_state_version_outputs(state_version_id, page_number, page_size)`: List outputs for a specific state version.
 - `get_state_version_output(state_version_output_id)`: Get details for a specific state version output.
+
+### Variables Management Tools
+
+#### Workspace Variables
+- `list_workspace_variables(workspace_id)`: List all variables (Terraform and environment) for a workspace.
+- `create_workspace_variable(workspace_id, key, category, params)`: Create a new variable in a workspace.
+- `update_workspace_variable(workspace_id, variable_id, params)`: Update an existing workspace variable.
+- `delete_workspace_variable(workspace_id, variable_id)`: Delete a workspace variable. **Requires ENABLE_DELETE_TOOLS=true**
+
+#### Variable Sets
+- `list_variable_sets(organization, page_number, page_size)`: List variable sets in an organization.
+- `get_variable_set(varset_id)`: Get details for a specific variable set.
+- `create_variable_set(organization, name, params)`: Create a new variable set.
+- `update_variable_set(varset_id, params)`: Update an existing variable set.
+- `delete_variable_set(varset_id)`: Delete a variable set and all its variables. **Requires ENABLE_DELETE_TOOLS=true**
+- `assign_variable_set_to_workspaces(varset_id, workspace_ids)`: Assign a variable set to workspaces.
+- `unassign_variable_set_from_workspaces(varset_id, workspace_ids)`: Remove a variable set from workspaces.
+- `assign_variable_set_to_projects(varset_id, project_ids)`: Assign a variable set to projects.
+- `unassign_variable_set_from_projects(varset_id, project_ids)`: Remove a variable set from projects.
+
+#### Variable Set Variables
+- `list_variables_in_variable_set(varset_id)`: List all variables in a variable set.
+- `create_variable_in_variable_set(varset_id, key, category, params)`: Create a variable in a variable set.
+- `update_variable_in_variable_set(varset_id, var_id, params)`: Update a variable in a variable set.
+- `delete_variable_from_variable_set(varset_id, var_id)`: Delete a variable from a variable set. **Requires ENABLE_DELETE_TOOLS=true**
+
+**Note**: Variable management includes both Terraform input variables and environment variables. Sensitive variables have their values hidden for security. Delete operations are disabled by default and require `ENABLE_DELETE_TOOLS=true`.
 
 ---
 
