@@ -20,6 +20,7 @@ from ..models.state_versions import (
 )
 from ..utils.decorators import handle_api_errors
 from ..utils.payload import create_api_payload, add_relationship
+from ..utils.request import query_params
 
 
 @handle_api_errors
@@ -63,24 +64,15 @@ async def list_state_versions(
 
     # Validate parameters
     params = StateVersionListRequest(
-        organization=organization,
-        workspace_name=workspace_name,
+        filter_workspace_name=workspace_name,
+        filter_organization_name=organization,
         page_number=page_number,
         page_size=page_size,
         filter_status=status_enum,
     )
 
-    # Build query parameters
-    query = {
-        "filter[workspace][name]": params.workspace_name,
-        "filter[organization][name]": params.organization,
-        "page[number]": params.page_number,
-        "page[size]": params.page_size,
-    }
-
-    # Add optional filter if provided
-    if params.filter_status:
-        query["filter[status]"] = params.filter_status.value
+    # Build query parameters using utility function
+    query = query_params(params)
 
     # Make API request
     return await api_request("state-versions", params=query)
@@ -170,23 +162,17 @@ async def create_state_version(
         docs/tools/state_versions.md for reference documentation
     """
     # Extract parameters from params object
-    param_dict = params.model_dump(exclude_none=True, by_alias=True) if params else {}
+    param_dict = params.model_dump(exclude_none=True, by_alias=False) if params else {}
 
     # Add required parameters
     param_dict["serial"] = serial
     param_dict["md5"] = md5
 
-    # Create request using Pydantic model with explicit optional parameters
+    # Create request using Pydantic model
     request_params = StateVersionCreateRequest(
         workspace_id=workspace_id,
-        serial=serial,
-        md5=md5,
-        state=param_dict.get("state"),
-        lineage=param_dict.get("lineage"),
-        json_state=param_dict.get("json-state"),
-        json_state_outputs=param_dict.get("json-state-outputs"),
-        run_id=param_dict.get("run_id"),
-    )  # type: ignore[call-arg]
+        **param_dict
+    )
 
     # Create API payload using utility function
     payload = create_api_payload(

@@ -8,15 +8,23 @@ Reference:
 - https://developer.hashicorp.com/terraform/cloud-docs/api-docs/variable-sets
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 from ..api.client import api_request
 from ..utils.decorators import handle_api_errors
+from ..utils.payload import create_api_payload
+from ..utils.request import query_params
 from ..models.base import APIResponse
 from ..models.variables import (
+    WorkspaceVariableCreateRequest,
+    WorkspaceVariableUpdateRequest,
     WorkspaceVariableParams,
+    VariableSetCreateRequest,
+    VariableSetUpdateRequest,
     VariableSetParams,
     VariableSetVariableParams,
+    VariableSetListRequest,
+    VariableCategory,
 )
 
 
@@ -76,26 +84,21 @@ async def create_workspace_variable(
     See:
         docs/tools/variables.md#create-workspace-variable for reference documentation
     """
-    # Build the API payload
-    attributes: Dict[str, Any] = {
-        "key": key,
-        "category": category,
-    }
+    param_dict = params.model_dump(exclude_none=True) if params else {}
+    request = WorkspaceVariableCreateRequest(
+        workspace_id=workspace_id,
+        key=key,
+        category=VariableCategory(category),
+        **param_dict,
+    )
 
-    # Add optional parameters if provided
-    if params:
-        if params.value is not None:
-            attributes["value"] = params.value
-        if params.description is not None:
-            attributes["description"] = params.description
-        if params.hcl is not None:
-            attributes["hcl"] = params.hcl
-        if params.sensitive is not None:
-            attributes["sensitive"] = params.sensitive
+    payload = create_api_payload(
+        resource_type="vars", model=request, exclude_fields={"workspace_id"}
+    )
 
-    payload = {"data": {"type": "vars", "attributes": attributes}}
-    endpoint = f"workspaces/{workspace_id}/vars"
-    return await api_request(endpoint, method="POST", data=payload)
+    return await api_request(
+        f"workspaces/{workspace_id}/vars", method="POST", data=payload
+    )
 
 
 @handle_api_errors
@@ -129,26 +132,20 @@ async def update_workspace_variable(
     See:
         docs/tools/variables.md#update-workspace-variable for reference documentation
     """
-    attributes: Dict[str, Any] = {}
+    param_dict = params.model_dump(exclude_none=True) if params else {}
+    request = WorkspaceVariableUpdateRequest(
+        workspace_id=workspace_id, variable_id=variable_id, **param_dict
+    )
 
-    # Add parameters to update if provided
-    if params:
-        if params.key is not None:
-            attributes["key"] = params.key
-        if params.value is not None:
-            attributes["value"] = params.value
-        if params.description is not None:
-            attributes["description"] = params.description
-        if params.category is not None:
-            attributes["category"] = str(params.category)
-        if params.hcl is not None:
-            attributes["hcl"] = params.hcl
-        if params.sensitive is not None:
-            attributes["sensitive"] = params.sensitive
+    payload = create_api_payload(
+        resource_type="vars",
+        model=request,
+        exclude_fields={"workspace_id", "variable_id"},
+    )
 
-    payload = {"data": {"type": "vars", "attributes": attributes}}
-    endpoint = f"workspaces/{workspace_id}/vars/{variable_id}"
-    return await api_request(endpoint, method="PATCH", data=payload)
+    return await api_request(
+        f"workspaces/{workspace_id}/vars/{variable_id}", method="PATCH", data=payload
+    )
 
 
 @handle_api_errors
@@ -200,12 +197,17 @@ async def list_variable_sets(
     See:
         docs/tools/variables.md#list-variable-sets for reference documentation
     """
-    endpoint = f"organizations/{organization}/varsets"
-    params = {
-        "page[number]": page_number,
-        "page[size]": page_size,
-    }
-    return await api_request(endpoint, method="GET", params=params)
+    request = VariableSetListRequest(
+        organization=organization,
+        page_number=page_number,
+        page_size=page_size,
+    )
+
+    params = query_params(request)
+
+    return await api_request(
+        f"organizations/{organization}/varsets", method="GET", params=params
+    )
 
 
 @handle_api_errors
@@ -258,23 +260,18 @@ async def create_variable_set(
     See:
         docs/tools/variables.md#create-variable-set for reference documentation
     """
-    # Build the API payload
-    attributes: Dict[str, Any] = {
-        "name": name,
-    }
+    param_dict = params.model_dump(exclude_none=True) if params else {}
+    request = VariableSetCreateRequest(
+        organization=organization, name=name, **param_dict
+    )
 
-    # Add optional parameters if provided
-    if params:
-        if params.description is not None:
-            attributes["description"] = params.description
-        if params.global_ is not None:
-            attributes["global"] = params.global_
-        if params.priority is not None:
-            attributes["priority"] = params.priority
+    payload = create_api_payload(
+        resource_type="varsets", model=request, exclude_fields={"organization"}
+    )
 
-    payload = {"data": {"type": "varsets", "attributes": attributes}}
-    endpoint = f"organizations/{organization}/varsets"
-    return await api_request(endpoint, method="POST", data=payload)
+    return await api_request(
+        f"organizations/{organization}/varsets", method="POST", data=payload
+    )
 
 
 @handle_api_errors
@@ -304,22 +301,14 @@ async def update_variable_set(
     See:
         docs/tools/variables.md#update-variable-set for reference documentation
     """
-    attributes: Dict[str, Any] = {}
+    param_dict = params.model_dump(exclude_none=True) if params else {}
+    request = VariableSetUpdateRequest(varset_id=varset_id, **param_dict)
 
-    # Add parameters to update if provided
-    if params:
-        if params.name is not None:
-            attributes["name"] = params.name
-        if params.description is not None:
-            attributes["description"] = params.description
-        if params.global_ is not None:
-            attributes["global"] = params.global_
-        if params.priority is not None:
-            attributes["priority"] = params.priority
+    payload = create_api_payload(
+        resource_type="varsets", model=request, exclude_fields={"varset_id"}
+    )
 
-    payload = {"data": {"type": "varsets", "attributes": attributes}}
-    endpoint = f"varsets/{varset_id}"
-    return await api_request(endpoint, method="PATCH", data=payload)
+    return await api_request(f"varsets/{varset_id}", method="PATCH", data=payload)
 
 
 @handle_api_errors
@@ -400,7 +389,7 @@ async def unassign_variable_set_from_workspaces(
     # Build relationships payload
     relationships_data = []
     for workspace_id in workspace_ids:
-        relationships_data.append({"id": workspace_id, "type": "workspaces"})
+        relationships_data.append({"type": "workspaces", "id": workspace_id})
 
     payload = {"data": relationships_data}
     endpoint = f"varsets/{varset_id}/relationships/workspaces"
@@ -462,7 +451,7 @@ async def unassign_variable_set_from_projects(
     # Build relationships payload
     relationships_data = []
     for project_id in project_ids:
-        relationships_data.append({"id": project_id, "type": "projects"})
+        relationships_data.append({"type": "projects", "id": project_id})
 
     payload = {"data": relationships_data}
     endpoint = f"varsets/{varset_id}/relationships/projects"
@@ -525,26 +514,22 @@ async def create_variable_in_variable_set(
     See:
         docs/tools/variables.md#create-variable-in-variable-set for reference documentation
     """
-    # Build the API payload
-    attributes: Dict[str, Any] = {
+    # Create a temporary request-like structure for the variable
+    # Note: We don't have specific models for variable set variables yet
+    var_data = {
         "key": key,
-        "category": category,
+        "category": VariableCategory(category).value,
     }
 
-    # Add optional parameters if provided
     if params:
-        if params.value is not None:
-            attributes["value"] = params.value
-        if params.description is not None:
-            attributes["description"] = params.description
-        if params.hcl is not None:
-            attributes["hcl"] = params.hcl
-        if params.sensitive is not None:
-            attributes["sensitive"] = params.sensitive
+        param_dict = params.model_dump(exclude_none=True)
+        var_data.update(param_dict)
 
-    payload = {"data": {"type": "vars", "attributes": attributes}}
-    endpoint = f"varsets/{varset_id}/relationships/vars"
-    return await api_request(endpoint, method="POST", data=payload)
+    payload = {"data": {"type": "vars", "attributes": var_data}}
+
+    return await api_request(
+        f"varsets/{varset_id}/relationships/vars", method="POST", data=payload
+    )
 
 
 @handle_api_errors
@@ -578,26 +563,13 @@ async def update_variable_in_variable_set(
     See:
         docs/tools/variables.md#update-variable-in-variable-set for reference documentation
     """
-    attributes: Dict[str, Any] = {}
+    param_dict = params.model_dump(exclude_none=True) if params else {}
 
-    # Add parameters to update if provided
-    if params:
-        if params.key is not None:
-            attributes["key"] = params.key
-        if params.value is not None:
-            attributes["value"] = params.value
-        if params.description is not None:
-            attributes["description"] = params.description
-        if params.category is not None:
-            attributes["category"] = str(params.category)
-        if params.hcl is not None:
-            attributes["hcl"] = params.hcl
-        if params.sensitive is not None:
-            attributes["sensitive"] = params.sensitive
+    payload = {"data": {"type": "vars", "attributes": param_dict}}
 
-    payload = {"data": {"type": "vars", "attributes": attributes}}
-    endpoint = f"varsets/{varset_id}/relationships/vars/{var_id}"
-    return await api_request(endpoint, method="PATCH", data=payload)
+    return await api_request(
+        f"varsets/{varset_id}/relationships/vars/{var_id}", method="PATCH", data=payload
+    )
 
 
 @handle_api_errors

@@ -7,7 +7,6 @@ Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/account
 from ..api.client import api_request
 from ..utils.decorators import handle_api_errors
 from ..models.base import APIResponse
-from ..models.account import AccountDetailsRequest
 
 
 @handle_api_errors
@@ -28,5 +27,4 @@ async def get_account_details() -> APIResponse:
     See:
         docs/tools/account.md for reference documentation
     """
-    AccountDetailsRequest()
     return await api_request("account/details")

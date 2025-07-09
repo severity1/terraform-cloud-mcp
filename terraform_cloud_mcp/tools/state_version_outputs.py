@@ -13,6 +13,7 @@ from ..models.state_version_outputs import (
     StateVersionOutputRequest,
 )
 from ..utils.decorators import handle_api_errors
+from ..utils.request import query_params
 
 
 @handle_api_errors
@@ -44,11 +45,8 @@ async def list_state_version_outputs(
         page_size=page_size,
     )
 
-    # Build query parameters
-    query = {
-        "page[number]": params.page_number,
-        "page[size]": params.page_size,
-    }
+    # Build query parameters using utility function
+    query = query_params(params)
 
     # Make API request
     return await api_request(

@@ -73,8 +73,13 @@ def query_params(model: BaseModel) -> Dict[str, Any]:
             if value == "":
                 continue
 
+            # Handle nested filters (workspace and organization for state versions)
+            if name == "filter_workspace_name":
+                params["filter[workspace][name]"] = str(value)
+            elif name == "filter_organization_name":
+                params["filter[organization][name]"] = str(value)
             # Handle two-level filters (permissions)
-            if "_permissions_" in name:
+            elif "_permissions_" in name:
                 parts = name.replace("filter_permissions_", "").split("_")
                 field_name = "-".join(parts)
                 params[f"filter[permissions][{field_name}]"] = (

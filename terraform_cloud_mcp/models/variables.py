@@ -144,9 +144,23 @@ class WorkspaceVariableCreateRequest(APIRequest):
         ...,
         description="Variable category (terraform or env)",
     )
-    params: Optional[WorkspaceVariableParams] = Field(
+    value: Optional[str] = Field(
         None,
-        description="Additional variable parameters",
+        description="Variable value",
+        max_length=256000,
+    )
+    description: Optional[str] = Field(
+        None,
+        description="Description of the variable",
+        max_length=512,
+    )
+    hcl: Optional[bool] = Field(
+        None,
+        description="Whether the value is HCL code (only valid for terraform variables)",
+    )
+    sensitive: Optional[bool] = Field(
+        None,
+        description="Whether the variable value is sensitive",
     )
 
 
@@ -171,9 +185,33 @@ class WorkspaceVariableUpdateRequest(APIRequest):
         description="The variable ID",
         pattern=r"^var-[a-zA-Z0-9]{16}$",
     )
-    params: Optional[WorkspaceVariableParams] = Field(
+    key: Optional[str] = Field(
         None,
-        description="Variable parameters to update",
+        description="Variable name/key",
+        min_length=1,
+        max_length=255,
+    )
+    value: Optional[str] = Field(
+        None,
+        description="Variable value",
+        max_length=256000,
+    )
+    description: Optional[str] = Field(
+        None,
+        description="Description of the variable",
+        max_length=512,
+    )
+    category: Optional[VariableCategory] = Field(
+        None,
+        description="Variable category (terraform or env)",
+    )
+    hcl: Optional[bool] = Field(
+        None,
+        description="Whether the value is HCL code (only valid for terraform variables)",
+    )
+    sensitive: Optional[bool] = Field(
+        None,
+        description="Whether the variable value is sensitive",
     )
 
 
@@ -409,4 +447,36 @@ class VariableSetVariableParams(APIRequest):
     sensitive: Optional[bool] = Field(
         None,
         description="Whether the variable value is sensitive",
+    )
+
+
+# List Request Models
+
+
+class VariableSetListRequest(APIRequest):
+    """Request model for listing variable sets.
+
+    Used for GET /organizations/:organization/varsets endpoint.
+
+    Reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/variable-sets
+
+    See:
+        docs/models/variables.md for reference
+    """
+
+    organization: str = Field(
+        ...,
+        description="The organization name",
+        min_length=1,
+    )
+    page_number: int = Field(
+        1,
+        description="The page number to return",
+        ge=1,
+    )
+    page_size: int = Field(
+        20,
+        description="The number of items per page",
+        ge=1,
+        le=100,
     )

@@ -2,6 +2,15 @@
 
 This file provides guidance for MCP tool implementations that expose Terraform Cloud API functionality to AI assistants.
 
+## Context Activation
+This guidance activates when:
+- Working in `terraform_cloud_mcp/tools/` directory
+- Reading/editing tool implementation files (*.py)
+- Implementing MCP functions for Terraform Cloud API
+- Adding new tool domains or expanding existing tools
+
+**Companion directories**: models/ (for validation), utils/ (for utilities), api/ (for client)
+
 ## Tool Architecture
 
 ### Directory Structure
@@ -34,39 +43,105 @@ This file provides guidance for MCP tool implementations that expose Terraform C
 - **Destructive**: delete_*, force_*, *_unlock affecting running processes (conditional)
 - **Potentially destructive**: cancel_*, discard_* operations (case-by-case)
 
+## Decision Matrices
+
+### When to Create New File vs Add to Existing
+| Scenario | New File | Add to Existing |
+|----------|----------|-----------------|
+| New API domain (≥5 conceptually distinct tools) | ✅ | ❌ |
+| Existing file has ≥15 functions | ✅ | ❌ |
+| Tool fits existing domain + file <15 functions | ❌ | ✅ |
+| Existing file will exceed 20 functions | ✅ Split by sub-domains | ❌ |
+
+### Tool Registration Decision Matrix
+| Operation Type | Examples | Registration | Reason |
+|----------------|----------|-------------|---------|
+| Non-destructive | get_*, list_*, create_*, update_* | Basic | Safe operations |
+| Destructive | delete_*, force_*, *_unlock | Conditional | Affects running processes |
+| Potentially destructive | cancel_*, discard_* | Case-by-case | Context-dependent impact |
+
+### Function Signature Pattern Decision
+| Parameter Count | Structure | Example |
+|-----------------|-----------|---------|
+| 1-2 required | Direct parameters | `get_workspace(workspace_id)` |
+| 3+ required | Routing + individual + params | `create_workspace(org, name, params)` |
+| 5+ optional | Use params object | `update_workspace(org, name, params)` |
+| <5 optional | Direct parameters | `list_workspaces(org, search, page)` |
+
 ## Implementation Requirements
 
 ### Essential Patterns
 1. Use @handle_api_errors decorator for consistent error handling
 2. Create corresponding Pydantic models for validation
-3. Follow function signature pattern: (routing_params, optional_params, params_object)
-4. Use utility functions for payload creation and parameter handling
+3. Follow function signature pattern: (required_routing_params, optional_individual_params, optional_params_object)
+4. Use utility functions for payload creation and parameter handling:
+   - `create_api_payload()` for JSON:API compliant payload creation
+   - `query_params()` for transforming Pydantic models to API parameters
 5. Document thoroughly with API endpoint references
 6. Register appropriately in server.py based on destructiveness
 
+### Function Signature Patterns
+
+Tool functions follow a consistent parameter structure. See `variables.py:create_workspace_variable` for the standard pattern.
+
+**Parameter Order:**
+1. **Required routing parameters** (workspace_id, organization, etc.)
+2. **Required API parameters** (key, category, name, etc.)  
+3. **Optional params object** for additional configuration
+
+### Query Parameter Pattern
+For list operations with filtering/pagination, use `query_params()` utility. See `workspaces.py:list_workspaces` for the standard pattern of transforming request models to API parameters.
+
 ### Documentation Integration
-- Reference [docs/API_REFERENCES.md](../../docs/API_REFERENCES.md) for official API groupings
+- Reference API_REFERENCES.md for official API groupings
 - Create usage examples in docs/tools/
 - Link to model definitions and conversation examples
 
-## Development Integration
+## Development Standards
 
-### Standards Reference
-Complete development guidance is in [docs/DEVELOPMENT.md](../../docs/DEVELOPMENT.md):
-- **Build Commands**: Quality check sequences and environment setup
-- **Quality Protocols**: 5-step mandatory validation process  
-- **Code Style**: Function patterns, async implementation, and validation requirements
+### Quality Checks
+- **Format**: `ruff format .`
+- **Lint**: `ruff check .`
+- **Type Check**: `mypy .`
+- **Test**: `pytest`
 
-### Tool-Specific Requirements
+### Code Style Requirements
 - Use @handle_api_errors decorator for all API functions
-- Follow (routing_params, optional_params, params_object) signature pattern
+- Follow (required_routing_params, optional_individual_params, optional_params_object) signature pattern
+- Apply async patterns with httpx for all API calls
+- Use Pydantic models for input validation
 - Apply comprehensive testing: Happy path → Edge cases → Error cases → Integration
-- Use Pydantic models for validation (see [../models/CLAUDE.md](../models/CLAUDE.md))
 
-## Component Cross-References
+### Model Integration
+When working with models:
+- Create corresponding Pydantic models for all tool parameters
+- Use model validation for input parameters
+- Follow field naming conventions (snake_case for Python, kebab-case for API)
+- Apply proper type hints and validation rules
 
-### Related Component Guidance
-- **Model Development**: [../models/CLAUDE.md](../models/CLAUDE.md) for Pydantic model patterns and validation
-- **Utility Functions**: [../utils/CLAUDE.md](../utils/CLAUDE.md) for error handling and payload utilities  
-- **API Client**: [../api/CLAUDE.md](../api/CLAUDE.md) for API request patterns
-- **Documentation**: [../../docs/CLAUDE.md](../../docs/CLAUDE.md) for documentation framework
+### Utility Function Usage
+Essential utility functions for tool implementation:
+- `create_api_payload()`: For JSON:API compliant payload creation
+- `query_params()`: For transforming Pydantic models to API parameters
+- `@handle_api_errors`: Decorator for consistent error handling
+- Request helpers: Authentication, pagination, filtering
+
+## Implementation Workflow
+
+### New Tool Development Process
+1. **Define function signature**: Follow parameter order pattern
+2. **Create Pydantic models**: For validation and type safety
+3. **Implement core logic**: Using utility functions and decorators
+4. **Add error handling**: Apply @handle_api_errors decorator
+5. **Register in server.py**: Based on destructiveness classification
+6. **Test thoroughly**: Cover happy path, edge cases, and error conditions
+7. **Update documentation**: TASKS.md, API_REFERENCES.md status updates
+
+### Quality Validation Checklist
+For each tool implementation:
+- [ ] Function follows Essential Patterns (decorator, models, utilities)
+- [ ] Pydantic models created and validated
+- [ ] Tool registered in server.py with appropriate classification
+- [ ] Quality checks passed: format, lint, type check
+- [ ] Documentation updated: implementation status tracking
+- [ ] Tests cover all scenarios: success, edge cases, errors

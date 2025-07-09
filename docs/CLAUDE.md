@@ -2,6 +2,15 @@
 
 This file provides guidance about the documentation structure and standards in this repository.
 
+## Context Activation
+This guidance activates when:
+- Working in `docs/` directory
+- Creating/editing documentation files (*.md)
+- Implementing multi-layer documentation structure
+- Adding cross-references or updating documentation standards
+
+**Companion directories**: All component directories (tools/, models/, utils/, api/)
+
 ## Documentation Architecture
 
 ### Core Files
@@ -55,28 +64,44 @@ Every new tool must maintain bidirectional links across all 4 layers:
 - [ ] Each layer references appropriate related layers
 - [ ] All links are valid and accessible
 
-## Development Integration
+## Development Standards
 
-### Quality Standards
-Complete development guidance is in [DEVELOPMENT.md](DEVELOPMENT.md):
-- **Build Commands**: Setup and quality check sequences
-- **Quality Protocols**: 5-step mandatory validation process
-- **Style Guidelines**: KISS/DRY principles and error handling patterns
+### Quality Checks
+- **Format**: `ruff format .`
+- **Lint**: `ruff check .`
+- **Type Check**: `mypy .`
+- **Test**: `pytest`
+
+### Documentation Quality Standards
+- Setup and quality check sequences
+- Comprehensive validation process for all documentation layers
+- KISS/DRY principles applied to documentation structure
+- Error handling patterns documented consistently
 
 ### AI Documentation Guidelines
 - Maintain consistency with existing documentation patterns
 - Reference actual code implementations rather than duplicate examples
 - Ensure examples include proper error handling
 - Keep examples concise but comprehensive
-- Follow cross-reference requirements above
+- Follow cross-reference requirements for all layers
 
-## Component Cross-References
+## Implementation Workflow
 
-### Related Guidance
-- **[../terraform_cloud_mcp/tools/CLAUDE.md](../terraform_cloud_mcp/tools/CLAUDE.md)** - Tool documentation patterns
-- **[../terraform_cloud_mcp/models/CLAUDE.md](../terraform_cloud_mcp/models/CLAUDE.md)** - Model documentation standards
-- **[../terraform_cloud_mcp/utils/CLAUDE.md](../terraform_cloud_mcp/utils/CLAUDE.md)** - Utility documentation patterns
-- **[../terraform_cloud_mcp/api/CLAUDE.md](../terraform_cloud_mcp/api/CLAUDE.md)** - API documentation integration
+### New Documentation Creation Process
+1. **Core Status Files**: Update TASKS.md and API_REFERENCES.md to reflect implementation progress
+2. **Multi-Layer Documentation**: Create docs/models/, docs/tools/, and docs/conversations/ for new domains
+3. **Cross-References**: Establish bidirectional links across all 4 layers
+4. **Integration**: Update docs/README.md with new documentation sections
+5. **Validation**: Test all links and anchor references
+
+### Documentation Quality Checklist
+For each new documentation implementation:
+- [ ] All 4 documentation layers created (conversations, models, tools, code docstrings)
+- [ ] Cross-references established bidirectionally between all layers
+- [ ] TASKS.md and API_REFERENCES.md updated to reflect new capabilities
+- [ ] All markdown links use relative paths and valid anchors
+- [ ] Examples include proper error handling and follow established patterns
+- [ ] Documentation follows consistent template structure
 
 ---
 
