@@ -20,6 +20,7 @@ from terraform_cloud_mcp.tools import cost_estimates
 from terraform_cloud_mcp.tools import assessment_results
 from terraform_cloud_mcp.tools import state_versions
 from terraform_cloud_mcp.tools import state_version_outputs
+from terraform_cloud_mcp.tools import variables
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -115,6 +116,39 @@ mcp.tool()(state_versions.download_state_file)
 # Register state version outputs tools
 mcp.tool()(state_version_outputs.list_state_version_outputs)
 mcp.tool()(state_version_outputs.get_state_version_output)
+
+# Register variable management tools
+# Workspace Variables
+mcp.tool()(variables.list_workspace_variables)
+mcp.tool()(variables.create_workspace_variable)
+mcp.tool()(variables.update_workspace_variable)
+mcp.tool(
+    enabled=enable_delete_tools,
+    annotations={"destructiveHint": True, "readOnlyHint": False},
+)(variables.delete_workspace_variable)
+
+# Variable Sets
+mcp.tool()(variables.list_variable_sets)
+mcp.tool()(variables.get_variable_set)
+mcp.tool()(variables.create_variable_set)
+mcp.tool()(variables.update_variable_set)
+mcp.tool(
+    enabled=enable_delete_tools,
+    annotations={"destructiveHint": True, "readOnlyHint": False},
+)(variables.delete_variable_set)
+mcp.tool()(variables.assign_variable_set_to_workspaces)
+mcp.tool()(variables.unassign_variable_set_from_workspaces)
+mcp.tool()(variables.assign_variable_set_to_projects)
+mcp.tool()(variables.unassign_variable_set_from_projects)
+
+# Variable Set Variables
+mcp.tool()(variables.list_variables_in_variable_set)
+mcp.tool()(variables.create_variable_in_variable_set)
+mcp.tool()(variables.update_variable_in_variable_set)
+mcp.tool(
+    enabled=enable_delete_tools,
+    annotations={"destructiveHint": True, "readOnlyHint": False},
+)(variables.delete_variable_from_variable_set)
 
 
 def main() -> None:

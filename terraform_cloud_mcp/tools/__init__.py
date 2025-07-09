@@ -11,6 +11,7 @@ from . import projects
 from . import runs
 from . import state_versions
 from . import state_version_outputs
+from . import variables
 from . import workspaces
 
 __all__ = [
@@ -24,5 +25,6 @@ __all__ = [
     "runs",
     "state_versions",
     "state_version_outputs",
+    "variables",
     "workspaces",
 ]
