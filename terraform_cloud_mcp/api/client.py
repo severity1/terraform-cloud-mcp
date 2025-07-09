@@ -11,14 +11,15 @@ automatic redirect following because:
 3. Terraform Cloud API uses pre-signed URLs that require the original auth headers
 """
 
-import os
 import logging
 from typing import Optional, Dict, TypeVar, Union, Any
 import httpx
 from pydantic import BaseModel
 
+from ..utils.env import get_tfc_token
+
 TERRAFORM_CLOUD_API_URL = "https://app.terraform.io/api/v2"
-DEFAULT_TOKEN = os.getenv("TFC_TOKEN")
+DEFAULT_TOKEN = get_tfc_token()
 logger = logging.getLogger(__name__)
 
 if DEFAULT_TOKEN:

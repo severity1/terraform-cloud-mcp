@@ -4,83 +4,82 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Terraform Cloud MCP Development Guide
 
-## Subagent Usage Guidelines
+## Component Architecture
 
-Subagents MUST be used for complex tasks following these rules:
+This project uses a hierarchical guidance system through component-specific CLAUDE.md files:
 
-- Use a minimum of 2 and maximum of 6 subagents for complex tasks
-- Assign different roles/"hats" to each subagent for more effective task division:
-  - Researcher: For finding patterns, documentation, and existing implementations
-  - Architect: For designing complex features and ensuring adherence to project patterns
-  - Implementer: For writing the actual code following project conventions
-  - Tester/Reviewer: For verifying implementations and checking for edge cases
-- Use subagents particularly for:
-  - Complex multi-step search operations or investigations
-  - Independent verification of implementations
-  - Early planning stages of complex features
-  - Test-driven development to avoid overfitting
+- **[docs/CLAUDE.md](docs/CLAUDE.md)** - Documentation standards and templates
+- **[terraform_cloud_mcp/tools/CLAUDE.md](terraform_cloud_mcp/tools/CLAUDE.md)** - MCP tools implementation patterns
+- **[terraform_cloud_mcp/models/CLAUDE.md](terraform_cloud_mcp/models/CLAUDE.md)** - Pydantic models and validation
+- **[terraform_cloud_mcp/utils/CLAUDE.md](terraform_cloud_mcp/utils/CLAUDE.md)** - Utility functions and error handling
+- **[terraform_cloud_mcp/api/CLAUDE.md](terraform_cloud_mcp/api/CLAUDE.md)** - API client patterns
 
-## Component-Specific Guidelines
+## Core Principles
 
-For detailed guidance on specific components, refer to the relevant CLAUDE.md files:
+**Decision-Making**: Always use documented criteria from component CLAUDE.md files - never base decisions on code inference alone.
 
-- [docs/CLAUDE.md](docs/CLAUDE.md) - Documentation structure and standards
-- [terraform_cloud_mcp/api/CLAUDE.md](terraform_cloud_mcp/api/CLAUDE.md) - API client details and usage
-- [terraform_cloud_mcp/models/CLAUDE.md](terraform_cloud_mcp/models/CLAUDE.md) - Pydantic models patterns and implementation
-- [terraform_cloud_mcp/tools/CLAUDE.md](terraform_cloud_mcp/tools/CLAUDE.md) - MCP tools implementation
-- [terraform_cloud_mcp/utils/CLAUDE.md](terraform_cloud_mcp/utils/CLAUDE.md) - Utility functions and patterns
+**Subagent Usage**: Use 2-6 subagents for complex tasks with specific roles:
+- **Researcher**: Pattern analysis and documentation research
+- **Architect**: System design and feature planning  
+- **Implementer**: Code development and integration
+- **Tester/Reviewer**: Quality assurance and validation
 
-## Build & Run Commands
-- Setup: `uv pip install -e .` (install with latest changes)
-- Install dev deps: `uv pip install black mypy pydantic ruff`
-- Format: `uv pip install black && uv run -m black .` 
-- Type check: `uv pip install mypy && uv run -m mypy .`
-- Lint: `uv pip install ruff && uv run -m ruff check .`
-- Fix lint issues: `uv pip install ruff && uv run -m ruff check --fix .`
+## Role-Based Guidance
 
-## Code Style Guidelines
+### Researcher Tasks
+Consult these components for analysis work:
+- [terraform_cloud_mcp/tools/CLAUDE.md](terraform_cloud_mcp/tools/CLAUDE.md) for domain boundary analysis
+- [terraform_cloud_mcp/models/CLAUDE.md](terraform_cloud_mcp/models/CLAUDE.md) for existing patterns
+- [docs/CLAUDE.md](docs/CLAUDE.md) for documentation standards
 
-> Note: Development documentation references actual code implementations rather than using code snippets. See docs/DEVELOPMENT.md for details.
-- **KISS Principle**: Keep It Simple, Stupid. Favor simple, maintainable solutions over complex ones.
-- **DRY Principle**: Don't Repeat Yourself. Use utility functions for common patterns.
-- **Imports**: stdlib → third-party → local, alphabetically within groups
-- **Formatting**: Black, 100 char line limit
-- **Types**: Type hints everywhere, Pydantic models for validation
-- **Pydantic Pattern**: See `terraform_cloud_mcp/models/workspaces.py` for reference implementation:
-  - Use `BaseModelConfig` base class for common configuration
-  - Use `APIRequest` for request validation
-  - Define explicit model classes for parameter objects (e.g., `WorkspaceParams`)
-  - Use `params` parameter instead of `**kwargs` in tool functions
-  - Use explicit field aliases (e.g., `alias="kebab-case-name"`) for API field mapping
-  - Type API responses as `APIResponse` (alias for `Dict[str, Any]`)
-- **Utility Functions**: Use common utilities for repetitive patterns:
-  - `create_api_payload()` from `utils/payload.py` for JSON:API payload creation
-  - `add_relationship()` from `utils/payload.py` for relationship management
-  - `query_params()` from `utils/request.py` for converting model to API parameters
-- **API Response Handling**:
-  - Handle 204 No Content responses properly, returning `{"status": "success", "status_code": 204}`
-  - Implement custom redirect handling for pre-signed URLs
-  - Use proper error handling for JSON parsing failures
-- **Naming**: snake_case (functions/vars), PascalCase (classes), UPPER_CASE (constants)
-- **Error handling**: Use `handle_api_errors` decorator from `terraform_cloud_mcp/utils/decorators.py` for consistent API error handling
-- **Async pattern**: All API functions should be async, using httpx
-- **Security**: Never log tokens, validate all inputs, redact sensitive data
-- **Documentation**: 
-  - Docstrings with Args/Returns for all functions
-  - Reference specific code implementations in docs rather than code snippets
-  - See cost_estimates.py for latest documentation patterns
-- **Comments**: Follow KISS principles for comments:
-  - Only explain the non-obvious "why" behind code choices, not the "what"
-  - Add comments for complex logic, edge cases, security measures, or API-specific requirements
-  - Avoid redundant, unnecessary, or self-explanatory comments
-  - Keep comments concise and directly relevant
+### Architect Tasks  
+Consult these components for design work:
+- [terraform_cloud_mcp/tools/CLAUDE.md](terraform_cloud_mcp/tools/CLAUDE.md) for function signatures
+- [terraform_cloud_mcp/models/CLAUDE.md](terraform_cloud_mcp/models/CLAUDE.md) for model hierarchies
+- [terraform_cloud_mcp/utils/CLAUDE.md](terraform_cloud_mcp/utils/CLAUDE.md) for utility integration
 
-## Workflow Guidelines
-- When adding/implementing new tools:
-  - Create model documentation in `docs/models/`
-  - Create documentation in `docs/tools/`
-  - Create conversation example in `docs/conversations/`
-  - Always update `docs/README.md`, `docs/DEVELOPMENT.md`
-  - Update any relevant `CLAUDE.md` files to include tool information
+### Implementer Tasks
+Use all component CLAUDE.md files following the implementation workflow below.
 
-- Update `TASKS.md` to mark task as completed if it exists and is used for the task.
+## Implementation Workflow
+
+### Tool Development Process
+1. **Planning**: Consult component CLAUDE.md files per role guidance above
+2. **Models**: Follow [terraform_cloud_mcp/models/CLAUDE.md](terraform_cloud_mcp/models/CLAUDE.md)
+3. **Implementation**: Follow [terraform_cloud_mcp/tools/CLAUDE.md](terraform_cloud_mcp/tools/CLAUDE.md)
+4. **Documentation**: Follow [docs/CLAUDE.md](docs/CLAUDE.md)
+5. **Quality**: Apply standards from component CLAUDE.md files
+
+### Development Standards
+Component CLAUDE.md files provide comprehensive guidance for:
+- **Build Commands & Quality Checks**: Development setup and validation
+- **Implementation Patterns**: Code style, error handling, and conventions  
+- **Documentation Templates**: Multi-layer documentation requirements
+
+## Subagent Quick Reference
+
+### Task Startup Checklist
+1. **Identify role**: Researcher, Architect, or Implementer
+2. **Consult components**: Use Role-Based Guidance above to find relevant CLAUDE.md files
+3. **Apply criteria**: Use documented patterns, not code inference
+4. **Validate patterns**: Reference existing code only to confirm documented guidance
+
+## Task Management
+
+### Complexity Assessment
+- **Simple** (< 2 hours): Direct implementation, minimal planning
+- **Medium** (2-8 hours): Use TodoWrite for 3-5 tasks  
+- **Complex** (> 8 hours): Use subagents (2-6) with comprehensive TodoWrite planning
+
+### TodoWrite Requirements
+Use TodoWrite for tasks with:
+- Multiple distinct steps (> 2)
+- Multiple file changes
+- Cross-component coordination
+- Medium to complex scope
+
+### Progress Standards
+- Mark todos `in_progress` before starting
+- Mark `completed` immediately after finishing
+- Update status in real-time
+- Provide concise progress updates for major phases

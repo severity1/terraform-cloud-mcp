@@ -124,6 +124,9 @@ terraform_cloud_mcp/
 - **Error handling**: Use `handle_api_errors` decorator from `terraform_cloud_mcp/utils/decorators.py`
 - **Async pattern**: All API functions should be async, using httpx
 - **Security**: Never log tokens, validate all inputs, redact sensitive data
+- **MCP Tool Registration**: Follow minimal pattern in `server.py`:
+  - Use simple `mcp.tool()(function_name)` for standard operations
+  - Use `mcp.tool(enabled=False)(function_name)` for dangerous delete operations
 
 ## Pydantic Model Standards
 
@@ -355,6 +358,93 @@ error_message = error_message.replace(token, "[REDACTED]")
 # Use exclude_unset to prevent default values from overriding server defaults
 request_data = data.model_dump(exclude_unset=True)
 ```
+
+## Quality Assurance Protocol
+
+### Mandatory Quality Check Sequence
+
+After ANY code changes, run these commands in exact order:
+
+1. **`uv run -m ruff check --fix .`** - Fix linting issues automatically
+2. **`uv run -m black .`** - Format code consistently  
+3. **`uv run -m mypy .`** - Verify type safety
+4. **Manual Testing** - Test basic tool functionality (see methodology below)
+5. **Documentation Completeness** - Verify using checklist below
+
+**IMPORTANT**: Fix all issues at each step before proceeding to the next step.
+
+### Manual Testing Methodology
+
+For each new tool, test these scenarios in order:
+
+1. **Happy Path**: Test with valid, typical parameters
+2. **Edge Cases**: Test with boundary values, empty strings, None values  
+3. **Error Cases**: Test with invalid IDs, missing permissions, malformed data
+4. **Integration**: Test with related tools in realistic workflows
+
+### Documentation Completeness Checklist
+
+- [ ] Function docstring includes API endpoint reference
+- [ ] Parameter descriptions include formats and constraints
+- [ ] Return value description explains structure and key fields
+- [ ] docs/tools/ entry created with function signature and examples
+- [ ] docs/models/ entry created if new models added
+- [ ] docs/conversations/ updated with realistic usage scenario
+- [ ] Cross-references between all documentation layers verified
+- [ ] All links in documentation are valid and accessible
+
+### Quality Standards
+
+- **Code Coverage**: All new functions must have comprehensive docstrings
+- **Type Safety**: All parameters and return values must have type hints
+- **Error Handling**: All tools must use @handle_api_errors decorator
+- **Security**: No tokens or sensitive data in logs or error messages
+- **Consistency**: New code must follow established patterns in existing codebase
+
+## Enhanced Code Style Guidelines
+
+### Core Principles
+- **KISS Principle**: Keep It Simple, Stupid. Favor simple, maintainable solutions over complex ones.
+- **DRY Principle**: Don't Repeat Yourself. Use utility functions for common patterns.
+- **Imports**: stdlib → third-party → local, alphabetically within groups
+- **Formatting**: Black, 100 char line limit
+- **Types**: Type hints everywhere, Pydantic models for validation
+- **Naming**: snake_case (functions/vars), PascalCase (classes), UPPER_CASE (constants)
+- **Error handling**: Use `handle_api_errors` decorator from `terraform_cloud_mcp/utils/decorators.py`
+- **Async pattern**: All API functions should be async, using httpx
+- **Security**: Never log tokens, validate all inputs, redact sensitive data
+
+### Pydantic Patterns
+See `terraform_cloud_mcp/models/workspaces.py` for reference implementation:
+- Use `BaseModelConfig` base class for common configuration
+- Use `APIRequest` for request validation
+- Define explicit model classes for parameter objects (e.g., `WorkspaceParams`)
+- Use `params` parameter instead of `**kwargs` in tool functions
+- Use explicit field aliases (e.g., `alias="kebab-case-name"`) for API field mapping
+- Type API responses as `APIResponse` (alias for `Dict[str, Any]`)
+
+### Utility Functions
+Use common utilities for repetitive patterns:
+- `create_api_payload()` from `utils/payload.py` for JSON:API payload creation
+- `add_relationship()` from `utils/payload.py` for relationship management
+- `query_params()` from `utils/request.py` for converting model to API parameters
+
+### API Response Handling
+- Handle 204 No Content responses properly, returning `{"status": "success", "status_code": 204}`
+- Implement custom redirect handling for pre-signed URLs
+- Use proper error handling for JSON parsing failures
+
+### Documentation Standards
+- Docstrings with Args/Returns for all functions
+- Reference specific code implementations in docs rather than code snippets
+- See cost_estimates.py for latest documentation patterns
+
+### Comments Guidelines
+Follow KISS principles for comments:
+- Only explain the non-obvious "why" behind code choices, not the "what"
+- Add comments for complex logic, edge cases, security measures, or API-specific requirements
+- Avoid redundant, unnecessary, or self-explanatory comments
+- Keep comments concise and directly relevant
 
 ## Contributing
 

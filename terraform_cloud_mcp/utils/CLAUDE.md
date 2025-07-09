@@ -1,93 +1,83 @@
 # CLAUDE.md for utils/
 
-This file provides guidance about the utility functions in this repository.
+This file provides guidance about shared utility functions for consistent operations across the Terraform Cloud MCP implementation.
 
-## Utils Overview
+## Utility Architecture
 
-The utils directory contains shared utility functions that handle common operations across the codebase. These utilities help maintain consistency, reduce code duplication, and encapsulate complex operations.
+The utils directory provides common functionality to maintain consistency and reduce code duplication:
 
-## Key Components
+### Core Utilities
+- **decorators.py**: `handle_api_errors` decorator for consistent error handling
+- **env.py**: Centralized environment variable management (tokens, feature flags)
+- **payload.py**: JSON:API payload creation and relationship management
+- **request.py**: Query parameter transformation for API requests
 
-- **decorators.py**: Function decorators for error handling
-  - `handle_api_errors`: Decorator for consistent API error handling
+## Implementation Standards
 
-- **payload.py**: JSON:API payload utilities
-  - `create_api_payload`: Creates JSON:API compliant payloads from Pydantic models
-  - `add_relationship`: Adds relationships to JSON:API payloads
+### Error Handling Pattern
+- **@handle_api_errors decorator**: Apply to all API functions for consistent error formatting
+- **Error format**: `{"error": "message"}` (never expose sensitive data)
+- **Success preservation**: Decorator preserves successful responses without modification
 
-- **request.py**: Request parameter utilities
-  - `query_params`: Transforms Pydantic models to API query parameters
+### Environment Management
+- **get_tfc_token()**: Centralized TFC_TOKEN access (never use direct os.getenv)
+- **should_enable_delete_tools()**: Safety control for destructive operations
+- **Centralized access**: All environment variables managed through utils/env.py
 
-## Decorator Patterns
+### Payload Creation
+- **create_api_payload()**: JSON:API compliant payload creation from Pydantic models
+- **add_relationship()**: Standardized relationship management for JSON:API
+- **query_params()**: Pydantic model to API parameter transformation
 
-```python
-@handle_api_errors
-async def example_function() -> APIResponse:
-    """A function that makes API calls."""
-    # Function body
-    return result
-```
+## Usage Standards
 
-The `handle_api_errors` decorator:
-1. Wraps async functions that make API calls
-2. Catches exceptions and formats them consistently
-3. Returns errors in a standardized format: `{"error": "message"}`
-4. Preserves successful responses without modification
+### Core Requirements
+- **Error handling**: Always use `@handle_api_errors` for API functions (never duplicate logic)
+- **Environment access**: Use utility functions instead of direct `os.getenv()` calls
+- **Payload creation**: Use `create_api_payload()` and `add_relationship()` for JSON:API operations
+- **Parameter handling**: Use `query_params()` for all list/filter operations
 
-## JSON:API Payload Utilities
+### Development Guidelines
+- **New utilities**: Place in appropriate module, document with type hints and examples
+- **Consistency**: Maintain established patterns, consistent return types and error formats
+- **Reusability**: Write utilities to be domain-agnostic and broadly applicable
 
-```python
-# Create a payload from a Pydantic model
-payload = create_api_payload(
-    resource_type="workspaces",
-    model=workspace_request,
-    exclude_fields={"organization"}  # Fields to exclude
-)
+## Error Handling Decision Matrix
 
-# Add a relationship to the payload
-payload = add_relationship(
-    payload=payload,
-    relation_name="organization",
-    resource_type="organizations",
-    resource_id="my-org"
-)
-```
+### When to Use Decorator Only
+- Standard CRUD operations with predictable API responses (200, 201, 204, 4xx, 5xx)
+- Most list and get operations without complex parameter validation
+- Tools that don't require business logic validation before API calls
 
-## Request Parameter Utilities
+### When to Add Custom Logic (WITH Decorator)
+- Parameter validation requiring specific error messages beyond Pydantic
+- API responses needing special status code interpretation
+- Multi-step operations with intermediate error handling needs
+- File operations requiring size/format validation
 
-```python
-# Convert a Pydantic model to API query parameters
-params = query_params(request_model)
+### Error Response Standards
+- **Format**: `{"error": "descriptive message"}` (never expose sensitive data)
+- **Success**: 200/201 return raw API response; 204 returns `{"status": "success", "status_code": 204}`
+- **Consistency**: Always preserve @handle_api_errors decorator even with custom logic
 
-# Result transforms fields following these patterns:
-# - page_number -> page[number]
-# - filter_name -> filter[name]
-# - search_term -> search[term]
-# - query_email -> q[email]
-# - q, search, sort -> direct mapping
-```
+## Development Integration
 
-## Usage Guidelines
+### Standards Reference
+Complete development guidance is in [docs/DEVELOPMENT.md](../../docs/DEVELOPMENT.md):
+- **Quality Protocol**: Error handling standards and 5-step validation sequence
+- **Build Commands**: Development workflow and testing requirements
+- **Code Style**: Type hints, async patterns, naming conventions, security practices
 
-1. **Error Handling**:
-   - Always use `handle_api_errors` for functions that make API calls
-   - Never duplicate error handling logic that's in the decorator
+### Utility-Specific Requirements
+- All functions must include proper error handling and consistent response format
+- Apply security guidelines for sensitive data redaction
+- Follow established patterns for error decoration and type safety
+- Test with mandatory quality check sequence after utility changes
 
-2. **JSON:API Payload Creation**:
-   - Use `create_api_payload` instead of manual payload construction
-   - Use `add_relationship` for all relationship handling
+## Component Cross-References
 
-3. **Query Parameter Handling**:
-   - Use `query_params` for all list/filter operations
-   - Follow the field naming conventions for proper parameter conversion
-
-4. **Adding New Utilities**:
-   - Place generic utilities in the appropriate module
-   - Document clearly with docstrings and type hints
-   - Include example usage in docstring
-   - Write utilities to be reusable across domains
-
-5. **Consistency**:
-   - Maintain consistent return types and error formats
-   - Follow established patterns for new utilities
-   - Ensure all utilities have proper type hints
+### Related Component Guidance
+- **Tool Implementation**: [../tools/CLAUDE.md](../tools/CLAUDE.md) for using utilities in tool functions
+- **Model Development**: [../models/CLAUDE.md](../models/CLAUDE.md) for validation patterns that use utilities
+- **API Client**: [../api/CLAUDE.md](../api/CLAUDE.md) for API request integration with utilities
+- **Documentation**: [../../docs/CLAUDE.md](../../docs/CLAUDE.md) for utility documentation standards
