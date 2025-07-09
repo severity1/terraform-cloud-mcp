@@ -2,6 +2,15 @@
 
 This file provides guidance about shared utility functions for consistent operations across the Terraform Cloud MCP implementation.
 
+## Context Activation
+This guidance activates when:
+- Working in `terraform_cloud_mcp/utils/` directory
+- Creating/editing utility functions (*.py)
+- Implementing shared functionality (decorators, helpers, formatters)
+- Adding error handling or payload creation utilities
+
+**Companion directories**: tools/ (for usage), models/ (for integration), api/ (for requests)
+
 ## Utility Architecture
 
 The utils directory provides common functionality to maintain consistency and reduce code duplication:
@@ -27,7 +36,21 @@ The utils directory provides common functionality to maintain consistency and re
 ### Payload Creation
 - **create_api_payload()**: JSON:API compliant payload creation from Pydantic models
 - **add_relationship()**: Standardized relationship management for JSON:API
-- **query_params()**: Pydantic model to API parameter transformation
+- **query_params()**: Pydantic model to API parameter transformation for list/filter operations
+
+### Query Parameter Transformation
+The `query_params()` function transforms Pydantic model fields to API parameters using consistent naming conventions:
+- **Pagination**: `page_number` → `page[number]`, `page_size` → `page[size]`
+- **Filters**: `filter_name` → `filter[name]`, `filter_permissions_update` → `filter[permissions][update]`
+- **Search**: `search_term` → `search[term]`, `search_user` → `search[user]`
+- **Query**: `query_email` → `q[email]`, `query_name` → `q[name]`
+- **Direct params**: `q`, `search`, `sort` mapped directly
+
+Usage pattern for all list operations: See `../tools/workspaces.py:list_workspaces` for the standard query parameter transformation approach.
+
+### Parameter Model Integration
+
+Functions use direct parameters with optional params objects. See `../tools/variables.py:create_workspace_variable` for the pattern of combining direct and optional parameters with request models.
 
 ## Usage Standards
 
@@ -60,24 +83,64 @@ The utils directory provides common functionality to maintain consistency and re
 - **Success**: 200/201 return raw API response; 204 returns `{"status": "success", "status_code": 204}`
 - **Consistency**: Always preserve @handle_api_errors decorator even with custom logic
 
-## Development Integration
+## Development Standards
 
-### Standards Reference
-Complete development guidance is in [docs/DEVELOPMENT.md](../../docs/DEVELOPMENT.md):
-- **Quality Protocol**: Error handling standards and 5-step validation sequence
-- **Build Commands**: Development workflow and testing requirements
-- **Code Style**: Type hints, async patterns, naming conventions, security practices
+### Quality Checks
+- **Format**: `ruff format .`
+- **Lint**: `ruff check .`
+- **Type Check**: `mypy .`
+- **Test**: `pytest`
 
 ### Utility-Specific Requirements
 - All functions must include proper error handling and consistent response format
 - Apply security guidelines for sensitive data redaction
 - Follow established patterns for error decoration and type safety
-- Test with mandatory quality check sequence after utility changes
+- Test with comprehensive quality check sequence after utility changes
 
-## Component Cross-References
+### Code Style Requirements
+- Type hints required for all parameters and return values
+- Apply async patterns where appropriate
+- Follow security practices for sensitive data handling
+- Maintain consistent naming conventions
 
-### Related Component Guidance
-- **Tool Implementation**: [../tools/CLAUDE.md](../tools/CLAUDE.md) for using utilities in tool functions
-- **Model Development**: [../models/CLAUDE.md](../models/CLAUDE.md) for validation patterns that use utilities
-- **API Client**: [../api/CLAUDE.md](../api/CLAUDE.md) for API request integration with utilities
-- **Documentation**: [../../docs/CLAUDE.md](../../docs/CLAUDE.md) for utility documentation standards
+## Integration Guidelines
+
+### Tool Integration
+When utilities are used in tools:
+- Apply `@handle_api_errors` decorator to all API functions
+- Use `create_api_payload()` for JSON:API compliant requests
+- Apply `query_params()` for all list/filter operations
+- Use centralized environment variable access
+
+### Model Integration
+When utilities work with models:
+- Use `create_api_payload()` with Pydantic model instances
+- Apply `query_params()` for transforming model data to API parameters
+- Handle model validation errors appropriately
+- Ensure proper type safety throughout
+
+### API Client Integration
+When utilities work with API client:
+- Use utilities for consistent request formatting
+- Apply error handling decorators
+- Use centralized token management
+- Ensure proper response handling
+
+## Implementation Workflow
+
+### New Utility Development Process
+1. **Define function signature**: Include proper type hints
+2. **Implement core logic**: Follow established patterns
+3. **Add error handling**: Apply consistent response formats
+4. **Test thoroughly**: Cover success, error, and edge cases
+5. **Document function**: Include usage examples and cross-references
+6. **Update status**: Implementation tracking
+
+### Quality Validation Checklist
+For each utility implementation:
+- [ ] Function includes proper error handling and consistent response format
+- [ ] Type hints provided for all parameters and return values
+- [ ] Documentation includes usage examples and patterns
+- [ ] Security guidelines followed for sensitive data handling
+- [ ] Quality checks passed: format, lint, type check
+- [ ] Tests cover all scenarios: success, error, edge cases

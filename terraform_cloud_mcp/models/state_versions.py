@@ -47,13 +47,13 @@ class StateVersionListRequest(APIRequest):
         docs/models/state_versions.md for reference
     """
 
-    workspace_name: str = Field(
-        ...,
-        description="The name of the workspace to list state versions for",
+    filter_workspace_name: Optional[str] = Field(
+        None,
+        description="Filter by workspace name",
     )
-    organization: str = Field(
-        ...,
-        description="The name of the organization that owns the workspace",
+    filter_organization_name: Optional[str] = Field(
+        None,
+        description="Filter by organization name",
     )
     filter_status: Optional[StateVersionStatus] = Field(
         None,

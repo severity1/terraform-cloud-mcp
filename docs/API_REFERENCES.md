@@ -66,10 +66,10 @@ This document contains links to all available Terraform Cloud API reference docu
 - [ ] [Teams](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/teams) 💰
 - [ ] [User Tokens](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/user-tokens)
 - [ ] [Users](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/users)
-- [ ] [Variables](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/variables)
-- [ ] [Variable Sets](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/variable-sets)
+- [✅] [Variables](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/variables)
+- [✅] [Variable Sets](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/variable-sets)
 - [ ] [VCS Events](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/vcs-events)
 - [✅] [Workspaces](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspaces) 💰
-- [ ] [Workspace-Specific Variables](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspace-variables)
+- [✅] [Workspace-Specific Variables](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspace-variables)
 - [ ] [Workspace Team Access](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/team-access) 💰
 - [ ] [Workspace Resources](https://developer.hashicorp.com/terraform/cloud-docs/api-docs/workspace-resources)

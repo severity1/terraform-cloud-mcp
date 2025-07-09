@@ -12,6 +12,7 @@ automatic redirect following because:
 """
 
 import logging
+import json
 from typing import Optional, Dict, TypeVar, Union, Any
 import httpx
 from pydantic import BaseModel
@@ -81,23 +82,12 @@ async def api_request(
 
     async with httpx.AsyncClient(follow_redirects=False) as client:
         url = path if external_url else f"{TERRAFORM_CLOUD_API_URL}/{path}"
-        methods = {
-            "GET": client.get,
-            "POST": client.post,
-            "PATCH": client.patch,
-            "DELETE": client.delete,
-        }
-        method_func = methods.get(method)
-        if not method_func:
-            return {"error": f"Unsupported method: {method}"}
-
         kwargs = {"headers": headers, "params": params}
-        if method in ["POST", "PATCH"]:
+        if request_data:
             kwargs["json"] = request_data
 
         try:
-            # Cast to proper callable type to satisfy mypy
-            response = await method_func(url, **kwargs)  # type: ignore
+            response = await client.request(method, url, **kwargs)
 
             # Handle redirects manually
             if response.status_code in (301, 302, 307, 308):
