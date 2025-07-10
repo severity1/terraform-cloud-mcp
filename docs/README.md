@@ -4,8 +4,10 @@ This directory contains supplementary documentation for the Terraform Cloud MCP 
 
 ## Structure
 
-### Development & Contributing Documentation
+### Core Documentation
+- `FILTERING_SYSTEM.md` - Audit-safe response filtering system (5-15% token reduction, 100% audit compliance)
 - `DEVELOPMENT.md` - Comprehensive development guidelines and coding standards
+- `API_REFERENCES.md` - Terraform Cloud API documentation links with implementation status
 - `CONTRIBUTING.md` - Guidelines for contributing to the project
 
 ### Model Documentation

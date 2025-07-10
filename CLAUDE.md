@@ -78,9 +78,22 @@ For any new implementation, always update:
 
 ### Implementation Standards  
 - **Use utility functions**: `create_api_payload()`, `query_params()`, `@handle_api_errors`
+- **Apply response filtering**: Automatic filtering system in `utils/filters.py` handles all GET requests
 - **Follow component patterns**: Apply standards from automatically loaded component CLAUDE.md files
 - **Run quality checks**: Format, lint, type check before completion
 - **Update relevant documentation**: Maintain consistency across project
+
+### Response Filtering Implementation Context
+This MCP server implements audit-safe response filtering with the following constraints:
+- **Primary use case**: Audit and compliance scenarios requiring complete data integrity
+- **Filtering approach**: Conservative token optimization (5-15% reduction) to preserve audit trails
+- **Critical preservation requirements**: 
+  - User accountability data (`created-at`, `updated-at`, `version-id`)
+  - Security configuration (permissions, auth policies)
+  - Change tracking (status timestamps, source information)
+  - Operational context (status, timing, progress indicators)
+- **Decision principle**: Preserve fields when audit impact is uncertain
+- **Implementation location**: `utils/filters.py` with configurations in `configs/filter_configs.py`
 
 ## Task Management
 
@@ -110,6 +123,8 @@ Use TodoWrite for tasks with:
 - **API changes**: Review model and tool implementation standards  
 - **Development workflow changes**: Update quality check commands
 - **Documentation structure changes**: Update docs/ guidance
+- **Filter configuration changes**: When new API fields appear, assess preservation vs. optimization trade-offs
+- **Compliance requirement changes**: Review filter configurations if audit use cases evolve
 
 ### Memory Optimization Indicators
 - **High context usage**: Review for redundant information across files

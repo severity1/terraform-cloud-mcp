@@ -169,10 +169,7 @@ async def create_state_version(
     param_dict["md5"] = md5
 
     # Create request using Pydantic model
-    request_params = StateVersionCreateRequest(
-        workspace_id=workspace_id,
-        **param_dict
-    )
+    request_params = StateVersionCreateRequest(workspace_id=workspace_id, **param_dict)
 
     # Create API payload using utility function
     payload = create_api_payload(
@@ -183,7 +180,6 @@ async def create_state_version(
 
     # Add relationship if run_id is provided
     if param_dict.get("run_id"):
-
         payload = add_relationship(
             payload=payload,
             relation_name="run",

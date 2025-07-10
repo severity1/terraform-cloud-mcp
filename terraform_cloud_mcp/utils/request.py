@@ -1,48 +1,11 @@
-"""Request utilities for Terraform Cloud MCP.
-
-This module provides helper functions for creating and processing
-API request parameters consistently across the codebase.
-"""
+"""Request utilities for Terraform Cloud MCP."""
 
 from typing import Dict, Any
 from pydantic import BaseModel
 
 
 def query_params(model: BaseModel) -> Dict[str, Any]:
-    """Transform Pydantic model fields to API parameters using naming conventions.
-
-    Creates a complete set of query parameters from a request model using
-    consistent naming conventions for parameter types:
-    - Pagination: 'page_number' -> 'page[number]'
-    - Filters: 'filter_name' -> 'filter[name]'
-    - Search: 'search_term' -> 'search[term]'
-    - Query: 'query_email' -> 'q[email]', 'query_name' -> 'q[name]'
-    - Direct params: Direct mapping for 'q', 'search', etc.
-
-    Args:
-        model: Pydantic model with parameter fields
-
-    Returns:
-        Dictionary with all formatted API parameters
-
-    Example:
-        ```python
-        request = ProjectListRequest(
-            organization="example",
-            page_number=2,
-            page_size=20,
-            filter_names="test",
-            q="search term"
-        )
-        params = query_params(request)
-        # Result: {
-        #   "page[number]": "2",
-        #   "page[size]": "20",
-        #   "filter[names]": "test",
-        #   "q": "search term"
-        # }
-        ```
-    """
+    """Transform Pydantic model fields to API parameters using naming conventions."""
     params = {}
     routing_fields = {
         "organization",
