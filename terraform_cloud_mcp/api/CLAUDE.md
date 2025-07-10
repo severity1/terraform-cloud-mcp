@@ -39,7 +39,8 @@ Custom redirect handling (not httpx automatic) provides:
 
 ### Response Handling Standards
 - **Success responses**: 200/201 return raw API data; 204 returns `{"status": "success", "status_code": 204}`
-- **Error handling**: HTTP status errors, network issues, JSON parsing failures
+- **Response filtering**: Automatic filtering applied to GET requests returning JSON data
+- **Error handling**: HTTP status errors, network issues, JSON parsing failures  
 - **Security**: Never logs tokens/credentials, validates inputs, proper error redaction
 
 ## Usage Standards

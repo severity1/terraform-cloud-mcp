@@ -1,23 +1,17 @@
-"""Terraform Cloud API client
-
-This module provides functions for making requests to the Terraform Cloud API.
-It handles authentication, request formatting, response processing, and
-specialized redirect handling for Terraform Cloud API's pre-signed URLs.
-
-The client implements custom redirect handling rather than using httpx's
-automatic redirect following because:
-1. We need to preserve authentication headers when following redirects
-2. We need content-type specific processing of redirect responses
-3. Terraform Cloud API uses pre-signed URLs that require the original auth headers
-"""
+"""Terraform Cloud API client"""
 
 import logging
-import json
 from typing import Optional, Dict, TypeVar, Union, Any
 import httpx
 from pydantic import BaseModel
 
-from ..utils.env import get_tfc_token
+from ..utils.env import get_tfc_token, should_return_raw_response
+from ..utils.filters import (
+    get_response_filter,
+    should_filter_response,
+    detect_resource_type,
+    detect_operation_type,
+)
 
 TERRAFORM_CLOUD_API_URL = "https://app.terraform.io/api/v2"
 DEFAULT_TOKEN = get_tfc_token()
@@ -39,31 +33,9 @@ async def api_request(
     data: Union[Dict[str, Any], BaseModel] = {},
     external_url: bool = False,
     accept_text: bool = False,
+    raw_response: Optional[bool] = None,
 ) -> Dict[str, Any]:
-    """Make a request to the Terraform Cloud API with proper error handling.
-
-    Creates an authenticated request to the Terraform Cloud API, handling
-    authentication, request formatting, and basic error checking.
-
-    Args:
-        path: API path to request (without leading slash) or full URL if external_url=True
-        method: HTTP method to use (GET, POST, PATCH, DELETE)
-        token: API token (defaults to TFC_TOKEN from environment)
-        params: Query parameters for the request
-        data: JSON payload data (dict or Pydantic model)
-        external_url: Whether path is a complete external URL instead of a TFC API path
-        accept_text: Whether to accept and return text content instead of JSON
-
-    Returns:
-        JSON response from the API as a dictionary or text content if accept_text=True
-
-    Raises:
-        HTTPStatusError: For HTTP errors (wrapped by handle_api_errors)
-        RequestError: For network/connection issues
-
-    Note:
-        This function expects TFC_TOKEN to be set in the environment or .env file
-    """
+    """Make a request to the Terraform Cloud API with proper error handling."""
     token = token or DEFAULT_TOKEN
     if not token:
         return {
@@ -82,7 +54,7 @@ async def api_request(
 
     async with httpx.AsyncClient(follow_redirects=False) as client:
         url = path if external_url else f"{TERRAFORM_CLOUD_API_URL}/{path}"
-        kwargs = {"headers": headers, "params": params}
+        kwargs: Dict[str, Any] = {"headers": headers, "params": params}
         if request_data:
             kwargs["json"] = request_data
 
@@ -96,7 +68,9 @@ async def api_request(
                     return {
                         "error": "Redirect received, but no Location header provided."
                     }
-                return await handle_redirect(location, headers, client, accept_text)
+                return await handle_redirect(
+                    location, headers, client, accept_text, path, method, raw_response
+                )
 
             # For text responses
             if accept_text:
@@ -109,9 +83,11 @@ async def api_request(
             # Handle other success responses
             json_data = response.json()
             # Ensure we return a dict as specified in the function signature
-            if isinstance(json_data, dict):
-                return json_data
-            return {"data": json_data}
+            if not isinstance(json_data, dict):
+                json_data = {"data": json_data}
+
+            # Apply response filtering if not disabled
+            return _apply_response_filtering(json_data, path, method, raw_response)
 
         except httpx.RequestError as e:
             logger.error(f"Network error while making request to {url}: {e}")
@@ -131,6 +107,9 @@ async def handle_redirect(
     headers: Dict[str, str],
     client: httpx.AsyncClient,
     accept_text: bool = False,
+    original_path: str = "",
+    original_method: str = "GET",
+    raw_response: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """Handle redirects manually, ensuring headers are forwarded."""
     try:
@@ -142,9 +121,13 @@ async def handle_redirect(
 
             # Parse the response as JSON and ensure it is a dictionary
             json_data = response.json()
-            if isinstance(json_data, dict):
-                return json_data
-            return {"data": json_data}
+            if not isinstance(json_data, dict):
+                json_data = {"data": json_data}
+
+            # Apply response filtering if not disabled
+            return _apply_response_filtering(
+                json_data, original_path, original_method, raw_response
+            )
         return {
             "error": f"Redirect request failed: {response.status_code}",
             "redirect_url": location,
@@ -167,3 +150,40 @@ async def handle_redirect(
             "error": f"Unexpected error while following redirect: {str(e)}",
             "redirect_url": location,
         }
+
+
+def _apply_response_filtering(
+    json_data: Dict[str, Any],
+    path: str,
+    method: str,
+    raw_response: Optional[bool] = None,
+) -> Dict[str, Any]:
+    """Apply response filtering based on configuration and request context."""
+    # Check if raw response is requested
+    if raw_response is True or (raw_response is None and should_return_raw_response()):
+        return json_data
+
+    # Check if this response should be filtered
+    if not should_filter_response(path, method):
+        return json_data
+
+    try:
+        # Detect resource type and operation type
+        resource_type = detect_resource_type(path, json_data)
+        operation_type = detect_operation_type(path, method)
+
+        # Get and apply the appropriate filter
+        filter_func = get_response_filter(resource_type)
+        filtered_data = filter_func(json_data, operation_type)
+
+        logger.info(
+            f"Applied {resource_type} filter ({filter_func.__name__}) for {operation_type} operation on {path}"
+        )
+        return dict(filtered_data)
+
+    except Exception as e:
+        # If filtering fails, log error and return raw data
+        logger.warning(
+            f"Response filtering failed for {path}: {e}. Returning raw response."
+        )
+        return json_data

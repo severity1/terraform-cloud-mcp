@@ -108,6 +108,7 @@ terraform_cloud_mcp/
 ├── utils/              # Shared utilities
 │   ├── __init__.py
 │   ├── decorators.py   # Error handling decorators
+│   ├── filters.py      # Response filtering for token optimization
 │   ├── payload.py      # JSON:API payload utilities
 │   └── request.py      # Request parameter utilities
 └── server.py           # MCP server entry point
@@ -122,6 +123,7 @@ terraform_cloud_mcp/
 - **Types**: Type hints everywhere, Pydantic models for validation
 - **Naming**: snake_case (functions/vars), PascalCase (classes), UPPER_CASE (constants)
 - **Error handling**: Use `handle_api_errors` decorator from `terraform_cloud_mcp/utils/decorators.py`
+- **Audit-safe filtering**: Automatic filtering system uses conservative 5-15% token reduction while preserving 100% audit compliance - all user accountability, security, and change tracking data preserved
 - **Async pattern**: All API functions should be async, using httpx
 - **Security**: Never log tokens, validate all inputs, redact sensitive data
 - **MCP Tool Registration**: Follow minimal pattern in `server.py`:

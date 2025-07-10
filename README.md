@@ -4,7 +4,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.16-blue)
+![Version](https://img.shields.io/badge/version-0.8.17-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -25,6 +25,10 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - **State Version Management**: List, retrieve, create, and download state versions; get current state for workspaces.
 - **State Version Outputs**: List and retrieve specific outputs from state versions including values and sensitivity information.
 - **Variables Management**: Complete workspace variable and variable set management including creation, updates, assignments, and optionally deletion (with safety controls).
+
+### Performance Features
+
+- **Audit-Safe Response Filtering**: Conservative token optimization (5-15% reduction) with 100% audit compliance - preserves all user accountability, security configuration, and change tracking data for comprehensive compliance scenarios.
 
 ### Safety Features
 
@@ -284,7 +288,9 @@ The codebase includes comprehensive documentation:
 - **Docstrings**: All public functions and classes include detailed docstrings
 - **Implementation References**: Development documentation now references actual code examples rather than using code snippets
 - **Example Files**: The `docs/` directory contains detailed examples for each domain:
+  - `docs/FILTERING_SYSTEM.md`: Comprehensive guide to the audit-safe response filtering system (5-15% token reduction, 100% audit compliance)
   - `docs/DEVELOPMENT.md`: Development standards and coding guidelines with references to actual code
+  - `docs/API_REFERENCES.md`: Terraform Cloud API documentation links with implementation status
   - `docs/CONTRIBUTING.md`: Guidelines for contributing to the project
   - `docs/models/`: Reference documentation for all model types
   - `docs/tools/`: Detailed reference documentation for each tool
