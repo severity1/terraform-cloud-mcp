@@ -177,6 +177,6 @@ cython_debug/
 .pypirc
 
 # Others
-examples/
-ISSUES.md
-TASKS.md
+# examples/
+# ISSUES.md
+# TASKS.md
