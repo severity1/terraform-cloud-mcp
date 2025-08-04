@@ -9,6 +9,11 @@ def get_tfc_token() -> Optional[str]:
     return os.getenv("TFC_TOKEN")
 
 
+def get_tfc_address() -> str:
+    """Get Terraform Cloud/Enterprise address from environment, with default of app.terraform.io."""
+    return os.getenv("TFC_ADDRESS", "https://app.terraform.io")
+
+
 def should_enable_delete_tools() -> bool:
     """Check if delete tools should be enabled."""
     env_value = os.getenv("ENABLE_DELETE_TOOLS", "false").lower().strip()

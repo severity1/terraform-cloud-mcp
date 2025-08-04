@@ -5,7 +5,7 @@ from typing import Optional, Dict, TypeVar, Union, Any
 import httpx
 from pydantic import BaseModel
 
-from ..utils.env import get_tfc_token, should_return_raw_response
+from ..utils.env import get_tfc_token, should_return_raw_response, get_tfc_address
 from ..utils.filters import (
     get_response_filter,
     should_filter_response,
@@ -13,7 +13,6 @@ from ..utils.filters import (
     detect_operation_type,
 )
 
-TERRAFORM_CLOUD_API_URL = "https://app.terraform.io/api/v2"
 DEFAULT_TOKEN = get_tfc_token()
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,8 @@ async def api_request(
     }
 
     async with httpx.AsyncClient(follow_redirects=False) as client:
-        url = path if external_url else f"{TERRAFORM_CLOUD_API_URL}/{path}"
+        tfc_address = get_tfc_address()
+        url = path if external_url else f"{tfc_address}/api/v2/{path}"
         kwargs: Dict[str, Any] = {"headers": headers, "params": params}
         if request_data:
             kwargs["json"] = request_data
