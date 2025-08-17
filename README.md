@@ -47,6 +47,13 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - `uv` package manager (recommended) or `pip`
 - Terraform Cloud API token
 
+### Environment Variables
+
+- `TFC_TOKEN` - Terraform Cloud API token (required)
+- `TFC_ADDRESS` - Terraform Cloud/Enterprise address (optional, defaults to https://app.terraform.io)
+- `ENABLE_DELETE_TOOLS` - Enable/disable destructive operations (optional, defaults to false)
+- `ENABLE_RAW_RESPONSE` - Return raw vs filtered responses (optional, defaults to false)
+
 ---
 
 ### Installation
@@ -72,6 +79,9 @@ uv pip install .
 # Add to Claude Code with your Terraform Cloud token
 claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -e ENABLE_DELETE_TOOLS=false -s user terraform-cloud-mcp -- "terraform-cloud-mcp"
 
+# To use a self-hosted Terraform Enterprise instance:
+# claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -e TFC_ADDRESS=https://terraform.example.com -s user terraform-cloud-mcp -- "terraform-cloud-mcp"
+
 # To enable delete operations (use with caution):
 # claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -e ENABLE_DELETE_TOOLS=true -s user terraform-cloud-mcp -- "terraform-cloud-mcp"
 ```
@@ -95,6 +105,7 @@ Create a `claude_desktop_config.json` configuration file:
       ],
       "env": {
         "TFC_TOKEN": "my token...", # replace with actual token
+        "TFC_ADDRESS": "https://app.terraform.io", # optional, change for self-hosted TFE
         "ENABLE_DELETE_TOOLS": "false" # set to "true" to enable destructive operations
       }
     }
@@ -109,8 +120,9 @@ Replace `your_terraform_cloud_token` with your actual Terraform Cloud API token.
 For other platforms (like Cursor, Copilot Studio, or Glama), follow their platform-specific instructions for adding an MCP server. Most platforms require:
 1. The server path or command to start the server.
 2. Environment variables for the Terraform Cloud API token (`TFC_TOKEN`).
-3. Optional environment variable to enable delete operations (`ENABLE_DELETE_TOOLS=true` for destructive operations).
-4. Configuration to auto-start the server when needed.
+3. Optional environment variable for self-hosted Terraform Enterprise (`TFC_ADDRESS`).
+4. Optional environment variable to enable delete operations (`ENABLE_DELETE_TOOLS=true` for destructive operations).
+5. Configuration to auto-start the server when needed.
 
 ---
 

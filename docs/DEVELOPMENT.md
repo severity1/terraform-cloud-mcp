@@ -38,6 +38,9 @@ uv pip install black mypy pydantic ruff
 ```bash
 # Add to Claude Code with your development path and token
 claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -s user terraform-cloud-mcp -- "$(pwd)/terraform_cloud_mcp/server.py"
+
+# To use a self-hosted Terraform Enterprise instance:
+# claude mcp add -e TFC_TOKEN=YOUR_TF_TOKEN -e TFC_ADDRESS=https://terraform.example.com -s user terraform-cloud-mcp -- "$(pwd)/terraform_cloud_mcp/server.py"
 ```
 
 #### Adding to Claude Desktop (Development Mode)
@@ -58,7 +61,8 @@ Create a `claude_desktop_config.json` configuration file:
         "terraform_cloud_mcp/server.py"
       ],
       "env": {
-        "TFC_TOKEN": "your_terraform_cloud_token" # Your actual TF Cloud token
+        "TFC_TOKEN": "your_terraform_cloud_token", # Your actual TF Cloud token
+        "TFC_ADDRESS": "https://app.terraform.io" # Optional, change for self-hosted TFE
       }
     }
   }
