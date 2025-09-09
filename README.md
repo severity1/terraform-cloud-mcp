@@ -125,10 +125,10 @@ Create a `claude_desktop_config.json` configuration file:
         "terraform-cloud-mcp"
       ],
       "env": {
-        "TFC_TOKEN": "your_actual_token_here",
-        "TFC_ADDRESS": "https://app.terraform.io",
-        "ENABLE_DELETE_TOOLS": "false",
-        "READ_ONLY_TOOLS": "false"
+        "TFC_TOKEN": "your_actual_token_here", # replace with actual token
+        "TFC_ADDRESS": "https://app.terraform.io", # optional, change for self-hosted TFE
+        "ENABLE_DELETE_TOOLS": "false", # set to "true" to enable destructive operations/tools
+        "READ_ONLY_TOOLS": "false" # set to  "true" to only enable ready-only operations/tools
       }
     }
   }
