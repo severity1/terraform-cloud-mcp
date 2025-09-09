@@ -84,12 +84,8 @@ cd terraform-cloud-mcp
 
 # Build the Docker image
 docker build -t terraform-cloud-mcp:latest .
-
-# Or use the build script
-./docker-build.sh
 ```
 
-See [DOCKER.md](DOCKER.md) for detailed Docker usage instructions.
 
 ### Adding to Claude Environments
 
@@ -176,7 +172,7 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 
 ## Available Tools
 
-**Note**: When `READ_ONLY_TOOLS=true`, all create, update, delete, apply, and state modification operations are disabled. Only read operations (list, get, view) remain available. See [DOCKER.md](DOCKER.md) for complete details.
+**Note**: When `READ_ONLY_TOOLS=true`, all create, update, delete, apply, and state modification operations are disabled. Only read operations (list, get, view) remain available.
 
 ### Account Tools
 
