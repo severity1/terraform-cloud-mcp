@@ -24,3 +24,9 @@ def should_return_raw_response() -> bool:
     """Check if raw API responses should be returned instead of filtered responses."""
     env_value = os.getenv("ENABLE_RAW_RESPONSE", "false").lower().strip()
     return env_value in ("true", "1", "yes", "on")
+
+
+def should_enable_read_only_tools() -> bool:
+    """Check if only read-only tools should be enabled."""
+    env_value = os.getenv("READ_ONLY_TOOLS", "false").lower().strip()
+    return env_value in ("true", "1", "yes", "on")
