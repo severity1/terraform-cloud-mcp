@@ -33,6 +33,7 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 ### Safety Features
 
 - **Destructive Operation Controls**: Delete operations are disabled by default and require explicit enablement via environment variable
+- **Read-Only Mode**: All write operations can be disabled with `READ_ONLY_TOOLS=true` for maximum safety in production environments
 - **Destructive Hints**: MCP clients receive proper destructive operation warnings for potentially dangerous tools
 - **Environment-Based Safety**: Production and development environments can have different safety configurations
 
@@ -52,11 +53,14 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - `TFC_TOKEN` - Terraform Cloud API token (required)
 - `TFC_ADDRESS` - Terraform Cloud/Enterprise address (optional, defaults to https://app.terraform.io)
 - `ENABLE_DELETE_TOOLS` - Enable/disable destructive operations (optional, defaults to false)
+- `READ_ONLY_TOOLS` - Enable only read-only operations (optional, defaults to false)
 - `ENABLE_RAW_RESPONSE` - Return raw vs filtered responses (optional, defaults to false)
 
 ---
 
 ### Installation
+
+#### Option 1: Local Installation
 
 ```bash
 # Clone the repository
@@ -70,6 +74,22 @@ source .venv/bin/activate
 # Install package
 uv pip install .
 ```
+
+#### Option 2: Docker Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/severity1/terraform-cloud-mcp.git
+cd terraform-cloud-mcp
+
+# Build the Docker image
+docker build -t terraform-cloud-mcp:latest .
+
+# Or use the build script
+./docker-build.sh
+```
+
+See [DOCKER.md](DOCKER.md) for detailed Docker usage instructions.
 
 ### Adding to Claude Environments
 
@@ -92,21 +112,48 @@ Create a `claude_desktop_config.json` configuration file:
 - mac: ~/Library/Application Support/Claude/claude_desktop_config.json
 - win: %APPDATA%\Claude\claude_desktop_config.json
 
+##### Local Installation Configuration:
 ```json
 {
   "mcpServers": {
     "terraform-cloud-mcp": {
-      "command": "/path/to/uv", # Get this by running: `which uv`
+      "command": "/path/to/uv",
       "args": [
         "--directory",
-        "/path/to/your/terraform-cloud-mcp", # Full path to this project
+        "/path/to/your/terraform-cloud-mcp",
         "run",
         "terraform-cloud-mcp"
       ],
       "env": {
-        "TFC_TOKEN": "my token...", # replace with actual token
-        "TFC_ADDRESS": "https://app.terraform.io", # optional, change for self-hosted TFE
-        "ENABLE_DELETE_TOOLS": "false" # set to "true" to enable destructive operations
+        "TFC_TOKEN": "your_actual_token_here",
+        "TFC_ADDRESS": "https://app.terraform.io",
+        "ENABLE_DELETE_TOOLS": "false",
+        "READ_ONLY_TOOLS": "false"
+      }
+    }
+  }
+}
+```
+
+##### Docker Configuration:
+```json
+{
+  "mcpServers": {
+    "terraform-cloud-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "TFC_TOKEN",
+        "-e", "TFC_ADDRESS",
+        "-e", "ENABLE_DELETE_TOOLS",
+        "-e", "READ_ONLY_TOOLS",
+        "terraform-cloud-mcp:latest"
+      ],
+      "env": {
+        "TFC_TOKEN": "your_actual_token_here",
+        "TFC_ADDRESS": "https://app.terraform.io",
+        "ENABLE_DELETE_TOOLS": "false",
+        "READ_ONLY_TOOLS": "false"
       }
     }
   }
@@ -122,11 +169,14 @@ For other platforms (like Cursor, Copilot Studio, or Glama), follow their platfo
 2. Environment variables for the Terraform Cloud API token (`TFC_TOKEN`).
 3. Optional environment variable for self-hosted Terraform Enterprise (`TFC_ADDRESS`).
 4. Optional environment variable to enable delete operations (`ENABLE_DELETE_TOOLS=true` for destructive operations).
-5. Configuration to auto-start the server when needed.
+5. Optional environment variable for read-only mode (`READ_ONLY_TOOLS=true` to disable all write operations).
+6. Configuration to auto-start the server when needed.
 
 ---
 
 ## Available Tools
+
+**Note**: When `READ_ONLY_TOOLS=true`, all create, update, delete, apply, and state modification operations are disabled. Only read operations (list, get, view) remain available. See [DOCKER.md](DOCKER.md) for complete details.
 
 ### Account Tools
 
@@ -328,6 +378,6 @@ See our [Contributing Guide](docs/CONTRIBUTING.md) for detailed instructions on 
 
 ## Disclaimer
 
-This project is not affiliated with, associated with, or endorsed by HashiCorp or Terraform.  
-"Terraform" and "Terraform Cloud" are trademarks of HashiCorp.  
+This project is not affiliated with, associated with, or endorsed by HashiCorp or Terraform.
+"Terraform" and "Terraform Cloud" are trademarks of HashiCorp.
 This project merely interacts with the Terraform Cloud public API under fair use.
