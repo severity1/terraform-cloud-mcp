@@ -117,10 +117,10 @@ Create a `claude_desktop_config.json` configuration file:
 {
   "mcpServers": {
     "terraform-cloud-mcp": {
-      "command": "/path/to/uv",
+      "command": "/path/to/uv", # Full path to this project
       "args": [
         "--directory",
-        "/path/to/your/terraform-cloud-mcp",
+        "/path/to/your/terraform-cloud-mcp", # Full path to this project
         "run",
         "terraform-cloud-mcp"
       ],
