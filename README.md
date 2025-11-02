@@ -63,6 +63,8 @@ To use this MCP server, you need a Terraform Cloud (or Terraform Enterprise) API
 
 Use this token as your `TFC_TOKEN` environment variable in the configuration steps below.
 
+For more information about API token types and permissions, see the [HCP Terraform API Tokens documentation](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens).
+
 ### Environment Variables
 
 - `TFC_TOKEN` - Terraform Cloud API token (required)
