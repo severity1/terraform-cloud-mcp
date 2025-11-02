@@ -4,7 +4,7 @@
 
 A Model Context Protocol (MCP) server that integrates AI assistants with the Terraform Cloud API, allowing you to manage your infrastructure through natural conversation. Built with Pydantic models and structured around domain-specific modules, this server is compatible with any MCP-supporting platform including Claude, Claude Code CLI, Claude Desktop, Cursor, Copilot Studio, and others.
 
-![Version](https://img.shields.io/badge/version-0.8.17-blue)
+![Version](https://img.shields.io/badge/version-0.8.20-blue)
 ![Python](https://img.shields.io/badge/python-3.12+-green)
 ![Type Checking](https://img.shields.io/badge/type_checking-mypy-brightgreen)
 ![Code Quality](https://img.shields.io/badge/code_quality-100%25-success)
@@ -47,6 +47,21 @@ A Model Context Protocol (MCP) server that integrates AI assistants with the Ter
 - MCP (includes FastMCP and development tools)
 - `uv` package manager (recommended) or `pip`
 - Terraform Cloud API token
+
+#### Creating a Terraform Cloud API Token
+
+To use this MCP server, you need a Terraform Cloud (or Terraform Enterprise) API token:
+
+1. Sign in to [HCP Terraform](https://app.terraform.io) (or your Terraform Enterprise instance)
+2. Click your avatar in the top-right corner and select **User Settings**
+3. Navigate to **Tokens** in the left sidebar
+4. Click **Create an API token**
+5. Provide a description (e.g., "MCP Server")
+6. Set an expiration date (recommended for security)
+7. Click **Generate token**
+8. **Copy the token immediately** - it will only be shown once
+
+Use this token as your `TFC_TOKEN` environment variable in the configuration steps below.
 
 ### Environment Variables
 
